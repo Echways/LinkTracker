@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Confluent.Kafka" Version="2.14.0"/>
+        <PackageReference Include="coverlet.collector" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="9.0.7"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0"/>
+        <PackageReference Include="NSubstitute" Version="5.3.0"/>
+        <PackageReference Include="Testcontainers" Version="4.11.0"/>
+        <PackageReference Include="Testcontainers.Kafka" Version="4.11.0"/>
+        <PackageReference Include="Testcontainers.PostgreSql" Version="4.11.0"/>
+        <PackageReference Include="Testcontainers.Redis" Version="4.11.0"/>
+        <PackageReference Include="xunit" Version="2.9.3"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\LinkTracker.AiAgent.Application\LinkTracker.AiAgent.Application.csproj"/>
+        <ProjectReference Include="..\LinkTracker.AiAgent.Infrastructure\LinkTracker.AiAgent.Infrastructure.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Bot.Application\LinkTracker.Bot.Application.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Bot.Infrastructure\LinkTracker.Bot.Infrastructure.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Bot.Presentation\LinkTracker.Bot.Presentation.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Scrapper.Application\LinkTracker.Scrapper.Application.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Scrapper.Infrastructure\LinkTracker.Scrapper.Infrastructure.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Scrapper.Presentation\LinkTracker.Scrapper.Presentation.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Bot\Unit\"/>
+    </ItemGroup>
+
+</Project>

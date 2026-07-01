@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "LinkTracker.Grpc";
+
+package botupdates;
+
+message LinkUpdateGrpcRequest {
+  int64 id = 1;
+  string url = 2;
+  string description = 3;
+  repeated int64 tg_chat_ids = 4;
+}
+
+service BotUpdatesGrpc {
+  rpc SendUpdate(LinkUpdateGrpcRequest) returns (google.protobuf.Empty);
+}

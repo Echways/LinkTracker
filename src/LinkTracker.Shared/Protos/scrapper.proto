@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "LinkTracker.Grpc";
+
+package scrapper;
+
+message ChatRequest {
+  int64 chat_id = 1;
+}
+
+message GetLinksRequest {
+  int64 chat_id = 1;
+}
+
+message AddLinkGrpcRequest {
+  int64 chat_id = 1;
+  string link = 2;
+  repeated string tags = 3;
+  repeated string filters = 4;
+}
+
+message RemoveLinkGrpcRequest {
+  int64 chat_id = 1;
+  string link = 2;
+}
+
+message LinkGrpcResponse {
+  int64 id = 1;
+  string url = 2;
+  repeated string tags = 3;
+  repeated string filters = 4;
+}
+
+message ListLinksGrpcResponse {
+  repeated LinkGrpcResponse links = 1;
+  int32 size = 2;
+}
+
+service ScrapperGrpc {
+  rpc RegisterChat(ChatRequest) returns (google.protobuf.Empty);
+  rpc DeleteChat(ChatRequest) returns (google.protobuf.Empty);
+  rpc GetLinks(GetLinksRequest) returns (ListLinksGrpcResponse);
+  rpc AddLink(AddLinkGrpcRequest) returns (LinkGrpcResponse);
+  rpc RemoveLink(RemoveLinkGrpcRequest) returns (LinkGrpcResponse);
+}

@@ -1,0 +1,41 @@
+# Scrapper RED метрики
+
+# Rate — количество HTTP запросов к API в секунду
+rate(api_requests_total{job="scrapper"}[1m])
+
+# Errors — доля ошибок (5xx) среди всех запросов
+sum(rate(http_request_duration_seconds_count{job="scrapper", code=~"5.."}[1m]))
+/ sum(rate(http_request_duration_seconds_count{job="scrapper"}[1m]))
+
+# Duration — 50-й, 95-й, 99-й перцентили времени операции scrape по типу источника
+histogram_quantile(0.50, sum by (le, scope_type) (rate(request_duration_ms_total_bucket{job="scrapper", scope="external_source"}[5m])))
+histogram_quantile(0.95, sum by (le, scope_type) (rate(request_duration_ms_total_bucket{job="scrapper", scope="external_source"}[5m])))
+histogram_quantile(0.99, sum by (le, scope_type) (rate(request_duration_ms_total_bucket{job="scrapper", scope="external_source"}[5m])))
+
+# Scrapper бизнес метрики
+
+# Количество активных ссылок в БД с разбивкой по домену
+links_on_track_total{job="scrapper"}
+
+# Bot RED метрики
+
+# 50-й, 95-й, 99-й перцентили времени выполнения команды
+histogram_quantile(0.50, sum by (le, scope_type) (rate(command_duration_ms_total_bucket{job="bot"}[5m])))
+histogram_quantile(0.95, sum by (le, scope_type) (rate(command_duration_ms_total_bucket{job="bot"}[5m])))
+histogram_quantile(0.99, sum by (le, scope_type) (rate(command_duration_ms_total_bucket{job="bot"}[5m])))
+
+# 50-й, 95-й, 99-й перцентили времени вызовов к Scrapper
+histogram_quantile(0.50, sum by (le, scope_type) (rate(scrapper_call_duration_ms_total_bucket{job="bot"}[5m])))
+histogram_quantile(0.95, sum by (le, scope_type) (rate(scrapper_call_duration_ms_total_bucket{job="bot"}[5m])))
+histogram_quantile(0.99, sum by (le, scope_type) (rate(scrapper_call_duration_ms_total_bucket{job="bot"}[5m])))
+
+# Bot бизнес метрики
+
+# Количество пользовательских запросов в секунду (по типу)
+rate(bot_requests_total{job="bot"}[1m])
+
+# Количество вызовов команд в секунду
+rate(command_requests_total{job="bot"}[1m])
+
+# Количество отправленных уведомлений в секунду
+rate(sent_notification_total{job="bot"}[1m])

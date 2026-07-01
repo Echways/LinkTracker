@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <ItemGroup>
+        <ProjectReference Include="..\LinkTracker.Bot.Application\LinkTracker.Bot.Application.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Bot.Infrastructure\LinkTracker.Bot.Infrastructure.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Bot.Presentation\LinkTracker.Bot.Presentation.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Shared\LinkTracker.Shared.csproj"/>
+        <ProjectReference Include="..\LinkTracker.EnvReader\LinkTracker.EnvReader.csproj"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+</Project>

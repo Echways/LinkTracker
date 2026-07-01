@@ -1,0 +1,81 @@
+services:
+  scrapper:
+    build:
+      context: .
+      dockerfile: src/LinkTracker.Scrapper.Api/Dockerfile
+      network: host
+    container_name: linktracker-scrapper
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+      schema-registry:
+        condition: service_started
+      valkey-cluster-init:
+        condition: service_completed_successfully
+      pushgateway:
+        condition: service_started
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+    env_file:
+      - src/LinkTracker.Scrapper.Api/.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"
+      Telemetry__Pushgateway__Endpoint: "http://pushgateway:9091/metrics"
+      Telemetry__Pushgateway__Job: "scrapper"
+
+    bot:
+      build:
+        context: .
+        dockerfile: src/LinkTracker.Bot.Api/Dockerfile
+        network: host
+      container_name: linktracker-bot
+      restart: unless-stopped
+      depends_on:
+        scrapper:
+          condition: service_started
+        kafka-init:
+          condition: service_completed_successfully
+        schema-registry:
+          condition: service_started
+        pushgateway:
+          condition: service_started
+      ports:
+        - "8091:8091"
+        - "8092:8092"
+        - "8011:8011"
+      env_file:
+        - src/LinkTracker.Bot.Api/.env
+      environment:
+        ASPNETCORE_ENVIRONMENT: "Docker"
+        Telemetry__Pushgateway__Endpoint: "http://pushgateway:9091/metrics"
+        Telemetry__Pushgateway__Job: "bot"
+      
+  aiagent:
+    build:
+      context: .
+      dockerfile: src/LinkTracker.AiAgent.Api/Dockerfile
+      network: host
+    container_name: linktracker-aiagent
+    restart: unless-stopped
+    depends_on:
+      scrapper:
+        condition: service_started
+      kafka-init:
+        condition: service_completed_successfully
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+      kafka-3:
+        condition: service_healthy
+    ports:
+      - "8101:8101"
+      - "8102:8102"
+    env_file:
+      - src/LinkTracker.AiAgent.Api/.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Docker"

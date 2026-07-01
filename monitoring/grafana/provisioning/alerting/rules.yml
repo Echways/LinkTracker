@@ -1,0 +1,47 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: memory
+    folder: LinkTracker
+    interval: 1m
+    rules:
+      - uid: ram_high_usage
+        title: High process memory usage
+        condition: C
+        for: 2m
+        noDataState: NoData
+        execErrState: Error
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое потребление RAM сервисом {{ $labels.job }}"
+          description: "process_memory_working_set_bytes превысил 500 MB (instance {{ $labels.instance }}, job {{ $labels.job }})"
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              refId: A
+              editorMode: code
+              expr: max by (job, instance) (process_memory_working_set_bytes{job=~"scrapper|bot"})
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions:
+                - type: query
+                  evaluator:
+                    type: gt
+                    params:
+                      - 524288000

@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Google.Protobuf" Version="3.34.0"/>
+        <PackageReference Include="Grpc.Tools" Version="2.76.0" PrivateAssets="all"/>
+        <PackageReference Include="Grpc.Core.Api" Version="2.76.0"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.5.0"/>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.5"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5"/>
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.1"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1"/>
+        <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="Protos/bot_updates.proto" GrpcServices="Server,Client"/>
+        <Protobuf Include="Protos/scrapper.proto" GrpcServices="Server,Client"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Prometheus.NetStandard">
+            <HintPath>..\..\..\..\..\..\.nuget\packages\prometheus-net\8.2.1\lib\net7.0\Prometheus.NetStandard.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+</Project>

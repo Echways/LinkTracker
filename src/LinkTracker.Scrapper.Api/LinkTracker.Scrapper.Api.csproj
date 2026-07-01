@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <ItemGroup>
+        <ProjectReference Include="..\LinkTracker.Scrapper.Application\LinkTracker.Scrapper.Application.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Scrapper.Infrastructure\LinkTracker.Scrapper.Infrastructure.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Scrapper.Presentation\LinkTracker.Scrapper.Presentation.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Scrapper.Contracts\LinkTracker.Scrapper.Contracts.csproj"/>
+        <ProjectReference Include="..\LinkTracker.Shared\LinkTracker.Shared.csproj"/>
+        <ProjectReference Include="..\LinkTracker.EnvReader\LinkTracker.EnvReader.csproj"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+</Project>

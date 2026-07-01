@@ -1,0 +1,18 @@
+using System.Text.Json.Serialization;
+
+namespace LinkTracker.Scrapper.Application.Clients.StackOverflow.Contracts;
+
+public sealed class StackOverflowCommentResponse
+{
+    [JsonPropertyName("comment_id")] public long CommentId { get; init; }
+
+    [JsonPropertyName("body")] public string Body { get; init; } = string.Empty;
+
+    [JsonPropertyName("link")] public Uri? Link { get; init; }
+
+    [JsonPropertyName("owner")] public StackOverflowUserResponse? Owner { get; init; }
+
+    [JsonPropertyName("creation_date")] public long CreationDateUnix { get; init; }
+
+    public DateTimeOffset CreationDate => DateTimeOffset.FromUnixTimeSeconds(CreationDateUnix);
+}
