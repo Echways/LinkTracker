@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
+  DOTNET_NOLOGO: "1"
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:9.0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/dotnet-restore
+      - run: dotnet build --no-restore
+
+  linter:
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:9.0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/dotnet-restore
+      - run: dotnet format --verify-no-changes --no-restore
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:9.0
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: bot-unit
+            filter: "Module=Bot&Category=Unit"
+          - name: scrapper-unit
+            filter: "Module=Scrapper&Category=Unit"
+          - name: shared-unit
+            filter: "Module=Shared&Category=Unit"
+          - name: aiagent-unit
+            filter: "Module=AiAgent&Category=Unit"
+          - name: shared-integration
+            filter: "Module=Shared&Category=Integration"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/dotnet-restore
+      - run: dotnet test --no-restore --filter "${{ matrix.filter }}"
+
+  docker-test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: bot-integration
+            filter: "Module=Bot&Category=Integration"
+          - name: scrapper-integration
+            filter: "Module=Scrapper&Category=Integration"
+          - name: aiagent-integration
+            filter: "Module=AiAgent&Category=Integration"
+    env:
+      TESTCONTAINERS_RYUK_DISABLED: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - uses: ./.github/actions/dotnet-restore
+
+      - run: dotnet test --no-restore --filter "${{ matrix.filter }}"

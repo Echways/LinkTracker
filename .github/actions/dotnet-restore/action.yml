@@ -1,0 +1,22 @@
+name: "Dotnet restore with cache"
+description: "Restores NuGet packages with caching"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.NUGET_PACKAGES }}
+        key: nuget-${{ github.ref_name }}-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          nuget-${{ github.ref_name }}-
+          nuget-
+
+    - name: dotnet info
+      shell: bash
+      run: dotnet --info
+
+    - name: dotnet restore
+      shell: bash
+      run: dotnet restore
