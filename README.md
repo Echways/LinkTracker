@@ -61,7 +61,7 @@ cp src/LinkTracker.Bot.Api/.env.template src/LinkTracker.Bot.Api/.env
 cp src/LinkTracker.Scrapper.Api/.env.template src/LinkTracker.Scrapper.Api/.env
 ```
 4. Поставить действительные параметры в .env.
-5. Создать копию [.env.template](src/LinkTracker.Scrapper/.env.template) с именем .env в каталоге скреппера.
+5. Создать копию [.env.template](src/LinkTracker.AiAgent/.env.template) с именем .env в каталоге ии-агента.
 ```
 cp src/LinkTracker.AiAgent.Api/.env.template src/LinkTracker.AiAgent.Api/.env
 ```
