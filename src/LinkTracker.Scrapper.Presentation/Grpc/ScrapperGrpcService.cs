@@ -49,7 +49,6 @@ public sealed class ScrapperGrpcService(
             request.ChatId,
             new Uri(request.Link),
             request.Tags.ToArray(),
-            request.Filters.ToArray(),
             context.CancellationToken);
 
         await cache.InvalidateAsync(request.ChatId, context.CancellationToken);
@@ -83,7 +82,6 @@ public sealed class ScrapperGrpcService(
         var grpcResponse = new LinkGrpcResponse { Id = response.Id, Url = response.Url.ToString() };
 
         grpcResponse.Tags.AddRange(response.Tags);
-        grpcResponse.Filters.AddRange(response.Filters);
 
         return grpcResponse;
     }

@@ -8,8 +8,7 @@ public sealed class TrackedLinkRecord
 
     public IReadOnlyList<string> Tags { get; init; } = [];
 
-    public IReadOnlyList<string> Filters { get; init; } = [];
-
     public DateTimeOffset? LastUpdatedAt { get; set; }
+
     public string? LastEventKey { get; set; }
 }

@@ -6,10 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LinkTracker.Scrapper.Storage.Orm;
 
-public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTrackingStore
+public sealed class OrmLinkTrackingStore(IDbContextFactory<AppDbContext> dbContextFactory) : ILinkTrackingStore
 {
     public async Task<bool> TryRegisterChatAsync(long chatId, CancellationToken ct = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
+
         var exists = await dbContext.Chats
             .AnyAsync(x => x.Id == chatId, ct);
 
@@ -26,6 +28,8 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
 
     public async Task<bool> TryDeleteChatAsync(long chatId, CancellationToken ct = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
+
         var chat = await dbContext.Chats
             .FirstOrDefaultAsync(x => x.Id == chatId, ct);
 
@@ -40,13 +44,17 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
         return true;
     }
 
-    public Task<bool> ChatExistsAsync(long chatId, CancellationToken ct = default)
+    public async Task<bool> ChatExistsAsync(long chatId, CancellationToken ct = default)
     {
-        return dbContext.Chats.AnyAsync(x => x.Id == chatId, ct);
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
+
+        return await dbContext.Chats.AnyAsync(x => x.Id == chatId, ct);
     }
 
     public async Task<IReadOnlyList<TrackedLinkRecord>> GetAllTrackedLinkRecordsAsync(long chatId, CancellationToken ct = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
+
         return await dbContext.Subscriptions
             .AsNoTracking()
             .Where(x => x.ChatId == chatId)
@@ -61,7 +69,6 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
                     .Select(t => t.Tag.Name)
                     .Distinct()
                     .ToArray(),
-                Filters = Array.Empty<string>()
             })
             .ToArrayAsync(ct);
     }
@@ -70,7 +77,6 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
         long chatId,
         Uri link,
         IReadOnlyList<string> tags,
-        IReadOnlyList<string> filters,
         CancellationToken ct = default)
     {
         var normalizedUrl = TrackedLinkUrl.Normalize(link);
@@ -80,6 +86,7 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
             .Distinct(StringComparer.Ordinal)
             .ToArray();
 
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
         await using var transaction = await dbContext.Database.BeginTransactionAsync(ct);
 
         try
@@ -127,7 +134,6 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
                 Id = linkEntity.Id,
                 Url = link,
                 Tags = cleanedTags,
-                Filters = [],
                 LastUpdatedAt = linkEntity.LastUpdatedAt,
                 LastEventKey = linkEntity.LastEventKey
             };
@@ -143,6 +149,7 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
     {
         var normalizedUrl = TrackedLinkUrl.Normalize(link);
 
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
         await using var transaction = await dbContext.Database.BeginTransactionAsync(ct);
 
         try
@@ -169,7 +176,6 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
                     .Select(x => x.Tag.Name)
                     .Distinct()
                     .ToArray(),
-                Filters = []
             };
 
             var linkId = subscription.LinkId;
@@ -218,6 +224,8 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
     {
         var normalizedTag = tag.Trim();
 
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
+
         var exists = await dbContext.Tags
             .AnyAsync(x => x.Name == normalizedTag, ct);
 
@@ -234,6 +242,8 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
 
     public async Task<IReadOnlyList<string>> GetTagsAsync(long chatId, CancellationToken ct = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
+
         return await dbContext.Subscriptions
             .AsNoTracking()
             .Where(x => x.ChatId == chatId)
@@ -248,6 +258,7 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
         var normalizedUrl = TrackedLinkUrl.Normalize(link);
         var cleanedTag = tag.Trim();
 
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
         await using var transaction = await dbContext.Database.BeginTransactionAsync(ct);
 
         try
@@ -300,6 +311,7 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
         var cleanedOldTag = tag.Trim();
         var cleanedNewTag = newTag.Trim();
 
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
         await using var transaction = await dbContext.Database.BeginTransactionAsync(ct);
 
         try
@@ -354,6 +366,7 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
     {
         var cleanedTag = tag.Trim();
 
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
         await using var transaction = await dbContext.Database.BeginTransactionAsync(ct);
 
         try
@@ -387,6 +400,8 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
 
     public async Task<IReadOnlyList<TrackedLinkSubscription>> GetAllSubscriptionsAsync(CancellationToken ct = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
+
         return await dbContext.Subscriptions
             .AsNoTracking()
             .GroupBy(x => new { x.LinkId, x.Link.Url, x.Link.LastUpdatedAt })
@@ -406,6 +421,8 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
         int batchSize,
         CancellationToken ct = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
+
         return await dbContext.Links
             .AsNoTracking()
             .Where(x => x.Subscriptions.Any())
@@ -428,6 +445,8 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
 
     public async Task SetCursorAsync(long linkId, DateTimeOffset lastUpdatedAt, string? lastEventKey, CancellationToken ct = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
+
         var entity = await dbContext.Links
             .FirstOrDefaultAsync(x => x.Id == linkId, ct);
 
@@ -454,7 +473,6 @@ public sealed class OrmLinkTrackingStore(AppDbContext dbContext) : ILinkTracking
                 .Distinct()
                 .OrderBy(x => x)
                 .ToArray(),
-            Filters = []
         };
     }
 }

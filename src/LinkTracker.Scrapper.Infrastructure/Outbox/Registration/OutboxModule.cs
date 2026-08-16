@@ -24,6 +24,10 @@ public static class OutboxModule
             .Validate(o => o.DispatchIntervalSeconds > 0, "Outbox:DispatchIntervalSeconds must be greater than zero.")
             .Validate(o => o.BatchSize > 0, "Outbox:BatchSize must be greater than zero.")
             .Validate(o => o.MaxRetryCount > 0, "Outbox:MaxRetryCount must be greater than zero.")
+            .Validate(o => o.LockSeconds > 0, "Outbox:LockSeconds must be greater than zero.")
+            .Validate(
+                o => o.LockSeconds > o.DispatchIntervalSeconds,
+                "Outbox:LockSeconds must be greater than Outbox:DispatchIntervalSeconds, otherwise a batch can be picked up twice.")
             .ValidateOnStart();
 
         services.AddSingleton<IOutboxMessageSerializer, SystemTextJsonOutboxMessageSerializer>();

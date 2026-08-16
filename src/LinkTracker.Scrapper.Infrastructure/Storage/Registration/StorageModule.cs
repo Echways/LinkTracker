@@ -31,7 +31,7 @@ public static class StorageModule
                 services.AddSingleton<ILinkTrackingStore, SqlLinkTrackingStore>();
                 break;
             case DatabaseAccessType.Orm:
-                services.AddScoped<ILinkTrackingStore, OrmLinkTrackingStore>();
+                services.AddSingleton<ILinkTrackingStore, OrmLinkTrackingStore>();
                 break;
             default:
                 throw new InvalidOperationException(

@@ -14,7 +14,6 @@ public interface ILinkTrackingStore
         long chatId,
         Uri link,
         IReadOnlyList<string> tags,
-        IReadOnlyList<string> filters,
         CancellationToken ct = default);
 
     Task<TrackedLinkRecord?> TryRemoveAsync(long chatId, Uri link, CancellationToken ct = default);

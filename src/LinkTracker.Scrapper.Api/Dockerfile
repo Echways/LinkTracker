@@ -9,7 +9,6 @@ COPY ["src/LinkTracker.Scrapper.Contracts/LinkTracker.Scrapper.Contracts.csproj"
 COPY ["src/LinkTracker.Scrapper.Infrastructure/LinkTracker.Scrapper.Infrastructure.csproj", "src/LinkTracker.Scrapper.Infrastructure/"]
 COPY ["src/LinkTracker.Scrapper.Presentation/LinkTracker.Scrapper.Presentation.csproj", "src/LinkTracker.Scrapper.Presentation/"]
 COPY ["src/LinkTracker.Scrapper.Storage.Abstractions/LinkTracker.Scrapper.Storage.Abstractions.csproj", "src/LinkTracker.Scrapper.Storage.Abstractions/"]
-COPY ["src/LinkTracker.Scrapper.Storage.InMemory/LinkTracker.Scrapper.Storage.InMemory.csproj", "src/LinkTracker.Scrapper.Storage.InMemory/"]
 COPY ["src/LinkTracker.Scrapper.Storage.Orm/LinkTracker.Scrapper.Storage.Orm.csproj", "src/LinkTracker.Scrapper.Storage.Orm/"]
 COPY ["src/LinkTracker.Scrapper.Storage.Sql/LinkTracker.Scrapper.Storage.Sql.csproj", "src/LinkTracker.Scrapper.Storage.Sql/"]
 COPY ["src/LinkTracker.EnvReader/LinkTracker.EnvReader.csproj", "src/LinkTracker.EnvReader/"]

@@ -23,7 +23,7 @@ public sealed class LinkTrackingServiceTests
         Uri link = new("https://github.com/test/repo");
 
         var exception = await Assert.ThrowsAsync<ApiException>(() =>
-            sut.AddLinkAsync(chatId, link, [], []));
+            sut.AddLinkAsync(chatId, link, []));
 
         Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
         Assert.Equal("invalid_chat_id", exception.Code);
@@ -43,7 +43,7 @@ public sealed class LinkTrackingServiceTests
             : new Uri(rawLink);
 
         var exception = await Assert.ThrowsAsync<ApiException>(() =>
-            sut.AddLinkAsync(1, link, [], []));
+            sut.AddLinkAsync(1, link, []));
 
         Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
         Assert.Equal(expectedCode, exception.Code);
@@ -60,7 +60,7 @@ public sealed class LinkTrackingServiceTests
         _handler.CanHandle(link).Returns(false);
 
         var exception = await Assert.ThrowsAsync<ApiException>(() =>
-            sut.AddLinkAsync(1, link, [], []));
+            sut.AddLinkAsync(1, link, []));
 
         Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
         Assert.Equal("unsupported_link", exception.Code);
@@ -79,7 +79,7 @@ public sealed class LinkTrackingServiceTests
         _store.ChatExistsAsync(1, Arg.Any<CancellationToken>()).Returns(false);
 
         var exception = await Assert.ThrowsAsync<ApiException>(() =>
-            sut.AddLinkAsync(1, link, ["tag"], []));
+            sut.AddLinkAsync(1, link, ["tag"]));
 
         Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
         Assert.Equal("chat_not_found", exception.Code);
@@ -88,7 +88,6 @@ public sealed class LinkTrackingServiceTests
             .TryAddAsync(
                 Arg.Any<long>(),
                 Arg.Any<Uri>(),
-                Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<CancellationToken>());
     }
@@ -105,12 +104,11 @@ public sealed class LinkTrackingServiceTests
                 1,
                 link,
                 Arg.Any<IReadOnlyList<string>>(),
-                Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<CancellationToken>())
             .Returns((TrackedLinkRecord?)null);
 
         var exception = await Assert.ThrowsAsync<ApiException>(() =>
-            sut.AddLinkAsync(1, link, ["tag"], ["legacy-filter"]));
+            sut.AddLinkAsync(1, link, ["tag"]));
 
         Assert.Equal(HttpStatusCode.Conflict, exception.StatusCode);
         Assert.Equal("link_already_exists", exception.Code);
@@ -128,7 +126,6 @@ public sealed class LinkTrackingServiceTests
             Id = 10,
             Url = link,
             Tags = tags,
-            Filters = [],
             LastUpdatedAt = DateTimeOffset.UtcNow
         };
 
@@ -138,21 +135,16 @@ public sealed class LinkTrackingServiceTests
                 1,
                 link,
                 Arg.Is<IReadOnlyList<string>>(value => value.SequenceEqual(tags)),
-                Arg.Is<IReadOnlyList<string>>(value => value.SequenceEqual(new List<string>().AsReadOnly())),
                 Arg.Any<CancellationToken>())
             .Returns(expected);
 
-        var result = await sut.AddLinkAsync(
-            1,
-            link,
-            tags,
-            ["legacy-filter-1", "legacy-filter-2"]);
+        var result = await sut.AddLinkAsync(1, link, tags);
 
         Assert.Same(expected, result);
     }
 
     [Fact]
-    public async Task AddLinkAsync_WhenRequestIsValid_PassesTagsAndEmptyFiltersToStore()
+    public async Task AddLinkAsync_WhenRequestIsValid_PassesTagsToStore()
     {
         var sut = CreateSut();
         Uri link = new("https://github.com/test/repo");
@@ -164,28 +156,21 @@ public sealed class LinkTrackingServiceTests
                 Arg.Any<long>(),
                 Arg.Any<Uri>(),
                 Arg.Any<IReadOnlyList<string>>(),
-                Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<CancellationToken>())
             .Returns(new TrackedLinkRecord
             {
                 Id = 1,
                 Url = link,
                 Tags = tags,
-                Filters = new List<string>().AsReadOnly(),
                 LastUpdatedAt = DateTimeOffset.UtcNow
             });
 
-        await sut.AddLinkAsync(
-            1,
-            link,
-            tags,
-            new List<string> { "legacy-filter-1", "legacy-filter-2" }.AsReadOnly());
+        await sut.AddLinkAsync(1, link, tags);
 
         await _store.Received(1).TryAddAsync(
             1,
             link,
             Arg.Is<IReadOnlyList<string>>(value => value.SequenceEqual(tags)),
-            Arg.Is<IReadOnlyList<string>>(value => value.SequenceEqual(new List<string>().AsReadOnly())),
             Arg.Any<CancellationToken>());
     }
 

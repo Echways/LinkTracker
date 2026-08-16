@@ -14,5 +14,4 @@ public sealed class SubscriptionEntity
 
     public ICollection<SubscriptionTagEntity> SubscriptionTags { get; set; } = [];
 
-    public ICollection<SubscriptionFilterEntity> SubscriptionFilters { get; set; } = [];
 }

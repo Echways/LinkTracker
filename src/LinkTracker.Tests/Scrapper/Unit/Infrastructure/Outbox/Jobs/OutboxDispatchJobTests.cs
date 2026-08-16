@@ -23,7 +23,7 @@ public sealed class OutboxDispatchJobTests
     {
         var outboxStore = Substitute.For<IOutboxStore>();
 
-        outboxStore.GetUnprocessedBatchAsync(100, 3, Arg.Any<CancellationToken>())
+        outboxStore.ClaimUnprocessedBatchAsync(100, 3, Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>())
             .Returns([]);
 
         var sut = CreateSut(
@@ -47,7 +47,7 @@ public sealed class OutboxDispatchJobTests
         var outboxStore = Substitute.For<IOutboxStore>();
         var message = CreateOutboxMessage();
 
-        outboxStore.GetUnprocessedBatchAsync(100, 3, Arg.Any<CancellationToken>())
+        outboxStore.ClaimUnprocessedBatchAsync(100, 3, Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>())
             .Returns([message]);
 
         var sut = CreateSut(
@@ -71,7 +71,7 @@ public sealed class OutboxDispatchJobTests
         var outboxStore = Substitute.For<IOutboxStore>();
         var message = CreateOutboxMessage();
 
-        outboxStore.GetUnprocessedBatchAsync(100, 3, Arg.Any<CancellationToken>())
+        outboxStore.ClaimUnprocessedBatchAsync(100, 3, Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>())
             .Returns([message]);
 
         var kafkaWasCalled = false;
@@ -108,7 +108,7 @@ public sealed class OutboxDispatchJobTests
         var outboxStore = Substitute.For<IOutboxStore>();
         var message = CreateOutboxMessage();
 
-        outboxStore.GetUnprocessedBatchAsync(100, 3, Arg.Any<CancellationToken>())
+        outboxStore.ClaimUnprocessedBatchAsync(100, 3, Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>())
             .Returns([message]);
 
         var sut = CreateSut(
@@ -138,7 +138,7 @@ public sealed class OutboxDispatchJobTests
         var outboxStore = Substitute.For<IOutboxStore>();
         var message = CreateOutboxMessage();
 
-        outboxStore.GetUnprocessedBatchAsync(100, 3, Arg.Any<CancellationToken>())
+        outboxStore.ClaimUnprocessedBatchAsync(100, 3, Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>())
             .Returns([message]);
 
         using var cts = new CancellationTokenSource();
@@ -169,7 +169,7 @@ public sealed class OutboxDispatchJobTests
     {
         var botOptions = Options.Create(new BotOptions { Transport = TransportKind.Http });
 
-        var outboxOptions = Options.Create(new OutboxOptions { Enabled = true, DispatchIntervalSeconds = 10, BatchSize = 100, MaxRetryCount = 3 });
+        var outboxOptions = Options.Create(new OutboxOptions { Enabled = true, DispatchIntervalSeconds = 10, BatchSize = 100, MaxRetryCount = 3, LockSeconds = 60 });
 
         var botClient = new FallbackBotClient(
             transportClients,

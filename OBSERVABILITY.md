@@ -2,8 +2,19 @@
 
 ## Архитектура сбора метрик
 
-Метрики приложений построены на **OpenTelemetry** и доставляются в Prometheus
-по **push-модели через Prometheus Pushgateway**.
+Метрики приложений построены на **OpenTelemetry** и отдаются Prometheus
+по **pull-модели**: каждый сервис публикует OpenTelemetry-метрики в формате Prometheus
+на своём эндпоинте `/metrics`, а Prometheus скрейпит их напрямую.
+
+- Scrapper: `http://scrapper:8081/metrics`
+- Bot: `http://bot:8011/metrics` (отдельный Kestrel-эндпоинт, наружу не публикуется)
+
+Эндпоинт `/metrics` исключён из общего rate limiter — иначе скрейп раз в 15 секунд
+конкурировал бы за лимит с прикладным трафиком и метрики выглядели бы «пропавшими».
+
+Имена серий, которые видит Prometheus, зафиксированы тестом
+`MetricsEndpointTests` — экспортёр переименовывает инструменты, и панели Grafana
+завязаны именно на итоговые имена.
 
 ## Метрики приложений
 
@@ -43,19 +54,16 @@
 
 > Histogram-метрики дают в Prometheus три серии: `<name>_bucket`, `<name>_sum`, `<name>_count`.
 
-## Конфигурация push
+## Конфигурация сбора
 
-Настройки секции `Telemetry:Pushgateway` (переопределяются переменными окружения
-с разделителем `__`):
+Настраивается на стороне Prometheus в `monitoring/prometheus.yml` — приложениям
+никакой конфигурации телеметрии не требуется. Лейбл `job` берётся из имени scrape-job
+(`scrapper` / `bot`), `instance` — из адреса цели.
 
-| Ключ | Env-переменная | По умолчанию |
+| Job | Цель | Интервал |
 |---|---|---|
-| `Endpoint` | `Telemetry__Pushgateway__Endpoint` | `http://pushgateway:9091/metrics` |
-| `Job` | `Telemetry__Pushgateway__Job` | `scrapper` / `bot` |
-| `Enabled` | `Telemetry__Pushgateway__Enabled` | `true` |
-| `IntervalMilliseconds` | `Telemetry__Pushgateway__IntervalMilliseconds` | `5000` |
-
-`Instance` берётся из переменной `HOSTNAME` (в контейнере — id контейнера) либо из имени хоста.
+| `scrapper` | `scrapper:8081` | 15s (`global.scrape_interval`) |
+| `bot` | `bot:8011` | 15s (`global.scrape_interval`) |
 
 ## Grafana
 
@@ -75,7 +83,7 @@
 ## Запуск мониторинга
 
 ```bash
-# Поднять инфраструктуру (Kafka, Postgres, Valkey, Pushgateway, Prometheus, Grafana)
+# Поднять инфраструктуру (Kafka, Postgres, Valkey, Prometheus, Grafana)
 docker compose -f docker-compose.yml up -d
 
 # Поднять приложения
@@ -84,5 +92,4 @@ docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
 
 После запуска:
 - Prometheus: http://localhost:9090
-- Pushgateway: http://localhost:9091
 - Grafana: http://localhost:3000 (admin / admin)

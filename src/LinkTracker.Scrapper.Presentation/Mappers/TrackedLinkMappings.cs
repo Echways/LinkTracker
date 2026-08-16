@@ -7,6 +7,6 @@ public static class TrackedLinkMappings
 {
     public static LinkResponse ToResponse(this TrackedLinkRecord record)
     {
-        return new LinkResponse { Id = record.Id, Url = record.Url, Tags = record.Tags, Filters = [] };
+        return new LinkResponse { Id = record.Id, Url = record.Url, Tags = record.Tags };
     }
 }

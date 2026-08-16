@@ -77,16 +77,18 @@ internal sealed class PostgresOutboxStore(
         });
     }
 
-    public Task<IReadOnlyList<OutboxMessage>> GetUnprocessedBatchAsync(
+    public Task<IReadOnlyList<OutboxMessage>> ClaimUnprocessedBatchAsync(
         int batchSize,
         int maxRetryCount,
+        TimeSpan lockDuration,
         CancellationToken ct)
     {
-        return MeasureAsync("get_unprocessed_batch", async () =>
+        return MeasureAsync("claim_unprocessed_batch", async () =>
         {
-            await using var command = dataSource.CreateCommand(OutboxMessageCommands.GetUnprocessedBatch);
+            await using var command = dataSource.CreateCommand(OutboxMessageCommands.ClaimUnprocessedBatch);
             command.Parameters.AddWithValue("batchSize", batchSize);
             command.Parameters.AddWithValue("maxRetryCount", maxRetryCount);
+            command.Parameters.AddWithValue("lockSeconds", lockDuration.TotalSeconds);
 
             await using var reader = await command.ExecuteReaderAsync(ct);
 
@@ -116,7 +118,10 @@ internal sealed class PostgresOutboxStore(
                 });
             }
 
-            return (IReadOnlyList<OutboxMessage>)result;
+            return (IReadOnlyList<OutboxMessage>)result
+                .OrderBy(x => x.CreatedAt)
+                .ThenBy(x => x.Id)
+                .ToArray();
         });
     }
 

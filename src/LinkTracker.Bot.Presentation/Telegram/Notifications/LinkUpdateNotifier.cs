@@ -1,6 +1,7 @@
 using LinkTracker.Bot.Application.Telemetry.Abstractions;
 using LinkTracker.Bot.Application.Updates.Abstractions;
 using LinkTracker.Shared.Constants;
+using LinkTracker.Shared.Contracts.AiAgent;
 using LinkTracker.Shared.Contracts.Bot;
 using Telegram.Bot;
 
@@ -26,6 +27,16 @@ public sealed class LinkUpdateNotifier(ITelegramBotClient botClient, IBotMetrics
             return update.Description[SystemMessageMarkers.FailedLinkReport.Length..];
         }
 
-        return $"Обновление по ссылке:\n{update.Url}\n\n{update.Description}";
+        return $"{BuildHeader(update.Priority)}\n{update.Url}\n\n{update.Description}";
+    }
+
+    private static string BuildHeader(LinkUpdatePriority priority)
+    {
+        return priority switch
+        {
+            LinkUpdatePriority.High => "‼️ Важное обновление по ссылке:",
+            LinkUpdatePriority.Low => "Незначительное обновление по ссылке:",
+            _ => "Обновление по ссылке:"
+        };
     }
 }

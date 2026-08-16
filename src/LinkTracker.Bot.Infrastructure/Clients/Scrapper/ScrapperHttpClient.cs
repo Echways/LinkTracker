@@ -78,7 +78,6 @@ public sealed class ScrapperHttpClient(HttpClient httpClient, IBotMetrics metric
         long chatId,
         Uri link,
         IReadOnlyList<string> tags,
-        IReadOnlyList<string> filters,
         CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
@@ -90,7 +89,7 @@ public sealed class ScrapperHttpClient(HttpClient httpClient, IBotMetrics metric
                 {
                     using var request = new HttpRequestMessage(HttpMethod.Post, "/links");
                     request.Headers.Add("Tg-Chat-Id", chatId.ToString());
-                    request.Content = JsonContent.Create(new AddLinkRequest { Link = link, Tags = tags, Filters = [] });
+                    request.Content = JsonContent.Create(new AddLinkRequest { Link = link, Tags = tags });
 
                     using var response = await httpClient.SendAsync(request, token);
                     await EnsureSuccessStatusCodeAsync(response, token);

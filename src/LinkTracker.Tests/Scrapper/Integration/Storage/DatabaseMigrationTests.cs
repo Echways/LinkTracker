@@ -19,11 +19,13 @@ public sealed class DatabaseMigrationTests(PostgresSqlStorageFixture fixture)
         Assert.Contains("links", tables);
         Assert.Contains("subscriptions", tables);
         Assert.Contains("tags", tables);
-        Assert.Contains("filters", tables);
         Assert.Contains("subscription_tags", tables);
-        Assert.Contains("subscription_filters", tables);
         Assert.Contains("dbup_schema_versions", tables);
         Assert.Contains("outbox_messages", tables);
+
+        // 005_drop_filters.sql: фича фильтров удалена, таблицы не должны возвращаться.
+        Assert.DoesNotContain("filters", tables);
+        Assert.DoesNotContain("subscription_filters", tables);
 
         Assert.Contains("ix_subscriptions_chat_id", indexes);
         Assert.Contains("ix_subscriptions_link_id", indexes);
@@ -42,9 +44,7 @@ public sealed class DatabaseMigrationTests(PostgresSqlStorageFixture fixture)
         Assert.Contains("links_normalized_url_key", uniqueConstraints);
         Assert.Contains("subscriptions_chat_id_link_id_key", uniqueConstraints);
         Assert.Contains("tags_name_key", uniqueConstraints);
-        Assert.Contains("filters_value_key", uniqueConstraints);
         Assert.Contains("subscription_tags_pkey", uniqueConstraints);
-        Assert.Contains("subscription_filters_pkey", uniqueConstraints);
     }
 
     private static async Task<HashSet<string>> GetTableNamesAsync(NpgsqlConnection connection)

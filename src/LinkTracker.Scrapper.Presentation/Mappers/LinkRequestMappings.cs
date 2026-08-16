@@ -5,10 +5,10 @@ namespace LinkTracker.Scrapper.Presentation.Mappers;
 
 public static class LinkRequestMappings
 {
-    public static (Uri Link, IReadOnlyList<string> Tags, IReadOnlyList<string> Filters) ToAddLinkData(
+    public static (Uri Link, IReadOnlyList<string> Tags) ToAddLinkData(
         this AddLinkRequest? request)
     {
-        return request?.Link is null ? throw ScrapperErrors.RequestLinkIsRequired() : (request.Link, request.Tags, request.Filters);
+        return request?.Link is null ? throw ScrapperErrors.RequestLinkIsRequired() : (request.Link, request.Tags);
     }
 
     public static Uri ToRemoveLinkData(this RemoveLinkRequest? request)

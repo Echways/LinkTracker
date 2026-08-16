@@ -40,20 +40,18 @@ public abstract class LinkTrackingStoreContractTests
 
             await sut.TryRegisterChatAsync(chatId);
 
-            var added = await sut.TryAddAsync(chatId, url, tags, []);
+            var added = await sut.TryAddAsync(chatId, url, tags);
             var links = await sut.GetAllTrackedLinkRecordsAsync(chatId);
 
             Assert.NotNull(added);
             Assert.Equal(url, added!.Url);
             Assert.Equal(["backend", "dotnet"], added.Tags.OrderBy(x => x).ToArray());
-            Assert.Empty(added.Filters);
             Assert.Null(added.LastUpdatedAt);
             Assert.Null(added.LastEventKey);
 
             var only = Assert.Single(links);
             Assert.Equal(url, only.Url);
             Assert.Equal(["backend", "dotnet"], only.Tags.OrderBy(x => x).ToArray());
-            Assert.Empty(only.Filters);
             Assert.Null(only.LastUpdatedAt);
             Assert.Null(only.LastEventKey);
         });
@@ -69,8 +67,8 @@ public abstract class LinkTrackingStoreContractTests
 
             await sut.TryRegisterChatAsync(chatId);
 
-            var first = await sut.TryAddAsync(chatId, url, ["tag1"], []);
-            var second = await sut.TryAddAsync(chatId, url, ["tag1"], []);
+            var first = await sut.TryAddAsync(chatId, url, ["tag1"]);
+            var second = await sut.TryAddAsync(chatId, url, ["tag1"]);
 
             Assert.NotNull(first);
             Assert.Null(second);
@@ -89,8 +87,8 @@ public abstract class LinkTrackingStoreContractTests
             await sut.TryRegisterChatAsync(firstChatId);
             await sut.TryRegisterChatAsync(secondChatId);
 
-            await sut.TryAddAsync(firstChatId, url, ["alpha"], []);
-            await sut.TryAddAsync(secondChatId, url, ["beta"], []);
+            await sut.TryAddAsync(firstChatId, url, ["alpha"]);
+            await sut.TryAddAsync(secondChatId, url, ["beta"]);
 
             var removed = await sut.TryRemoveAsync(firstChatId, url);
             var firstChatLinks = await sut.GetAllTrackedLinkRecordsAsync(firstChatId);
@@ -139,7 +137,7 @@ public abstract class LinkTrackingStoreContractTests
             const string eventKey = "issue:123";
 
             await sut.TryRegisterChatAsync(chatId);
-            var added = await sut.TryAddAsync(chatId, url, ["sync"], []);
+            var added = await sut.TryAddAsync(chatId, url, ["sync"]);
             Assert.NotNull(added);
 
             await sut.SetCursorAsync(added!.Id, updatedAt, eventKey);
@@ -172,8 +170,8 @@ public abstract class LinkTrackingStoreContractTests
             await sut.TryRegisterChatAsync(firstChatId);
             await sut.TryRegisterChatAsync(secondChatId);
 
-            var firstAdded = await sut.TryAddAsync(firstChatId, url, ["alpha"], []);
-            var secondAdded = await sut.TryAddAsync(secondChatId, url, ["beta"], []);
+            var firstAdded = await sut.TryAddAsync(firstChatId, url, ["alpha"]);
+            var secondAdded = await sut.TryAddAsync(secondChatId, url, ["beta"]);
 
             Assert.NotNull(firstAdded);
             Assert.NotNull(secondAdded);
@@ -213,7 +211,7 @@ public abstract class LinkTrackingStoreContractTests
             var updatedAt = new DateTimeOffset(2026, 3, 22, 12, 0, 0, TimeSpan.Zero);
 
             await sut.TryRegisterChatAsync(chatId);
-            var added = await sut.TryAddAsync(chatId, url, ["baseline"], []);
+            var added = await sut.TryAddAsync(chatId, url, ["baseline"]);
             Assert.NotNull(added);
 
             await sut.SetCursorAsync(added!.Id, updatedAt, null);
@@ -241,7 +239,7 @@ public abstract class LinkTrackingStoreContractTests
             var url = new Uri("https://github.com/user/repo-tags");
 
             await sut.TryRegisterChatAsync(chatId);
-            await sut.TryAddAsync(chatId, url, ["alpha"], []);
+            await sut.TryAddAsync(chatId, url, ["alpha"]);
 
             var afterAddTag = await sut.TryAddTagAsync(chatId, url, "beta");
             var tagsAfterAdd = await sut.GetTagsAsync(chatId);
@@ -283,7 +281,7 @@ public abstract class LinkTrackingStoreContractTests
 
             if (scenario is not "add-tag-missing-subscription")
             {
-                await sut.TryAddAsync(chatId, url, ["alpha"], []);
+                await sut.TryAddAsync(chatId, url, ["alpha"]);
             }
 
             switch (scenario)
@@ -324,7 +322,7 @@ public abstract class LinkTrackingStoreContractTests
             var url = new Uri("https://github.com/user/repo");
 
             await sut.TryRegisterChatAsync(chatId);
-            await sut.TryAddAsync(chatId, url, ["alpha", "beta"], []);
+            await sut.TryAddAsync(chatId, url, ["alpha", "beta"]);
 
             var renamed = await sut.TryRenameTagAsync(chatId, "alpha", "beta");
             var links = await sut.GetAllTrackedLinkRecordsAsync(chatId);
@@ -354,19 +352,16 @@ public abstract class LinkTrackingStoreContractTests
             var first = await sut.TryAddAsync(
                 firstChatId,
                 new Uri("https://github.com/user/repo-1"),
-                [],
                 []);
 
             var second = await sut.TryAddAsync(
                 secondChatId,
                 new Uri("https://github.com/user/repo-2"),
-                [],
                 []);
 
             var third = await sut.TryAddAsync(
                 thirdChatId,
                 new Uri("https://github.com/user/repo-3"),
-                [],
                 []);
 
             Assert.NotNull(first);
@@ -400,19 +395,16 @@ public abstract class LinkTrackingStoreContractTests
             var first = await sut.TryAddAsync(
                 firstChatId,
                 new Uri("https://github.com/user/repo-1"),
-                [],
                 []);
 
             var second = await sut.TryAddAsync(
                 secondChatId,
                 new Uri("https://github.com/user/repo-2"),
-                [],
                 []);
 
             var third = await sut.TryAddAsync(
                 thirdChatId,
                 new Uri("https://github.com/user/repo-3"),
-                [],
                 []);
 
             Assert.NotNull(first);
@@ -445,10 +437,10 @@ public abstract class LinkTrackingStoreContractTests
             await sut.TryRegisterChatAsync(thirdChatId);
             await sut.TryRegisterChatAsync(fourthChatId);
 
-            await sut.TryAddAsync(firstChatId, new Uri("https://github.com/user/repo-1"), [], []);
-            await sut.TryAddAsync(secondChatId, new Uri("https://github.com/user/repo-2"), [], []);
-            await sut.TryAddAsync(thirdChatId, new Uri("https://github.com/user/repo-3"), [], []);
-            await sut.TryAddAsync(fourthChatId, new Uri("https://github.com/user/repo-4"), [], []);
+            await sut.TryAddAsync(firstChatId, new Uri("https://github.com/user/repo-1"), []);
+            await sut.TryAddAsync(secondChatId, new Uri("https://github.com/user/repo-2"), []);
+            await sut.TryAddAsync(thirdChatId, new Uri("https://github.com/user/repo-3"), []);
+            await sut.TryAddAsync(fourthChatId, new Uri("https://github.com/user/repo-4"), []);
 
             var batch = await sut.GetSubscriptionsBatchAsync(null, batchSize);
 
@@ -468,8 +460,8 @@ public abstract class LinkTrackingStoreContractTests
             await sut.TryRegisterChatAsync(firstChatId);
             await sut.TryRegisterChatAsync(secondChatId);
 
-            var first = await sut.TryAddAsync(firstChatId, url, ["alpha"], []);
-            var second = await sut.TryAddAsync(secondChatId, url, ["beta"], []);
+            var first = await sut.TryAddAsync(firstChatId, url, ["alpha"]);
+            var second = await sut.TryAddAsync(secondChatId, url, ["beta"]);
 
             Assert.NotNull(first);
             Assert.NotNull(second);
@@ -499,7 +491,7 @@ public abstract class LinkTrackingStoreContractTests
 
             await sut.TryRegisterChatAsync(chatId);
 
-            var added = await sut.TryAddAsync(chatId, url, [], []);
+            var added = await sut.TryAddAsync(chatId, url, []);
             Assert.NotNull(added);
 
             await sut.SetCursorAsync(added!.Id, updatedAt, eventKey);

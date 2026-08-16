@@ -157,15 +157,12 @@ public sealed class ScrapperLinksCacheApiTests(ValkeyTestContainerFixture fixtur
                 chatId,
                 Arg.Any<Uri>(),
                 Arg.Any<IReadOnlyList<string>>(),
-                Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<CancellationToken>())
             .Returns(call =>
             {
                 var link = call.ArgAt<Uri>(1);
                 var tags = call.ArgAt<IReadOnlyList<string>>(2);
-                var filters = call.ArgAt<IReadOnlyList<string>>(3);
-
-                var record = CreateRecord(2, link.ToString(), tags, filters);
+                var record = CreateRecord(2, link.ToString(), tags);
                 currentLinks = [.. currentLinks, record];
 
                 return Task.FromResult(record);
@@ -181,7 +178,7 @@ public sealed class ScrapperLinksCacheApiTests(ValkeyTestContainerFixture fixtur
 
         using var postRequest = new HttpRequestMessage(HttpMethod.Post, "/links");
         postRequest.Headers.Add("Tg-Chat-Id", chatId.ToString());
-        postRequest.Content = JsonContent.Create(new AddLinkRequest { Link = addedUrl, Tags = ["new"], Filters = [] });
+        postRequest.Content = JsonContent.Create(new AddLinkRequest { Link = addedUrl, Tags = ["new"] });
 
         var postResponse = await client.SendAsync(postRequest);
 
@@ -197,7 +194,6 @@ public sealed class ScrapperLinksCacheApiTests(ValkeyTestContainerFixture fixtur
         await service.Received(1).AddLinkAsync(
             chatId,
             addedUrl,
-            Arg.Any<IReadOnlyList<string>>(),
             Arg.Any<IReadOnlyList<string>>(),
             Arg.Any<CancellationToken>());
     }
@@ -315,10 +311,9 @@ public sealed class ScrapperLinksCacheApiTests(ValkeyTestContainerFixture fixtur
     private static TrackedLinkRecord CreateRecord(
         long id,
         string url,
-        IReadOnlyList<string>? tags = null,
-        IReadOnlyList<string>? filters = null)
+        IReadOnlyList<string>? tags = null)
     {
-        return new TrackedLinkRecord { Id = id, Url = new Uri(url), Tags = tags ?? [], Filters = filters ?? [] };
+        return new TrackedLinkRecord { Id = id, Url = new Uri(url), Tags = tags ?? [] };
     }
 
     private static string BuildLinksCacheKey(long chatId)

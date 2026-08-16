@@ -7,6 +7,4 @@ public sealed class LinkResponse
     public Uri Url { get; init; } = default!;
 
     public IReadOnlyList<string> Tags { get; init; } = [];
-
-    public IReadOnlyList<string> Filters { get; init; } = [];
 }
