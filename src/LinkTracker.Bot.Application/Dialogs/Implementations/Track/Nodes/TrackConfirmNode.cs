@@ -57,7 +57,7 @@ public sealed class TrackConfirmNode(IScrapperClient scrapperClient) : IDialogNo
 
         try
         {
-            await scrapperClient.AddLinkAsync(ctx.ChatId, uri, tags, [], ct);
+            await scrapperClient.AddLinkAsync(ctx.ChatId, uri, tags, ct);
 
             return new DialogNodeResult(
                 $"Начал отслеживать:\n{pendingUrl}\nТеги: {tagsText}",

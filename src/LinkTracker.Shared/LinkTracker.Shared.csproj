@@ -21,18 +21,12 @@
         <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1"/>
         <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1"/>
         <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1"/>
-        <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1"/>
+        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.15.1-beta.1"/>
     </ItemGroup>
 
     <ItemGroup>
         <Protobuf Include="Protos/bot_updates.proto" GrpcServices="Server,Client"/>
         <Protobuf Include="Protos/scrapper.proto" GrpcServices="Server,Client"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="Prometheus.NetStandard">
-            <HintPath>..\..\..\..\..\..\.nuget\packages\prometheus-net\8.2.1\lib\net7.0\Prometheus.NetStandard.dll</HintPath>
-        </Reference>
     </ItemGroup>
 
 </Project>

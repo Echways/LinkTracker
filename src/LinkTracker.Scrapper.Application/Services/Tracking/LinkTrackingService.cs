@@ -45,7 +45,6 @@ public sealed class LinkTrackingService(
         long chatId,
         Uri link,
         IReadOnlyList<string> tags,
-        IReadOnlyList<string> filters,
         CancellationToken ct = default)
     {
         ValidateChatId(chatId);
@@ -57,7 +56,7 @@ public sealed class LinkTrackingService(
             throw ScrapperErrors.ChatNotFound(chatId);
         }
 
-        var record = await store.TryAddAsync(chatId, link, tags, [], ct);
+        var record = await store.TryAddAsync(chatId, link, tags, ct);
 
         return record ?? throw ScrapperErrors.LinkAlreadyExists(link);
     }

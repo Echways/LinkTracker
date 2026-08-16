@@ -12,7 +12,7 @@ using LinkTracker.Bot.Presentation.Telegram.Registration;
 using LinkTracker.EnvReader;
 using LinkTracker.Shared.Infrastructure.RateLimiting;
 using LinkTracker.Shared.Infrastructure.Resilience;
-using Prometheus;
+using LinkTracker.Shared.Infrastructure.Telemetry;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,7 +43,7 @@ app.MapGrpcService<BotUpdatesGrpcService>();
 
 try
 {
-    app.MapMetrics().RequireHost("*:8011");
+    app.MapMetricsEndpoint().RequireHost("*:8011");
     await app.RunAsync();
 }
 finally

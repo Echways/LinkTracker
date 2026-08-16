@@ -32,7 +32,7 @@ public sealed class StorageModuleTests(PostgresSqlStorageFixture fixture)
         services.AddSingleton<NpgsqlDataSource>(_ =>
             new NpgsqlDataSourceBuilder(fixture.ConnectionString).Build());
 
-        services.AddDbContext<AppDbContext>(options =>
+        services.AddDbContextFactory<AppDbContext>(options =>
         {
             options.UseNpgsql(fixture.ConnectionString);
         });
@@ -65,7 +65,7 @@ public sealed class StorageModuleTests(PostgresSqlStorageFixture fixture)
         services.AddSingleton<NpgsqlDataSource>(_ =>
             new NpgsqlDataSourceBuilder(fixture.ConnectionString).Build());
 
-        services.AddDbContext<AppDbContext>(options =>
+        services.AddDbContextFactory<AppDbContext>(options =>
         {
             options.UseNpgsql(fixture.ConnectionString);
         });

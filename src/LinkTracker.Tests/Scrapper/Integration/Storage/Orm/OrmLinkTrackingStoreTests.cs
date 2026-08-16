@@ -13,8 +13,7 @@ public sealed class OrmLinkTrackingStoreTests(PostgresSqlStorageFixture fixture)
     {
         await fixture.ResetAsync();
 
-        await using var dbContext = fixture.CreateDbContext();
-        ILinkTrackingStore sut = new OrmLinkTrackingStore(dbContext);
+        ILinkTrackingStore sut = new OrmLinkTrackingStore(fixture.CreateDbContextFactory());
 
         await test(sut);
     }

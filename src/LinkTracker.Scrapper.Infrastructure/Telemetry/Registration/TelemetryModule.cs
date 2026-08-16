@@ -12,9 +12,7 @@ public static class TelemetryModule
     {
         services.AddSingleton<ScrapperMetrics>();
 
-        services.AddOpenTelemetryMetricsWithPushgateway(
-            configuration,
-            "scrapper",
+        services.AddOpenTelemetryMetrics(
             "scrapper",
             ScrapperMetrics.MeterName,
             "Npgsql");

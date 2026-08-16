@@ -104,7 +104,6 @@ public sealed class ScrapperGrpcClient(
         long chatId,
         Uri link,
         IReadOnlyList<string> tags,
-        IReadOnlyList<string> filters,
         CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
@@ -112,11 +111,10 @@ public sealed class ScrapperGrpcClient(
         try
         {
             logger.LogInformation(
-                "Клиент gRPC Scrapper: вызов AddLink. ChatId={ChatId}, Ссылка={Link}, КоличествоТегов={TagsCount}, КоличествоФильтров={FiltersCount}",
+                "Клиент gRPC Scrapper: вызов AddLink. ChatId={ChatId}, Ссылка={Link}, КоличествоТегов={TagsCount}",
                 chatId,
                 link,
-                tags.Count,
-                filters.Count);
+                tags.Count);
 
             try
             {
@@ -180,7 +178,7 @@ public sealed class ScrapperGrpcClient(
 
     private static LinkResponse ToModel(LinkGrpcResponse response)
     {
-        return new LinkResponse { Id = response.Id, Url = new Uri(response.Url), Tags = response.Tags.ToArray(), Filters = [] };
+        return new LinkResponse { Id = response.Id, Url = new Uri(response.Url), Tags = response.Tags.ToArray() };
     }
 
     private static ScrapperClientException ToClientException(RpcException ex)

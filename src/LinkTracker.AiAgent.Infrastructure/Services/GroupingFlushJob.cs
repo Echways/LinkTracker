@@ -26,26 +26,26 @@ internal sealed class GroupingFlushJob(
 
     private async Task FlushAsync(CancellationToken ct)
     {
-        var flushed = buffer.Flush();
+        var pending = buffer.Flush()
+            .SelectMany(entry => grouper
+                .Group(entry.Updates)
+                .Select(update => (entry.ChatId, Update: update)))
+            .OrderByDescending(x => x.Update.Priority)
+            .ToArray();
 
-        foreach (var (chatId, updates) in flushed)
+        foreach (var (chatId, update) in pending)
         {
-            var grouped = grouper.Group(updates);
-
-            foreach (var update in grouped)
+            try
             {
-                try
-                {
-                    await publisher.PublishAsync(update, ct);
+                await publisher.PublishAsync(update, ct);
 
-                    logger.LogInformation(
-                        "Группа опубликована. ChatId={ChatId}, Count={Count}, Priority={Priority}",
-                        chatId, updates.Count, update.Priority);
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    logger.LogError(ex, "Ошибка публикации сгруппированного обновления. ChatId={ChatId}", chatId);
-                }
+                logger.LogInformation(
+                    "Группа опубликована. ChatId={ChatId}, UpdateId={UpdateId}, Priority={Priority}",
+                    chatId, update.Id, update.Priority);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                logger.LogError(ex, "Ошибка публикации сгруппированного обновления. ChatId={ChatId}", chatId);
             }
         }
     }

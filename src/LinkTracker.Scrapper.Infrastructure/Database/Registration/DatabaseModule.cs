@@ -23,7 +23,7 @@ public static class DatabaseModule
             return new NpgsqlDataSourceBuilder(options.BuildConnectionString()).Build();
         });
 
-        services.AddDbContext<AppDbContext>((sp, options) =>
+        services.AddDbContextFactory<AppDbContext>((sp, options) =>
         {
             var databaseOptions = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
             options.UseNpgsql(databaseOptions.BuildConnectionString());

@@ -14,9 +14,10 @@ internal interface IOutboxStore
         IReadOnlyCollection<LinkUpdate> updates,
         CancellationToken ct);
 
-    Task<IReadOnlyList<OutboxMessage>> GetUnprocessedBatchAsync(
+    Task<IReadOnlyList<OutboxMessage>> ClaimUnprocessedBatchAsync(
         int batchSize,
         int maxRetryCount,
+        TimeSpan lockDuration,
         CancellationToken ct);
 
     Task MarkProcessedAsync(long id, CancellationToken ct);

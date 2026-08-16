@@ -50,7 +50,7 @@ public sealed class CacheModuleValkeyTests(ValkeyTestContainerFixture fixture)
             Size = 1,
             Links =
             [
-                new LinkResponse { Id = 42, Url = new Uri("https://github.com/user/repo"), Tags = ["backend"], Filters = [] }
+                new LinkResponse { Id = 42, Url = new Uri("https://github.com/user/repo"), Tags = ["backend"] }
             ]
         };
 

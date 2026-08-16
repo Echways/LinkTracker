@@ -13,9 +13,7 @@ public static class TelemetryModule
     {
         services.AddSingleton<IBotMetrics, BotMetrics>();
 
-        services.AddOpenTelemetryMetricsWithPushgateway(
-            configuration,
-            "bot",
+        services.AddOpenTelemetryMetrics(
             "bot",
             BotMetrics.MeterName);
 

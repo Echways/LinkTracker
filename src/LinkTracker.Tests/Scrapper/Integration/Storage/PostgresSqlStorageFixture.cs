@@ -85,11 +85,19 @@ public sealed class PostgresSqlStorageFixture : IAsyncLifetime
 
     public AppDbContext CreateDbContext()
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
+        return new AppDbContext(BuildDbContextOptions());
+    }
+
+    public IDbContextFactory<AppDbContext> CreateDbContextFactory()
+    {
+        return new TestDbContextFactory(BuildDbContextOptions());
+    }
+
+    private DbContextOptions<AppDbContext> BuildDbContextOptions()
+    {
+        return new DbContextOptionsBuilder<AppDbContext>()
             .UseNpgsql(DataSource)
             .Options;
-
-        return new AppDbContext(options);
     }
 
     public async Task ResetAsync()
@@ -99,10 +107,8 @@ public sealed class PostgresSqlStorageFixture : IAsyncLifetime
             truncate table
                 outbox_messages,
                 subscription_tags,
-                subscription_filters,
                 subscriptions,
                 tags,
-                filters,
                 links,
                 chats
             restart identity cascade;
@@ -139,6 +145,15 @@ public sealed class PostgresSqlStorageFixture : IAsyncLifetime
         }
 
         throw new InvalidOperationException("PostgreSQL did not become ready in time.");
+    }
+
+    private sealed class TestDbContextFactory(DbContextOptions<AppDbContext> options)
+        : IDbContextFactory<AppDbContext>
+    {
+        public AppDbContext CreateDbContext()
+        {
+            return new AppDbContext(options);
+        }
     }
 
     private sealed class TestWebHostEnvironment : IWebHostEnvironment

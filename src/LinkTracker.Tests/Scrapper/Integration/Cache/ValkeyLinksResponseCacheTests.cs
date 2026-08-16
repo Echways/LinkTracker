@@ -27,8 +27,8 @@ public sealed class ValkeyLinksResponseCacheTests(ValkeyTestContainerFixture fix
             Size = 2,
             Links =
             [
-                new LinkResponse { Id = 42, Url = new Uri("https://github.com/user/repo"), Tags = ["backend", "dotnet"], Filters = ["user:alice"] },
-                new LinkResponse { Id = 43, Url = new Uri("https://stackoverflow.com/questions/123"), Tags = ["qa"], Filters = [] }
+                new LinkResponse { Id = 42, Url = new Uri("https://github.com/user/repo"), Tags = ["backend", "dotnet"] },
+                new LinkResponse { Id = 43, Url = new Uri("https://stackoverflow.com/questions/123"), Tags = ["qa"] }
             ]
         };
 
@@ -46,14 +46,12 @@ public sealed class ValkeyLinksResponseCacheTests(ValkeyTestContainerFixture fix
                 Assert.Equal(42, first.Id);
                 Assert.Equal(new Uri("https://github.com/user/repo"), first.Url);
                 Assert.Equal(["backend", "dotnet"], first.Tags);
-                Assert.Equal(["user:alice"], first.Filters);
             },
             second =>
             {
                 Assert.Equal(43, second.Id);
                 Assert.Equal(new Uri("https://stackoverflow.com/questions/123"), second.Url);
                 Assert.Equal(["qa"], second.Tags);
-                Assert.Empty(second.Filters);
             });
     }
 
@@ -72,7 +70,7 @@ public sealed class ValkeyLinksResponseCacheTests(ValkeyTestContainerFixture fix
                 Size = 1,
                 Links =
                 [
-                    new LinkResponse { Id = 1, Url = new Uri("https://github.com/user/repo"), Tags = [], Filters = [] }
+                    new LinkResponse { Id = 1, Url = new Uri("https://github.com/user/repo"), Tags = [] }
                 ]
             },
             CancellationToken.None);
@@ -128,7 +126,7 @@ public sealed class ValkeyLinksResponseCacheTests(ValkeyTestContainerFixture fix
                 Size = 1,
                 Links =
                 [
-                    new LinkResponse { Id = 42, Url = new Uri("https://github.com/user/repo"), Tags = ["backend"], Filters = [] }
+                    new LinkResponse { Id = 42, Url = new Uri("https://github.com/user/repo"), Tags = ["backend"] }
                 ]
             },
             CancellationToken.None);

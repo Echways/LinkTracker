@@ -19,9 +19,10 @@ internal sealed class OutboxDispatchJob(
         var ct = context.CancellationToken;
         var options = outboxOptions.Value;
 
-        var messages = await outboxStore.GetUnprocessedBatchAsync(
+        var messages = await outboxStore.ClaimUnprocessedBatchAsync(
             options.BatchSize,
             options.MaxRetryCount,
+            TimeSpan.FromSeconds(options.LockSeconds),
             ct);
 
         if (messages.Count == 0)

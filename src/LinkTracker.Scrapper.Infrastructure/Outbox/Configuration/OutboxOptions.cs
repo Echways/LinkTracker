@@ -9,4 +9,6 @@ public sealed class OutboxOptions
     public int BatchSize { get; set; } = 100;
 
     public int MaxRetryCount { get; set; } = 3;
+
+    public int LockSeconds { get; set; } = 60;
 }

@@ -67,7 +67,6 @@ public sealed class SqlLinkTrackingStore(NpgsqlDataSource dataSource) : ILinkTra
         long chatId,
         Uri link,
         IReadOnlyList<string> tags,
-        IReadOnlyList<string> filters,
         CancellationToken ct = default)
     {
         var normalizedUrl = TrackedLinkUrl.Normalize(link);
@@ -126,7 +125,6 @@ public sealed class SqlLinkTrackingStore(NpgsqlDataSource dataSource) : ILinkTra
                 Id = linkId,
                 Url = link,
                 Tags = cleanedTags,
-                Filters = [],
                 LastUpdatedAt = null,
                 LastEventKey = null
             };
@@ -198,7 +196,6 @@ public sealed class SqlLinkTrackingStore(NpgsqlDataSource dataSource) : ILinkTra
                 LastUpdatedAt = row.LastUpdatedAt,
                 LastEventKey = row.LastEventKey,
                 Tags = row.Tags,
-                Filters = []
             };
         }
         catch
@@ -449,7 +446,6 @@ public sealed class SqlLinkTrackingStore(NpgsqlDataSource dataSource) : ILinkTra
             LastUpdatedAt = row.LastUpdatedAt,
             LastEventKey = row.LastEventKey,
             Tags = row.Tags,
-            Filters = []
         };
     }
 
@@ -462,7 +458,6 @@ public sealed class SqlLinkTrackingStore(NpgsqlDataSource dataSource) : ILinkTra
             LastUpdatedAt = row.LastUpdatedAt,
             LastEventKey = row.LastEventKey,
             Tags = row.Tags,
-            Filters = []
         };
     }
 

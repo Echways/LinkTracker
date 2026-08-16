@@ -118,7 +118,6 @@ public static class ScrapperEndpoints
             resolvedChatId,
             data.Link,
             data.Tags,
-            data.Filters,
             ct);
 
         await cache.InvalidateAsync(resolvedChatId, ct);

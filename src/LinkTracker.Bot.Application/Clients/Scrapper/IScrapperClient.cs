@@ -14,7 +14,6 @@ public interface IScrapperClient
         long chatId,
         Uri link,
         IReadOnlyList<string> tags,
-        IReadOnlyList<string> filters,
         CancellationToken ct = default);
 
     Task<LinkResponse> RemoveLinkAsync(long chatId, Uri link, CancellationToken ct = default);

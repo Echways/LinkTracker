@@ -15,7 +15,7 @@ using LinkTracker.Scrapper.Presentation.Endpoints;
 using LinkTracker.Scrapper.Presentation.Grpc;
 using LinkTracker.Shared.Infrastructure.RateLimiting;
 using LinkTracker.Shared.Infrastructure.Resilience;
-using Prometheus;
+using LinkTracker.Shared.Infrastructure.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,5 +56,5 @@ app.UseMiddleware<RequestDurationMiddleware>();
 app.MapScrapperEndpoints();
 app.MapGrpcService<ScrapperGrpcService>();
 
-app.MapMetrics();
+app.MapMetricsEndpoint();
 await app.RunAsync();

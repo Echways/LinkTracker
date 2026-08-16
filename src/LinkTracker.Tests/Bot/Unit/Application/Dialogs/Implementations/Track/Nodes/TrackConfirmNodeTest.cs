@@ -23,7 +23,6 @@ public sealed class TrackConfirmNodeTests
                 123L,
                 uri,
                 Arg.Is<IReadOnlyList<string>>(x => x.SequenceEqual(new[] { "dotnet", "runtime" })),
-                Arg.Is<IReadOnlyList<string>>(x => x.Count == 0),
                 Arg.Any<CancellationToken>())
             .Returns(new LinkResponse { Id = 1, Url = uri, Tags = ["dotnet", "runtime"] });
 
@@ -42,7 +41,6 @@ public sealed class TrackConfirmNodeTests
             123L,
             uri,
             Arg.Is<IReadOnlyList<string>>(x => x.SequenceEqual(new[] { "dotnet", "runtime" })),
-            Arg.Is<IReadOnlyList<string>>(x => x.Count == 0),
             Arg.Any<CancellationToken>());
     }
 
@@ -68,7 +66,6 @@ public sealed class TrackConfirmNodeTests
                 Arg.Any<long>(),
                 Arg.Any<Uri>(),
                 Arg.Any<IReadOnlyList<string>>(),
-                Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<CancellationToken>());
     }
 
@@ -81,7 +78,6 @@ public sealed class TrackConfirmNodeTests
             .AddLinkAsync(
                 123L,
                 Arg.Any<Uri>(),
-                Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromException<LinkResponse>(
@@ -112,7 +108,6 @@ public sealed class TrackConfirmNodeTests
                 123L,
                 Arg.Any<Uri>(),
                 Arg.Any<IReadOnlyList<string>>(),
-                Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromException<LinkResponse>(
                 CreateException(
@@ -139,7 +134,6 @@ public sealed class TrackConfirmNodeTests
             .AddLinkAsync(
                 123L,
                 Arg.Any<Uri>(),
-                Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<IReadOnlyList<string>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromException<LinkResponse>(
