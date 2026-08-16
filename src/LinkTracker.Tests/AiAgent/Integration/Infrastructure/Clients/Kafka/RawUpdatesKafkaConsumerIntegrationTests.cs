@@ -54,7 +54,8 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
                 {
                     groupingBuffer.Received(1).Add(
                         42L,
-                        Arg.Is<ProcessedLinkUpdate>(u => u.Id == 100));
+                        Arg.Is<ProcessedLinkUpdate>(u => u.Id == 100),
+                        Arg.Any<IMessageAck>());
 
                     return Task.FromResult(true);
                 }
@@ -94,7 +95,7 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
 
             await Task.Delay(TimeSpan.FromSeconds(3));
 
-            groupingBuffer.DidNotReceive().Add(Arg.Any<long>(), Arg.Any<ProcessedLinkUpdate>());
+            groupingBuffer.DidNotReceive().Add(Arg.Any<long>(), Arg.Any<ProcessedLinkUpdate>(), Arg.Any<IMessageAck>());
         }
         finally
         {
@@ -119,7 +120,7 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
 
             await Task.Delay(TimeSpan.FromSeconds(3));
 
-            groupingBuffer.DidNotReceive().Add(Arg.Any<long>(), Arg.Any<ProcessedLinkUpdate>());
+            groupingBuffer.DidNotReceive().Add(Arg.Any<long>(), Arg.Any<ProcessedLinkUpdate>(), Arg.Any<IMessageAck>());
         }
         finally
         {
@@ -166,7 +167,7 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
                 "{ this is not valid json !!!",
                 Encoding.UTF8.GetString(Convert.FromBase64String(root.GetProperty("payload").GetString()!)));
 
-            groupingBuffer.DidNotReceive().Add(Arg.Any<long>(), Arg.Any<ProcessedLinkUpdate>());
+            groupingBuffer.DidNotReceive().Add(Arg.Any<long>(), Arg.Any<ProcessedLinkUpdate>(), Arg.Any<IMessageAck>());
         }
         finally
         {
@@ -228,6 +229,7 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
             summarizer,
             prioritizer,
             groupingBuffer,
+            Substitute.For<IProcessedUpdatePublisher>(),
             NullLogger<LinkUpdateProcessingService>.Instance);
 
         var messageHandler = new RawUpdatesKafkaMessageHandler(
@@ -248,7 +250,7 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
         }).Build();
 
         return new RawUpdatesKafkaConsumer(
-            kafkaConsumer, messageHandler, consumerOpts,
+            kafkaConsumer, messageHandler, new KafkaOffsetTracker(), consumerOpts,
             Substitute.For<IAiAgentMetrics>(),
             NullLogger<RawUpdatesKafkaConsumer>.Instance);
     }

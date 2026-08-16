@@ -25,12 +25,13 @@ public sealed class RawUpdatesKafkaMessageHandlerTests
 
         var sut = CreateSut(processingService, deadLetterPublisher, 3);
 
-        var result = await sut.HandleAsync(CreateValidConsumeResult(), CancellationToken.None);
+        var result = await sut.HandleAsync(CreateValidConsumeResult(), Substitute.For<IMessageAck>(), CancellationToken.None);
 
         Assert.True(result);
 
         await processingService.Received(1).ProcessAsync(
             Arg.Is<LinkUpdate>(u => u.Id == 42),
+            Arg.Any<IMessageAck>(),
             Arg.Any<CancellationToken>());
 
         await deadLetterPublisher.DidNotReceive().PublishAsync(
@@ -50,12 +51,13 @@ public sealed class RawUpdatesKafkaMessageHandlerTests
 
         var message = CreateConsumeResult("{ invalid json");
 
-        var result = await sut.HandleAsync(message, CancellationToken.None);
+        var result = await sut.HandleAsync(message, Substitute.For<IMessageAck>(), CancellationToken.None);
 
         Assert.True(result);
 
         await processingService.DidNotReceive().ProcessAsync(
             Arg.Any<LinkUpdate>(),
+            Arg.Any<IMessageAck>(),
             Arg.Any<CancellationToken>());
 
         await deadLetterPublisher.Received(1).PublishAsync(
@@ -72,19 +74,20 @@ public sealed class RawUpdatesKafkaMessageHandlerTests
         var deadLetterPublisher = Substitute.For<IRawUpdateDeadLetterPublisher>();
 
         processingService
-            .ProcessAsync(Arg.Any<LinkUpdate>(), Arg.Any<CancellationToken>())
+            .ProcessAsync(Arg.Any<LinkUpdate>(), Arg.Any<IMessageAck>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromException(new InvalidOperationException("YandexAi failed")));
 
         var sut = CreateSut(processingService, deadLetterPublisher, 3);
 
         var message = CreateValidConsumeResult();
 
-        var result = await sut.HandleAsync(message, CancellationToken.None);
+        var result = await sut.HandleAsync(message, Substitute.For<IMessageAck>(), CancellationToken.None);
 
         Assert.True(result);
 
         await processingService.Received(3).ProcessAsync(
             Arg.Any<LinkUpdate>(),
+            Arg.Any<IMessageAck>(),
             Arg.Any<CancellationToken>());
 
         await deadLetterPublisher.Received(1).PublishAsync(
@@ -111,7 +114,7 @@ public sealed class RawUpdatesKafkaMessageHandlerTests
 
         var sut = CreateSut(processingService, deadLetterPublisher, 3, metrics: metrics);
 
-        var result = await sut.HandleAsync(CreateConsumeResult("{ invalid json"), CancellationToken.None);
+        var result = await sut.HandleAsync(CreateConsumeResult("{ invalid json"), Substitute.For<IMessageAck>(), CancellationToken.None);
 
         Assert.False(result);
 
@@ -128,7 +131,7 @@ public sealed class RawUpdatesKafkaMessageHandlerTests
         using var cts = new CancellationTokenSource();
 
         processingService
-            .ProcessAsync(Arg.Any<LinkUpdate>(), Arg.Any<CancellationToken>())
+            .ProcessAsync(Arg.Any<LinkUpdate>(), Arg.Any<IMessageAck>(), Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromCanceled(cts.Token));
 
         var sut = CreateSut(processingService, deadLetterPublisher, 3);
@@ -136,7 +139,7 @@ public sealed class RawUpdatesKafkaMessageHandlerTests
         await cts.CancelAsync();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-            sut.HandleAsync(CreateValidConsumeResult(), cts.Token));
+            sut.HandleAsync(CreateValidConsumeResult(), Substitute.For<IMessageAck>(), cts.Token));
 
         await deadLetterPublisher.DidNotReceive().PublishAsync(
             Arg.Any<ConsumeResult<string, byte[]>>(),

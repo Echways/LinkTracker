@@ -8,7 +8,6 @@ using LinkTracker.Scrapper.Infrastructure.Outbox.Configuration;
 using LinkTracker.Scrapper.Infrastructure.Quartz.Configuration;
 using LinkTracker.Scrapper.Infrastructure.Telemetry;
 using LinkTracker.Scrapper.Storage.Abstractions.Models;
-using LinkTracker.Shared.Constants;
 using LinkTracker.Shared.Contracts.Bot;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -203,7 +202,14 @@ internal sealed class LinkUpdatesJob(
             try
             {
                 await botClient.SendUpdateAsync(
-                    new LinkUpdate { Id = 0, Url = report.Urls[0], TgChatIds = [report.ChatId], Description = BuildFailedReportDescription(report.Urls) },
+                    new LinkUpdate
+                    {
+                        Id = 0,
+                        Url = report.Urls[0],
+                        TgChatIds = [report.ChatId],
+                        Description = BuildFailedReportDescription(report.Urls),
+                        Kind = LinkUpdateKind.SystemReport
+                    },
                     ct);
             }
             catch (Exception ex)
@@ -223,7 +229,6 @@ internal sealed class LinkUpdatesJob(
         var urlLines = string.Join(newLine, urls.Select(url => $"- {url}"));
 
         return
-            $"{SystemMessageMarkers.FailedLinkReport}" +
             $"Не удалось проверить часть ссылок в текущем цикле:{newLine}" +
             $"{urlLines}{newLine}{newLine}" +
             "Остальные ссылки были обработаны. Повторим попытку в следующем запуске.";

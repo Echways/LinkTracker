@@ -54,9 +54,13 @@ public static class ClientsModule
             .Bind(configuration.GetSection("YandexAi"))
             .ValidateOnStart();
 
+        services.AddSingleton<KafkaOffsetTracker>();
+
         services.AddSingleton<IConsumer<string, byte[]>>(sp =>
         {
             var opts = sp.GetRequiredService<IOptions<RawUpdatesKafkaOptions>>().Value;
+            var offsetTracker = sp.GetRequiredService<KafkaOffsetTracker>();
+
             return new ConsumerBuilder<string, byte[]>(new ConsumerConfig
             {
                 BootstrapServers = opts.BootstrapServers,
@@ -64,7 +68,10 @@ public static class ClientsModule
                 EnableAutoCommit = false,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 AllowAutoCreateTopics = false
-            }).Build();
+            })
+            .SetPartitionsRevokedHandler((_, partitions) =>
+                offsetTracker.Forget(partitions.Select(x => x.TopicPartition)))
+            .Build();
         });
 
         services.AddSingleton<IProducer<string, byte[]>>(sp =>
@@ -95,6 +102,7 @@ public static class ClientsModule
         services.AddSingleton<ILinkUpdatePrioritizer, KeywordLinkUpdatePrioritizer>();
         services.AddSingleton<ILinkUpdateGrouper, WindowLinkUpdateGrouper>();
         services.AddSingleton<IGroupingBuffer, TimeWindowGroupingBuffer>();
+
         services.AddHostedService<GroupingFlushJob>();
 
         return services;

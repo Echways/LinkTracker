@@ -4,7 +4,6 @@ using LinkTracker.AiAgent.Application.Abstractions;
 using LinkTracker.AiAgent.Infrastructure.Clients.YandexAi.Contracts;
 using LinkTracker.AiAgent.Infrastructure.Configuration.AiAgent;
 using LinkTracker.AiAgent.Infrastructure.Configuration.YandexAi;
-using LinkTracker.Shared.Constants;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -71,43 +70,18 @@ internal sealed class YandexAiHttpClient(
 
     private static string FallbackTruncate(string text, int threshold)
     {
-        var markerIndex = text.IndexOf(SystemMessageMarkers.FailedLinkReport, StringComparison.Ordinal);
+        var cutAt = threshold;
 
-        if (markerIndex < 0)
+        while (cutAt > 0 && text[cutAt - 1] != '\n')
         {
-            var cutAt = threshold;
-            while (cutAt > 0 && text[cutAt - 1] != '\n')
-            {
-                cutAt--;
-            }
-
-            if (cutAt == 0)
-            {
-                cutAt = threshold;
-            }
-
-            return string.Concat(text.AsSpan(0, cutAt).TrimEnd(), "\n...");
+            cutAt--;
         }
 
-        var mainContent = text[..markerIndex].TrimEnd();
-        var systemSuffix = text[markerIndex..];
-
-        if (mainContent.Length <= threshold)
+        if (cutAt == 0)
         {
-            return text;
+            cutAt = threshold;
         }
 
-        var mainCutAt = threshold;
-        while (mainCutAt > 0 && mainContent[mainCutAt - 1] != '\n')
-        {
-            mainCutAt--;
-        }
-
-        if (mainCutAt == 0)
-        {
-            mainCutAt = threshold;
-        }
-
-        return string.Concat(mainContent.AsSpan(0, mainCutAt).TrimEnd(), "\n...\n", systemSuffix);
+        return string.Concat(text.AsSpan(0, cutAt).TrimEnd(), "\n...");
     }
 }

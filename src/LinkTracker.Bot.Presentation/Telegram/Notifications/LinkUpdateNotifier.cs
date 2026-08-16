@@ -1,6 +1,5 @@
 using LinkTracker.Bot.Application.Telemetry.Abstractions;
 using LinkTracker.Bot.Application.Updates.Abstractions;
-using LinkTracker.Shared.Constants;
 using LinkTracker.Shared.Contracts.AiAgent;
 using LinkTracker.Shared.Contracts.Bot;
 using Telegram.Bot;
@@ -22,9 +21,9 @@ public sealed class LinkUpdateNotifier(ITelegramBotClient botClient, IBotMetrics
 
     private static string BuildMessage(LinkUpdate update)
     {
-        if (update.Description.StartsWith(SystemMessageMarkers.FailedLinkReport, StringComparison.Ordinal))
+        if (update.Kind == LinkUpdateKind.SystemReport)
         {
-            return update.Description[SystemMessageMarkers.FailedLinkReport.Length..];
+            return update.Description;
         }
 
         return $"{BuildHeader(update.Priority)}\n{update.Url}\n\n{update.Description}";

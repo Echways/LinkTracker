@@ -1,6 +1,5 @@
 using LinkTracker.Bot.Application.Telemetry.Abstractions;
 using LinkTracker.Bot.Presentation.Telegram.Notifications;
-using LinkTracker.Shared.Constants;
 using LinkTracker.Shared.Contracts.AiAgent;
 using LinkTracker.Shared.Contracts.Bot;
 using NSubstitute;
@@ -52,7 +51,7 @@ public sealed class LinkUpdateNotifierTests
     }
 
     [Fact]
-    public async Task NotifyAsync_WhenSystemReport_StripsMarkerAndSkipsPriorityHeader()
+    public async Task NotifyAsync_WhenSystemReport_SendsDescriptionAsIsWithoutHeader()
     {
         var (botClient, sentTexts) = CreateBotClient();
         var sut = new LinkUpdateNotifier(botClient, Substitute.For<IBotMetrics>());
@@ -62,9 +61,10 @@ public sealed class LinkUpdateNotifierTests
             {
                 Id = 0,
                 Url = Url,
-                Description = $"{SystemMessageMarkers.FailedLinkReport}Не удалось проверить часть ссылок",
+                Description = "Не удалось проверить часть ссылок",
                 TgChatIds = [42],
-                Priority = LinkUpdatePriority.High
+                Priority = LinkUpdatePriority.High,
+                Kind = LinkUpdateKind.SystemReport
             },
             CancellationToken.None);
 

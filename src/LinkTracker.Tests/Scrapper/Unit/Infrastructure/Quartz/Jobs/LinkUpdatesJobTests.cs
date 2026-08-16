@@ -7,7 +7,6 @@ using LinkTracker.Scrapper.Infrastructure.Quartz.Configuration;
 using LinkTracker.Scrapper.Infrastructure.Quartz.Jobs;
 using LinkTracker.Scrapper.Infrastructure.Telemetry;
 using LinkTracker.Scrapper.Storage.Abstractions.Models;
-using LinkTracker.Shared.Constants;
 using LinkTracker.Shared.Contracts.Bot;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -161,7 +160,7 @@ public sealed class LinkUpdatesJobTests
                 Arg.Is<LinkUpdate>(x =>
                     x.TgChatIds.Count == 1 &&
                     x.TgChatIds.Contains(1001L) &&
-                    x.Description.Contains(SystemMessageMarkers.FailedLinkReport) &&
+                    x.Kind == LinkUpdateKind.SystemReport &&
                     x.Description.Contains(subscription.Url.ToString())),
                 Arg.Any<CancellationToken>());
     }
@@ -509,7 +508,7 @@ public sealed class LinkUpdatesJobTests
                     x.Url == successfulSubscription.Url &&
                     x.TgChatIds.Count == 1 &&
                     x.TgChatIds.Contains(1002L) &&
-                    !x.Description.Contains(SystemMessageMarkers.FailedLinkReport) &&
+                    x.Kind == LinkUpdateKind.Content &&
                     x.Description.Contains("Заголовок: Issue")),
                 Arg.Any<CancellationToken>());
 
@@ -518,7 +517,7 @@ public sealed class LinkUpdatesJobTests
                 Arg.Is<LinkUpdate>(x =>
                     x.TgChatIds.Count == 1 &&
                     x.TgChatIds.Contains(1001L) &&
-                    x.Description.Contains(SystemMessageMarkers.FailedLinkReport) &&
+                    x.Kind == LinkUpdateKind.SystemReport &&
                     x.Description.Contains(failedSubscription.Url.ToString())),
                 Arg.Any<CancellationToken>());
 
@@ -760,7 +759,7 @@ public sealed class LinkUpdatesJobTests
                 Arg.Is<LinkUpdate>(x =>
                     x.TgChatIds.Count == 1 &&
                     x.TgChatIds.Contains(1001L) &&
-                    x.Description.Contains(SystemMessageMarkers.FailedLinkReport) &&
+                    x.Kind == LinkUpdateKind.SystemReport &&
                     x.Description.Contains(firstFailedSubscription.Url.ToString()) &&
                     !x.Description.Contains(secondFailedSubscription.Url.ToString())),
                 Arg.Any<CancellationToken>());
@@ -770,7 +769,7 @@ public sealed class LinkUpdatesJobTests
                 Arg.Is<LinkUpdate>(x =>
                     x.TgChatIds.Count == 1 &&
                     x.TgChatIds.Contains(1002L) &&
-                    x.Description.Contains(SystemMessageMarkers.FailedLinkReport) &&
+                    x.Kind == LinkUpdateKind.SystemReport &&
                     x.Description.Contains(firstFailedSubscription.Url.ToString()) &&
                     x.Description.Contains(secondFailedSubscription.Url.ToString())),
                 Arg.Any<CancellationToken>());
@@ -981,7 +980,7 @@ public sealed class LinkUpdatesJobTests
             Arg.Is<LinkUpdate>(x =>
                 x.Id == 0 &&
                 x.TgChatIds.SequenceEqual(new[] { 1001L }) &&
-                x.Description.Contains(SystemMessageMarkers.FailedLinkReport) &&
+                x.Kind == LinkUpdateKind.SystemReport &&
                 x.Description.Contains(subscription.Url.ToString())),
             Arg.Any<CancellationToken>());
     }

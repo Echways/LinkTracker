@@ -1,6 +1,7 @@
 using LinkTracker.AiAgent.Infrastructure.Kafka.Serialization;
 using LinkTracker.Bot.Infrastructure.Kafka.Deserialization;
 using LinkTracker.Shared.Contracts.AiAgent;
+using LinkTracker.Shared.Contracts.Bot;
 
 namespace LinkTracker.Tests.Shared.Unit.Contracts;
 
@@ -41,5 +42,29 @@ public sealed class ProcessedUpdateWireCompatibilityTests
         Assert.Equal(published.Url, received.Url);
         Assert.Equal(published.Description, received.Description);
         Assert.Equal(published.TgChatIds, received.TgChatIds);
+    }
+
+    [Theory]
+    [InlineData(LinkUpdateKind.Content)]
+    [InlineData(LinkUpdateKind.SystemReport)]
+    public async Task BotDeserializer_ReadsKindPublishedByAiAgent(LinkUpdateKind kind)
+    {
+        var published = new ProcessedLinkUpdate
+        {
+            Id = 0,
+            Url = new Uri("https://github.com/dotnet/runtime"),
+            Description = "Не удалось проверить часть ссылок",
+            TgChatIds = [1001],
+            Kind = kind
+        };
+
+        var payload = await new JsonProcessedLinkUpdateKafkaSerializer()
+            .SerializeAsync(published, Topic, CancellationToken.None);
+
+        var received = await new JsonLinkUpdateKafkaDeserializer()
+            .DeserializeAsync(payload, Topic, CancellationToken.None);
+
+        Assert.NotNull(received);
+        Assert.Equal(kind, received!.Kind);
     }
 }

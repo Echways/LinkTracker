@@ -15,6 +15,7 @@ using LinkTracker.Scrapper.Infrastructure.Clients.Bot;
 using LinkTracker.Scrapper.Infrastructure.Configuration.Kafka;
 using LinkTracker.Scrapper.Infrastructure.Kafka.Serialization;
 using LinkTracker.Scrapper.Infrastructure.Telemetry;
+using LinkTracker.Shared.Contracts.AiAgent;
 using LinkTracker.Shared.Contracts.Bot;
 using LinkTracker.Shared.Infrastructure;
 using LinkTracker.Tests.Bot.Integration.Kafka;
@@ -252,7 +253,16 @@ public sealed class LinkUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerF
         try
         {
             await scrapperKafkaClient.Client.SendUpdateAsync(
-                new LinkUpdate { Id = 42, Url = new Uri("https://github.com/user/repo"), Description = "Repository updated with Avro", TgChatIds = [123] });
+                new LinkUpdate
+                {
+                    Id = 42,
+                    Url = new Uri("https://github.com/user/repo"),
+                    Description = "Repository updated with Avro",
+                    Author = "octocat",
+                    TgChatIds = [123],
+                    Priority = LinkUpdatePriority.High,
+                    Kind = LinkUpdateKind.SystemReport
+                });
 
             await WaitUntilAsync(async () =>
             {
@@ -263,6 +273,9 @@ public sealed class LinkUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerF
                             update.Id == 42
                             && update.Url == new Uri("https://github.com/user/repo")
                             && update.Description == "Repository updated with Avro"
+                            && update.Author == "octocat"
+                            && update.Priority == LinkUpdatePriority.High
+                            && update.Kind == LinkUpdateKind.SystemReport
                             && update.TgChatIds.SequenceEqual(new[] { 123L })),
                         Arg.Any<CancellationToken>());
 

@@ -17,7 +17,10 @@ internal sealed class RawUpdatesKafkaMessageHandler(
     IAiAgentMetrics metrics,
     ILogger<RawUpdatesKafkaMessageHandler> logger) : IRawUpdatesKafkaMessageHandler
 {
-    public async Task<bool> HandleAsync(ConsumeResult<string, byte[]> result, CancellationToken ct)
+    public async Task<bool> HandleAsync(
+        ConsumeResult<string, byte[]> result,
+        IMessageAck ack,
+        CancellationToken ct)
     {
         LinkUpdate? update;
 
@@ -47,7 +50,7 @@ internal sealed class RawUpdatesKafkaMessageHandler(
                 ct);
         }
 
-        var processingError = await TryProcessWithRetriesAsync(update, ct);
+        var processingError = await TryProcessWithRetriesAsync(update, ack, ct);
 
         if (processingError is not null)
         {
@@ -68,7 +71,10 @@ internal sealed class RawUpdatesKafkaMessageHandler(
         return true;
     }
 
-    private async Task<Exception?> TryProcessWithRetriesAsync(LinkUpdate update, CancellationToken ct)
+    private async Task<Exception?> TryProcessWithRetriesAsync(
+        LinkUpdate update,
+        IMessageAck ack,
+        CancellationToken ct)
     {
         var attempts = Math.Max(1, kafkaOptions.Value.RetryAttempts);
         var backoff = TimeSpan.FromMilliseconds(Math.Max(0, kafkaOptions.Value.RetryBackoffMilliseconds));
@@ -77,7 +83,7 @@ internal sealed class RawUpdatesKafkaMessageHandler(
         {
             try
             {
-                await processingService.ProcessAsync(update, ct);
+                await processingService.ProcessAsync(update, ack, ct);
                 return null;
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
