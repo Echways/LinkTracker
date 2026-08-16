@@ -1,3 +1,5 @@
+using LinkTracker.Shared.Contracts.Bot;
+
 namespace LinkTracker.Shared.Contracts.AiAgent;
 
 public sealed class ProcessedLinkUpdate
@@ -11,4 +13,6 @@ public sealed class ProcessedLinkUpdate
     public IReadOnlyList<long> TgChatIds { get; init; } = [];
 
     public LinkUpdatePriority Priority { get; init; } = LinkUpdatePriority.Medium;
+
+    public LinkUpdateKind Kind { get; init; } = LinkUpdateKind.Content;
 }

@@ -1,5 +1,6 @@
 using LinkTracker.AiAgent.Application.Abstractions;
 using LinkTracker.AiAgent.Infrastructure.Configuration.AiAgent;
+using LinkTracker.Shared.Contracts.AiAgent;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -19,34 +20,84 @@ internal sealed class GroupingFlushJob(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Task.Delay(interval, stoppingToken);
-            await FlushAsync(stoppingToken);
+            try
+            {
+                await Task.Delay(interval, stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+
+            await FlushAsync(false, stoppingToken);
         }
     }
 
-    private async Task FlushAsync(CancellationToken ct)
+    // Окна, не успевшие закрыться, публикуются на остановке: иначе они умрут вместе
+    // с процессом, а сообщения будут переигрываться с последнего подтвержденного оффсета.
+    public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        var pending = buffer.Flush()
-            .SelectMany(entry => grouper
-                .Group(entry.Updates)
-                .Select(update => (entry.ChatId, Update: update)))
-            .OrderByDescending(x => x.Update.Priority)
+        await base.StopAsync(cancellationToken);
+        await FlushAsync(true, cancellationToken);
+    }
+
+    private async Task FlushAsync(bool force, CancellationToken ct)
+    {
+        var pending = buffer.Flush(force)
+            .Select(bucket => new
+            {
+                Bucket = bucket,
+                Groups = grouper.Group(bucket.Updates.Select(x => x.Update).ToArray())
+            })
+            .OrderByDescending(x => x.Groups.Max(group => group.Priority))
             .ToArray();
 
-        foreach (var (chatId, update) in pending)
+        foreach (var entry in pending)
         {
-            try
+            if (!await TryPublishAsync(entry.Bucket, entry.Groups, ct))
             {
-                await publisher.PublishAsync(update, ct);
+                buffer.Requeue(entry.Bucket);
+
+                if (ct.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    private async Task<bool> TryPublishAsync(
+        GroupingBucket bucket,
+        IReadOnlyList<ProcessedLinkUpdate> groups,
+        CancellationToken ct)
+    {
+        try
+        {
+            foreach (var group in groups)
+            {
+                await publisher.PublishAsync(group, ct);
 
                 logger.LogInformation(
                     "Группа опубликована. ChatId={ChatId}, UpdateId={UpdateId}, Priority={Priority}",
-                    chatId, update.Id, update.Priority);
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                logger.LogError(ex, "Ошибка публикации сгруппированного обновления. ChatId={ChatId}", chatId);
+                    bucket.ChatId, group.Id, group.Priority);
             }
         }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Ошибка публикации сгруппированного обновления, окно возвращено в буфер. ChatId={ChatId}",
+                bucket.ChatId);
+
+            return false;
+        }
+
+        // Оффсеты исходных сообщений подтверждаются только после успешной публикации.
+        foreach (var buffered in bucket.Updates)
+        {
+            buffered.Ack.Release();
+        }
+
+        return true;
     }
 }

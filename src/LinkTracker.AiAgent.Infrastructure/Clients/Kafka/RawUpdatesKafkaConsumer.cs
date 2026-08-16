@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using Confluent.Kafka;
+using LinkTracker.AiAgent.Application.Telemetry.Abstractions;
 using LinkTracker.AiAgent.Infrastructure.Configuration.Kafka;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -9,12 +11,16 @@ namespace LinkTracker.AiAgent.Infrastructure.Clients.Kafka;
 internal sealed class RawUpdatesKafkaConsumer(
     IConsumer<string, byte[]> consumer,
     IRawUpdatesKafkaMessageHandler messageHandler,
+    KafkaOffsetTracker offsetTracker,
     IOptions<RawUpdatesKafkaOptions> kafkaOptions,
+    IAiAgentMetrics metrics,
     ILogger<RawUpdatesKafkaConsumer> logger) : BackgroundService
 {
+    private static readonly TimeSpan PollTimeout = TimeSpan.FromMilliseconds(500);
+
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return ConsumeLoopAsync(stoppingToken);
+        return Task.Run(() => ConsumeLoopAsync(stoppingToken), stoppingToken);
     }
 
     private async Task ConsumeLoopAsync(CancellationToken stoppingToken)
@@ -35,7 +41,7 @@ internal sealed class RawUpdatesKafkaConsumer(
 
                 try
                 {
-                    result = consumer.Consume(stoppingToken);
+                    result = consumer.Consume(PollTimeout);
                 }
                 catch (ConsumeException ex)
                 {
@@ -43,12 +49,12 @@ internal sealed class RawUpdatesKafkaConsumer(
                     continue;
                 }
 
-                if (result is null)
+                if (result is not null && !result.IsPartitionEOF)
                 {
-                    continue;
+                    await ProcessMessageAsync(result, stoppingToken);
                 }
 
-                await ProcessMessageAsync(result, stoppingToken);
+                CommitCompleted();
             }
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
@@ -57,19 +63,29 @@ internal sealed class RawUpdatesKafkaConsumer(
         }
         finally
         {
+            CommitCompleted();
             consumer.Close();
         }
     }
 
     private async Task ProcessMessageAsync(ConsumeResult<string, byte[]> result, CancellationToken ct)
     {
+        var sw = Stopwatch.StartNew();
+
+        var ack = offsetTracker.Track(result);
+
         try
         {
-            var shouldCommit = await messageHandler.HandleAsync(result, ct);
+            var handled = await messageHandler.HandleAsync(result, ack, ct);
 
-            if (shouldCommit)
+            sw.Stop();
+
+            metrics.IncrementKafkaConsumed(result.Topic);
+            metrics.ObserveKafkaConsumeDuration(result.Topic, sw.Elapsed.TotalMilliseconds);
+
+            if (handled)
             {
-                TryCommit(result);
+                ack.Release();
             }
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -78,6 +94,11 @@ internal sealed class RawUpdatesKafkaConsumer(
         }
         catch (Exception ex)
         {
+            sw.Stop();
+
+            metrics.IncrementKafkaConsumeError(result.Topic);
+            metrics.ObserveKafkaConsumeDuration(result.Topic, sw.Elapsed.TotalMilliseconds);
+
             logger.LogError(
                 ex,
                 "Ошибка обработки Kafka сообщения. Offset не будет подтвержден. Topic={Topic}, Partition={Partition}, Offset={Offset}",
@@ -87,23 +108,25 @@ internal sealed class RawUpdatesKafkaConsumer(
         }
     }
 
-    private bool TryCommit(ConsumeResult<string, byte[]> result)
+    private void CommitCompleted()
     {
+        var offsets = offsetTracker.TakeCommittableOffsets();
+
+        if (offsets.Count == 0)
+        {
+            return;
+        }
+
         try
         {
-            consumer.Commit(result);
-            return true;
+            consumer.Commit(offsets);
         }
         catch (KafkaException ex)
         {
             logger.LogError(
                 ex,
-                "Не удалось подтвердить Kafka offset. Topic={Topic}, Partition={Partition}, Offset={Offset}",
-                result.Topic,
-                result.Partition.Value,
-                result.Offset.Value);
-
-            return false;
+                "Не удалось подтвердить Kafka offsets. Offsets={Offsets}",
+                string.Join(", ", offsets));
         }
     }
 }

@@ -19,4 +19,6 @@ public sealed class LinkUpdate
     /// приоритет там просто ещё не вычислен.
     /// </summary>
     public LinkUpdatePriority Priority { get; init; } = LinkUpdatePriority.Medium;
+
+    public LinkUpdateKind Kind { get; init; } = LinkUpdateKind.Content;
 }

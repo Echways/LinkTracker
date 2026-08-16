@@ -10,10 +10,17 @@ public sealed class LinkUpdateProcessingService(
     ILinkUpdateSummarizer summarizer,
     ILinkUpdatePrioritizer prioritizer,
     IGroupingBuffer groupingBuffer,
+    IProcessedUpdatePublisher publisher,
     ILogger<LinkUpdateProcessingService> logger) : ILinkUpdateProcessingService
 {
-    public async Task ProcessAsync(LinkUpdate update, CancellationToken ct)
+    public async Task ProcessAsync(LinkUpdate update, IMessageAck ack, CancellationToken ct = default)
     {
+        if (update.Kind == LinkUpdateKind.SystemReport)
+        {
+            await PublishSystemReportAsync(update, ct);
+            return;
+        }
+
         if (filter.ShouldFilter(update))
         {
             logger.LogDebug(
@@ -27,18 +34,41 @@ public sealed class LinkUpdateProcessingService(
 
         foreach (var chatId in update.TgChatIds)
         {
-            groupingBuffer.Add(chatId, new ProcessedLinkUpdate
-            {
-                Id = update.Id,
-                Url = update.Url,
-                Description = description,
-                TgChatIds = [chatId],
-                Priority = priority
-            });
+            groupingBuffer.Add(
+                chatId,
+                new ProcessedLinkUpdate
+                {
+                    Id = update.Id,
+                    Url = update.Url,
+                    Description = description,
+                    TgChatIds = [chatId],
+                    Priority = priority
+                },
+                ack);
         }
 
         logger.LogDebug(
             "Обновление добавлено в буфер. UpdateId={UpdateId}, Priority={Priority}",
             update.Id, priority);
+    }
+
+    private async Task PublishSystemReportAsync(LinkUpdate update, CancellationToken ct)
+    {
+        foreach (var chatId in update.TgChatIds)
+        {
+            await publisher.PublishAsync(
+                new ProcessedLinkUpdate
+                {
+                    Id = update.Id,
+                    Url = update.Url,
+                    Description = update.Description,
+                    TgChatIds = [chatId],
+                    Priority = update.Priority,
+                    Kind = LinkUpdateKind.SystemReport
+                },
+                ct);
+        }
+
+        logger.LogDebug("Служебный отчёт опубликован без обработки. UpdateId={UpdateId}", update.Id);
     }
 }

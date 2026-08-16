@@ -18,6 +18,25 @@ public static class LinkUpdateAvroSchema
                 "type": "array",
                 "items": "long"
               }
+            },
+            { "name": "author", "type": "string", "default": "" },
+            {
+              "name": "priority",
+              "type": {
+                "type": "enum",
+                "name": "LinkUpdatePriority",
+                "symbols": ["Low", "Medium", "High"]
+              },
+              "default": "Medium"
+            },
+            {
+              "name": "kind",
+              "type": {
+                "type": "enum",
+                "name": "LinkUpdateKind",
+                "symbols": ["Content", "SystemReport"]
+              },
+              "default": "Content"
             }
           ]
         }

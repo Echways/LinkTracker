@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using LinkTracker.Bot.Application.Telemetry.Abstractions;
 using LinkTracker.Bot.Application.Updates.Abstractions;
 using LinkTracker.Bot.Infrastructure.Abstractions.Kafka;
 using LinkTracker.Bot.Infrastructure.Configuration.Kafka;
@@ -15,6 +16,7 @@ internal sealed class LinkUpdatesKafkaMessageHandler(
     ILinkUpdateDeadLetterPublisher deadLetterPublisher,
     ILinkUpdateNotifier notifier,
     IOptions<LinkUpdatesKafkaOptions> kafkaOptions,
+    IBotMetrics metrics,
     ILogger<LinkUpdatesKafkaMessageHandler> logger) : ILinkUpdatesKafkaMessageHandler
 {
     public async Task<bool> HandleAsync(ConsumeResult<string, byte[]> result, CancellationToken ct)
@@ -122,6 +124,9 @@ internal sealed class LinkUpdatesKafkaMessageHandler(
         try
         {
             await deadLetterPublisher.PublishAsync(result, reason, exception, ct);
+
+            metrics.IncrementKafkaDeadLetter(result.Topic);
+
             return true;
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -130,12 +135,16 @@ internal sealed class LinkUpdatesKafkaMessageHandler(
         }
         catch (Exception ex)
         {
+            metrics.IncrementKafkaDeadLetterError(result.Topic);
+            metrics.IncrementError("kafka_dead_letter", result.Topic, "publish_failed");
+
             logger.LogError(
                 ex,
-                "Не удалось отправить Kafka сообщение в DLQ. Offset не будет подтвержден. Topic={Topic}, Partition={Partition}, Offset={Offset}",
+                "Не удалось отправить Kafka сообщение в DLQ. Offset не будет подтвержден, сообщение будет переигрываться. Topic={Topic}, Partition={Partition}, Offset={Offset}, DeadLetterTopic={DeadLetterTopic}",
                 result.Topic,
                 result.Partition.Value,
-                result.Offset.Value);
+                result.Offset.Value,
+                kafkaOptions.Value.DeadLetterTopic);
 
             return false;
         }

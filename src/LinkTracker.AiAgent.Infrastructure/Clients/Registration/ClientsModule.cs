@@ -37,6 +37,9 @@ public static class ClientsModule
             .Validate(o => !string.IsNullOrWhiteSpace(o.BootstrapServers), "Kafka:Consumer:BootstrapServers must be set")
             .Validate(o => !string.IsNullOrWhiteSpace(o.Topic), "Kafka:Consumer:Topic must be set")
             .Validate(o => !string.IsNullOrWhiteSpace(o.GroupId), "Kafka:Consumer:GroupId must be set")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.DeadLetterTopic), "Kafka:Consumer:DeadLetterTopic must be set")
+            .Validate(o => o.RetryAttempts > 0, "Kafka:Consumer:RetryAttempts must be positive")
+            .Validate(o => o.RetryBackoffMilliseconds >= 0, "Kafka:Consumer:RetryBackoffMilliseconds must not be negative")
             .ValidateOnStart();
 
         services
@@ -51,9 +54,13 @@ public static class ClientsModule
             .Bind(configuration.GetSection("YandexAi"))
             .ValidateOnStart();
 
+        services.AddSingleton<KafkaOffsetTracker>();
+
         services.AddSingleton<IConsumer<string, byte[]>>(sp =>
         {
             var opts = sp.GetRequiredService<IOptions<RawUpdatesKafkaOptions>>().Value;
+            var offsetTracker = sp.GetRequiredService<KafkaOffsetTracker>();
+
             return new ConsumerBuilder<string, byte[]>(new ConsumerConfig
             {
                 BootstrapServers = opts.BootstrapServers,
@@ -61,13 +68,16 @@ public static class ClientsModule
                 EnableAutoCommit = false,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 AllowAutoCreateTopics = false
-            }).Build();
+            })
+            .SetPartitionsRevokedHandler((_, partitions) =>
+                offsetTracker.Forget(partitions.Select(x => x.TopicPartition)))
+            .Build();
         });
 
         services.AddSingleton<IProducer<string, byte[]>>(sp =>
         {
             var opts = sp.GetRequiredService<IOptions<ProcessedUpdatesKafkaOptions>>().Value;
-            return new ProducerBuilder<string, byte[]>(new ProducerConfig { BootstrapServers = opts.BootstrapServers, Acks = Acks.All, AllowAutoCreateTopics = false }).Build();
+            return new ProducerBuilder<string, byte[]>(new ProducerConfig { BootstrapServers = opts.BootstrapServers, Acks = Acks.All, EnableIdempotence = true, AllowAutoCreateTopics = false }).Build();
         });
 
         services.AddHttpClient(nameof(YandexAiHttpClient), (sp, client) =>
@@ -85,12 +95,14 @@ public static class ClientsModule
         services.AddSingleton<ILinkUpdateFilter, LinkUpdateFilter>();
         services.AddSingleton<IProcessedUpdatePublisher, ProcessedUpdatesKafkaPublisher>();
 
+        services.AddSingleton<IRawUpdateDeadLetterPublisher, RawUpdatesKafkaDeadLetterPublisher>();
         services.AddSingleton<IRawUpdatesKafkaMessageHandler, RawUpdatesKafkaMessageHandler>();
         services.AddHostedService<RawUpdatesKafkaConsumer>();
 
         services.AddSingleton<ILinkUpdatePrioritizer, KeywordLinkUpdatePrioritizer>();
         services.AddSingleton<ILinkUpdateGrouper, WindowLinkUpdateGrouper>();
         services.AddSingleton<IGroupingBuffer, TimeWindowGroupingBuffer>();
+
         services.AddHostedService<GroupingFlushJob>();
 
         return services;
