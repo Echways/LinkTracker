@@ -18,6 +18,8 @@ public sealed class BotMetrics : IBotMetrics, IDisposable
     private readonly Counter<long> _kafkaConsumed;
     private readonly Histogram<double> _kafkaConsumeDuration;
     private readonly Counter<long> _kafkaConsumeErrors;
+    private readonly Counter<long> _kafkaDeadLetterErrors;
+    private readonly Counter<long> _kafkaDeadLetters;
 
     private readonly Meter _meter;
     private readonly Histogram<double> _scrapperCallDuration;
@@ -63,6 +65,14 @@ public sealed class BotMetrics : IBotMetrics, IDisposable
         _kafkaConsumeErrors = _meter.CreateCounter<long>(
             "kafka_consume_errors_total",
             description: "Количество ошибок обработки сообщений из Kafka");
+
+        _kafkaDeadLetters = _meter.CreateCounter<long>(
+            "kafka_dead_letter_total",
+            description: "Количество сообщений, отправленных в DLQ");
+
+        _kafkaDeadLetterErrors = _meter.CreateCounter<long>(
+            "kafka_dead_letter_errors_total",
+            description: "Количество неудачных отправок в DLQ (offset не подтверждается, сообщение переигрывается)");
 
         _kafkaConsumeDuration = _meter.CreateHistogram(
             "kafka_consume_duration_ms_total",
@@ -145,6 +155,20 @@ public sealed class BotMetrics : IBotMetrics, IDisposable
     {
         _kafkaConsumeDuration.Record(
             milliseconds,
+            new KeyValuePair<string, object?>("topic", topic));
+    }
+
+    public void IncrementKafkaDeadLetter(string topic)
+    {
+        _kafkaDeadLetters.Add(
+            1,
+            new KeyValuePair<string, object?>("topic", topic));
+    }
+
+    public void IncrementKafkaDeadLetterError(string topic)
+    {
+        _kafkaDeadLetterErrors.Add(
+            1,
             new KeyValuePair<string, object?>("topic", topic));
     }
 

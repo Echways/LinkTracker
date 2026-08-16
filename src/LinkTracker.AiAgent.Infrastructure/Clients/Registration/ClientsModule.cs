@@ -37,6 +37,9 @@ public static class ClientsModule
             .Validate(o => !string.IsNullOrWhiteSpace(o.BootstrapServers), "Kafka:Consumer:BootstrapServers must be set")
             .Validate(o => !string.IsNullOrWhiteSpace(o.Topic), "Kafka:Consumer:Topic must be set")
             .Validate(o => !string.IsNullOrWhiteSpace(o.GroupId), "Kafka:Consumer:GroupId must be set")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.DeadLetterTopic), "Kafka:Consumer:DeadLetterTopic must be set")
+            .Validate(o => o.RetryAttempts > 0, "Kafka:Consumer:RetryAttempts must be positive")
+            .Validate(o => o.RetryBackoffMilliseconds >= 0, "Kafka:Consumer:RetryBackoffMilliseconds must not be negative")
             .ValidateOnStart();
 
         services
@@ -67,7 +70,7 @@ public static class ClientsModule
         services.AddSingleton<IProducer<string, byte[]>>(sp =>
         {
             var opts = sp.GetRequiredService<IOptions<ProcessedUpdatesKafkaOptions>>().Value;
-            return new ProducerBuilder<string, byte[]>(new ProducerConfig { BootstrapServers = opts.BootstrapServers, Acks = Acks.All, AllowAutoCreateTopics = false }).Build();
+            return new ProducerBuilder<string, byte[]>(new ProducerConfig { BootstrapServers = opts.BootstrapServers, Acks = Acks.All, EnableIdempotence = true, AllowAutoCreateTopics = false }).Build();
         });
 
         services.AddHttpClient(nameof(YandexAiHttpClient), (sp, client) =>
@@ -85,6 +88,7 @@ public static class ClientsModule
         services.AddSingleton<ILinkUpdateFilter, LinkUpdateFilter>();
         services.AddSingleton<IProcessedUpdatePublisher, ProcessedUpdatesKafkaPublisher>();
 
+        services.AddSingleton<IRawUpdateDeadLetterPublisher, RawUpdatesKafkaDeadLetterPublisher>();
         services.AddSingleton<IRawUpdatesKafkaMessageHandler, RawUpdatesKafkaMessageHandler>();
         services.AddHostedService<RawUpdatesKafkaConsumer>();
 

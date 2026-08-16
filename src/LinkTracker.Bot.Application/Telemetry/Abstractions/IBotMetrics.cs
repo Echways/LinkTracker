@@ -19,4 +19,8 @@ public interface IBotMetrics
     void IncrementKafkaConsumeError(string topic);
 
     void ObserveKafkaConsumeDuration(string topic, double milliseconds);
+
+    void IncrementKafkaDeadLetter(string topic);
+
+    void IncrementKafkaDeadLetterError(string topic);
 }

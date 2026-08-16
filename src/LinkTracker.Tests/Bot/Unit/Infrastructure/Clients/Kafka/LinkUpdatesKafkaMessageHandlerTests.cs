@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Confluent.Kafka;
+using LinkTracker.Bot.Application.Telemetry.Abstractions;
 using LinkTracker.Bot.Application.Updates.Abstractions;
 using LinkTracker.Bot.Infrastructure.Abstractions.Kafka;
 using LinkTracker.Bot.Infrastructure.Clients.Kafka;
@@ -195,6 +196,57 @@ public sealed class LinkUpdatesKafkaMessageHandlerTests
     }
 
     [Fact]
+    public async Task HandleAsync_WhenDeadLetterPublishingFails_IncrementsDeadLetterErrorMetric()
+    {
+        var notifier = Substitute.For<ILinkUpdateNotifier>();
+        var deadLetterPublisher = Substitute.For<ILinkUpdateDeadLetterPublisher>();
+        var metrics = Substitute.For<IBotMetrics>();
+
+        deadLetterPublisher
+            .PublishAsync(
+                Arg.Any<ConsumeResult<string, byte[]>>(),
+                Arg.Any<string>(),
+                Arg.Any<Exception?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new InvalidOperationException("Kafka DLQ failed")));
+
+        var sut = CreateSut(
+            notifier,
+            deadLetterPublisher,
+            3,
+            metrics: metrics);
+
+        var result = await sut.HandleAsync(CreateConsumeResult("{ invalid json"), CancellationToken.None);
+
+        Assert.False(result);
+
+        metrics.Received(1).IncrementKafkaDeadLetterError("link.processed-updates");
+        metrics.Received(1).IncrementError("kafka_dead_letter", "link.processed-updates", "publish_failed");
+        metrics.DidNotReceive().IncrementKafkaDeadLetter(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task HandleAsync_WhenDeadLetterPublishingSucceeds_IncrementsDeadLetterMetric()
+    {
+        var notifier = Substitute.For<ILinkUpdateNotifier>();
+        var deadLetterPublisher = Substitute.For<ILinkUpdateDeadLetterPublisher>();
+        var metrics = Substitute.For<IBotMetrics>();
+
+        var sut = CreateSut(
+            notifier,
+            deadLetterPublisher,
+            3,
+            metrics: metrics);
+
+        var result = await sut.HandleAsync(CreateConsumeResult("{ invalid json"), CancellationToken.None);
+
+        Assert.True(result);
+
+        metrics.Received(1).IncrementKafkaDeadLetter("link.processed-updates");
+        metrics.DidNotReceive().IncrementKafkaDeadLetterError(Arg.Any<string>());
+    }
+
+    [Fact]
     public async Task HandleAsync_WhenCancellationRequested_ThrowsOperationCanceledException()
     {
         var notifier = Substitute.For<ILinkUpdateNotifier>();
@@ -229,12 +281,13 @@ public sealed class LinkUpdatesKafkaMessageHandlerTests
         ILinkUpdateNotifier notifier,
         ILinkUpdateDeadLetterPublisher deadLetterPublisher,
         int retryAttempts,
-        int retryBackoffMilliseconds = 0)
+        int retryBackoffMilliseconds = 0,
+        IBotMetrics? metrics = null)
     {
         var options = Options.Create(new LinkUpdatesKafkaOptions
         {
-            Topic = "link-updates",
-            DeadLetterTopic = "link-updates-dlq",
+            Topic = "link.processed-updates",
+            DeadLetterTopic = "link.processed-updates-dlq",
             GroupId = "linktracker-bot",
             BootstrapServers = "localhost:9092",
             RetryAttempts = retryAttempts,
@@ -247,6 +300,7 @@ public sealed class LinkUpdatesKafkaMessageHandlerTests
             deadLetterPublisher,
             notifier,
             options,
+            metrics ?? Substitute.For<IBotMetrics>(),
             NullLogger<LinkUpdatesKafkaMessageHandler>.Instance);
     }
 
@@ -265,6 +319,6 @@ public sealed class LinkUpdatesKafkaMessageHandlerTests
 
     private static ConsumeResult<string, byte[]> CreateConsumeResult(string payload)
     {
-        return new ConsumeResult<string, byte[]> { Topic = "link-updates", Partition = new Partition(0), Offset = new Offset(1), Message = new Message<string, byte[]> { Key = "key", Value = Encoding.UTF8.GetBytes(payload) } };
+        return new ConsumeResult<string, byte[]> { Topic = "link.processed-updates", Partition = new Partition(0), Offset = new Offset(1), Message = new Message<string, byte[]> { Key = "key", Value = Encoding.UTF8.GetBytes(payload) } };
     }
 }

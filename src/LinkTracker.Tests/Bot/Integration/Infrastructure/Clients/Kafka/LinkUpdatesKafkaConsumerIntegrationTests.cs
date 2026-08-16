@@ -323,6 +323,7 @@ public sealed class LinkUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerF
             deadLetterPublisher,
             notifier,
             options,
+            Substitute.For<IBotMetrics>(),
             NullLogger<LinkUpdatesKafkaMessageHandler>.Instance);
 
         return new LinkUpdatesKafkaConsumer(
@@ -377,6 +378,7 @@ public sealed class LinkUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerF
             deadLetterPublisher,
             notifier,
             options,
+            Substitute.For<IBotMetrics>(),
             NullLogger<LinkUpdatesKafkaMessageHandler>.Instance);
 
         return new LinkUpdatesKafkaConsumer(

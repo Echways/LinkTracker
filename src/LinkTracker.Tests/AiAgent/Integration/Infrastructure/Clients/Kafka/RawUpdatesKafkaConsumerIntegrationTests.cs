@@ -3,9 +3,11 @@ using System.Text.Json;
 using Confluent.Kafka;
 using LinkTracker.AiAgent.Application.Abstractions;
 using LinkTracker.AiAgent.Application.Services;
+using LinkTracker.AiAgent.Application.Telemetry.Abstractions;
 using LinkTracker.AiAgent.Infrastructure.Clients.Kafka;
 using LinkTracker.AiAgent.Infrastructure.Configuration.AiAgent;
 using LinkTracker.AiAgent.Infrastructure.Configuration.Kafka;
+using LinkTracker.AiAgent.Infrastructure.Kafka.Abstractions;
 using LinkTracker.AiAgent.Infrastructure.Kafka.Deserialization;
 using LinkTracker.AiAgent.Infrastructure.Services;
 using LinkTracker.Shared.Contracts.AiAgent;
@@ -125,7 +127,82 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
         }
     }
 
-    private RawUpdatesKafkaConsumer BuildConsumer(string topic, IGroupingBuffer groupingBuffer)
+    [Fact]
+    public async Task Consumer_WhenMalformedMessagePublished_PublishesMessageToDeadLetterTopic()
+    {
+        var topic = $"link-raw-dlq-{Guid.NewGuid():N}";
+        var deadLetterTopic = $"link-raw-dlq-{Guid.NewGuid():N}-dlq";
+
+        await kafkaFixture.CreateTopicAsync(topic);
+        await kafkaFixture.CreateTopicAsync(deadLetterTopic);
+
+        using var deadLetterProducer = new ProducerBuilder<string, byte[]>(
+            new ProducerConfig { BootstrapServers = kafkaFixture.BootstrapServers, Acks = Acks.All, EnableIdempotence = true }).Build();
+
+        var deadLetterPublisher = new RawUpdatesKafkaDeadLetterPublisher(
+            deadLetterProducer,
+            Options.Create(new RawUpdatesKafkaOptions { DeadLetterTopic = deadLetterTopic }),
+            NullLogger<RawUpdatesKafkaDeadLetterPublisher>.Instance);
+
+        var groupingBuffer = Substitute.For<IGroupingBuffer>();
+        using var consumer = BuildConsumer(topic, groupingBuffer, deadLetterPublisher, deadLetterTopic);
+
+        await consumer.StartAsync(CancellationToken.None);
+
+        try
+        {
+            await ProduceRawAsync(topic, "{ this is not valid json !!!");
+
+            var deadLettered = ReadFirstMessage(deadLetterTopic);
+
+            Assert.NotNull(deadLettered);
+
+            using var document = JsonDocument.Parse(deadLettered);
+            var root = document.RootElement;
+
+            Assert.Equal(topic, root.GetProperty("sourceTopic").GetString());
+            Assert.Contains("десериализовать", root.GetProperty("reason").GetString());
+            Assert.Equal(
+                "{ this is not valid json !!!",
+                Encoding.UTF8.GetString(Convert.FromBase64String(root.GetProperty("payload").GetString()!)));
+
+            groupingBuffer.DidNotReceive().Add(Arg.Any<long>(), Arg.Any<ProcessedLinkUpdate>());
+        }
+        finally
+        {
+            await consumer.StopAsync(CancellationToken.None);
+        }
+    }
+
+    private string? ReadFirstMessage(string topic)
+    {
+        using var consumer = new ConsumerBuilder<string, byte[]>(new ConsumerConfig
+        {
+            BootstrapServers = kafkaFixture.BootstrapServers,
+            GroupId = $"dlq-reader-{Guid.NewGuid():N}",
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnableAutoCommit = false
+        }).Build();
+
+        consumer.Subscribe(topic);
+
+        try
+        {
+            var result = consumer.Consume(TimeSpan.FromSeconds(30));
+
+            return result is null ? null : Encoding.UTF8.GetString(result.Message.Value);
+        }
+        finally
+        {
+            consumer.Close();
+        }
+    }
+
+    private RawUpdatesKafkaConsumer BuildConsumer(
+        string topic,
+        IGroupingBuffer groupingBuffer,
+        IRawUpdateDeadLetterPublisher? deadLetterPublisher = null,
+        string deadLetterTopic = "unused-dlq")
     {
         var summarizer = Substitute.For<ILinkUpdateSummarizer>();
         summarizer.SummarizeAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -134,7 +211,15 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
         var prioritizer = Substitute.For<ILinkUpdatePrioritizer>();
         prioritizer.Prioritize(Arg.Any<string>()).Returns(LinkUpdatePriority.Medium);
 
-        var consumerOpts = Options.Create(new RawUpdatesKafkaOptions { BootstrapServers = kafkaFixture.BootstrapServers, Topic = topic, GroupId = $"test-group-{Guid.NewGuid():N}" });
+        var consumerOpts = Options.Create(new RawUpdatesKafkaOptions
+        {
+            BootstrapServers = kafkaFixture.BootstrapServers,
+            Topic = topic,
+            GroupId = $"test-group-{Guid.NewGuid():N}",
+            DeadLetterTopic = deadLetterTopic,
+            RetryAttempts = 1,
+            RetryBackoffMilliseconds = 0
+        });
 
         var aiAgentOpts = Options.Create(new AiAgentOptions { Filtering = new FilteringOptions { MinLength = 10, StopWords = [], ExcludedAuthors = [] }, Summarization = new SummarizationOptions { Threshold = 1000 } });
 
@@ -148,6 +233,9 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
         var messageHandler = new RawUpdatesKafkaMessageHandler(
             new JsonRawLinkUpdateKafkaDeserializer(),
             processingService,
+            deadLetterPublisher ?? Substitute.For<IRawUpdateDeadLetterPublisher>(),
+            consumerOpts,
+            Substitute.For<IAiAgentMetrics>(),
             NullLogger<RawUpdatesKafkaMessageHandler>.Instance);
 
         var kafkaConsumer = new ConsumerBuilder<string, byte[]>(new ConsumerConfig
@@ -161,6 +249,7 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
 
         return new RawUpdatesKafkaConsumer(
             kafkaConsumer, messageHandler, consumerOpts,
+            Substitute.For<IAiAgentMetrics>(),
             NullLogger<RawUpdatesKafkaConsumer>.Instance);
     }
 

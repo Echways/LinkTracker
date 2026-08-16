@@ -103,33 +103,24 @@ services:
       - /bin/sh
       - -c
       - |
-        /opt/kafka/bin/kafka-topics.sh \
-          --bootstrap-server kafka-1:9092 \
-          --create \
-          --if-not-exists \
-          --topic link.processed-updates \
-          --partitions 6 \
-          --replication-factor 3 \
-          --config min.insync.replicas=2
+        set -e
         
-        /opt/kafka/bin/kafka-topics.sh \
-          --bootstrap-server kafka-1:9092 \
-          --create \
-          --if-not-exists \
-          --topic link.raw-updates \
-          --partitions 6 \
-          --replication-factor 3 \
-          --config min.insync.replicas=2
+        for topic in \
+          link.raw-updates \
+          link.raw-updates-dlq \
+          link.processed-updates \
+          link.processed-updates-dlq
+        do
+          /opt/kafka/bin/kafka-topics.sh \
+            --bootstrap-server kafka-1:9092 \
+            --create \
+            --if-not-exists \
+            --topic "$$topic" \
+            --partitions 6 \
+            --replication-factor 3 \
+            --config min.insync.replicas=2
+        done
 
-        /opt/kafka/bin/kafka-topics.sh \
-          --bootstrap-server kafka-1:9092 \
-          --create \
-          --if-not-exists \
-          --topic link.raw-updates-dlq \
-          --partitions 6 \
-          --replication-factor 3 \
-          --config min.insync.replicas=2
-        
   schema-registry:
     image: confluentinc/cp-schema-registry:7.6.1
     container_name: linktracker-schema-registry

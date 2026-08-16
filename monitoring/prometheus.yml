@@ -9,3 +9,7 @@ scrape_configs:
   - job_name: bot
     static_configs:
       - targets: ["bot:8011"]
+
+  - job_name: aiagent
+    static_configs:
+      - targets: ["aiagent:8102"]
