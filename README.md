@@ -78,7 +78,7 @@ dotnet run --project src/LinkTracker.AiAgent.Api
 ```
 
 ### Для запуска в контейнерах
-7. В [bot.Docker.appesettings](src/LinkTracker.Bot.Api/appsettings.Docker.json), [scrapper.Docker.appsettings](src/LinkTracker.Scrapper.Api/appsettings.Docker.json) и [aiagent.Docker.appesettings](src/LinkTracker.AiAgent.Api/appsettings.Docker.json) в ветках Scrapper, Bot и AiAgent соответственно выбрать валидные параметры.
+7. В [bot.Docker.appsettings](src/LinkTracker.Bot.Api/appsettings.Docker.json), [scrapper.Docker.appsettings](src/LinkTracker.Scrapper.Api/appsettings.Docker.json) и [aiagent.Docker.appesettings](src/LinkTracker.AiAgent.Api/appsettings.Docker.json) в ветках Scrapper, Bot и AiAgent соответственно выбрать валидные параметры.
 8. Выполнить поочердено запуск сначала [docker-compose](docker-compose.yml), [Scrapper](src/LinkTracker.Scrapper.Api/Program.cs), а затем [Bot](src/LinkTracker.Bot.Api/Program.cs) с помощью команд.
 ```
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up 
