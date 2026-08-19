@@ -7,10 +7,16 @@
 на своём эндпоинте `/metrics`, а Prometheus скрейпит их напрямую.
 
 - Scrapper: `http://scrapper:8081/metrics`
-- Bot: `http://bot:8011/metrics` (отдельный Kestrel-эндпоинт, наружу не публикуется)
+- Bot: `http://bot:8011/metrics` (отдельный Kestrel-эндпоинт)
+- AI-Agent: `http://aiagent:8102/metrics` (отдельный Kestrel-эндпоинт)
 
-Эндпоинт `/metrics` исключён из общего rate limiter — иначе скрейп раз в 15 секунд
-конкурировал бы за лимит с прикладным трафиком и метрики выглядели бы «пропавшими».
+Порты приложений не публикуются на хост — Prometheus скрейпит цели изнутри
+сети compose.
+
+Rate limiter применяется точечно, политикой `public-api` на прикладных маршрутах,
+поэтому `/metrics` и gRPC-сервисы под лимит не попадают в принципе.
+Партиционирование идёт по `Tg-Chat-Id`, а не по IP: в Docker весь трафик бота
+приходит с одного адреса, и лимит по IP отсекал бы легитимные запросы.
 
 Имена серий, которые видит Prometheus, зафиксированы тестом
 `MetricsEndpointTests` — экспортёр переименовывает инструменты, и панели Grafana
@@ -23,7 +29,7 @@
 | Метрика | Тип | Лейблы | Описание |
 |---|---|---|---|
 | `links_on_track_total` | Gauge | `tracked_source` | Количество ссылок в БД на мониторинге |
-| `api_requests_total` | Counter | `source` | Счётчик запросов к API |
+| `api_requests_total` | Counter | `source` | Счётчик запросов к API (лейбл — шаблон маршрута, не сырой путь) |
 | `request_duration_ms_total` | Histogram | `scope`, `scope_type` | Длительность операции в мс (RED: Duration) |
 | `errors_total` | Counter | `scope`, `scope_type`, `reason` | **Ошибки (RED: Errors)** |
 | `sent_updates_total` | Counter | — | Количество обновлений, отправленных в Bot |
@@ -58,12 +64,13 @@
 
 Настраивается на стороне Prometheus в `monitoring/prometheus.yml` — приложениям
 никакой конфигурации телеметрии не требуется. Лейбл `job` берётся из имени scrape-job
-(`scrapper` / `bot`), `instance` — из адреса цели.
+(`scrapper` / `bot` / `aiagent`), `instance` — из адреса цели.
 
 | Job | Цель | Интервал |
 |---|---|---|
 | `scrapper` | `scrapper:8081` | 15s (`global.scrape_interval`) |
 | `bot` | `bot:8011` | 15s (`global.scrape_interval`) |
+| `aiagent` | `aiagent:8102` | 15s (`global.scrape_interval`) |
 
 ## Grafana
 

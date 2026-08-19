@@ -61,15 +61,23 @@ cp src/LinkTracker.Bot.Api/.env.template src/LinkTracker.Bot.Api/.env
 cp src/LinkTracker.Scrapper.Api/.env.template src/LinkTracker.Scrapper.Api/.env
 ```
 4. Поставить действительные параметры в .env.
-5. Создать копию [.env.template](src/LinkTracker.AiAgent/.env.template) с именем .env в каталоге ии-агента.
+5. Создать копию [.env.template](src/LinkTracker.AiAgent.Api/.env.template) с именем .env в каталоге ии-агента.
 ```
 cp src/LinkTracker.AiAgent.Api/.env.template src/LinkTracker.AiAgent.Api/.env
 ```
 6. Поставить действительные параметры в .env.
+7. Задать общий сервисный секрет. Bot и Scrapper аутентифицируют друг друга по нему,
+   поэтому значение должно совпадать в обоих сервисах.
+```
+cp .env.template .env
+```
+8. Поставить в корневой .env своё значение `SERVICE_AUTH_SECRET`, а в
+   `src/LinkTracker.Bot.Api/.env` и `src/LinkTracker.Scrapper.Api/.env` — то же самое
+   значение в `ServiceAuth__Secret` (нужно для локального запуска без Docker).
 
 ### Для локального запуска
-7. В [bot.Api.appesettings](src/LinkTracker.Bot.Api/appsettings.json), [scrapper.Api.appsettings](src/LinkTracker.Scrapper.Api/appsettings.json) и [aiagent.appsettings](src/LinkTracker.AiAgent.Api/appsettings.json) в ветках Scrapper, Bot и AiAgent соответственно выбрать валидные параметры.
-8. Выполнить поочердено запуск сначала [docker-compose](docker-compose.yml), [Scrapper](src/LinkTracker.Scrapper.Api/Program.cs), [Bot](src/LinkTracker.Bot.Api/Program.cs) и [AiAgent](src/LinkTracker.AiAgent.Api/Program.cs) с помощью команд.
+9. В [bot.Api.appsettings](src/LinkTracker.Bot.Api/appsettings.json), [scrapper.Api.appsettings](src/LinkTracker.Scrapper.Api/appsettings.json) и [aiagent.Api.appsettings](src/LinkTracker.AiAgent.Api/appsettings.json) в ветках Scrapper, Bot и AiAgent соответственно выбрать валидные параметры.
+10. Выполнить поочердено запуск сначала [docker-compose](docker-compose.yml), [Scrapper](src/LinkTracker.Scrapper.Api/Program.cs), [Bot](src/LinkTracker.Bot.Api/Program.cs) и [AiAgent](src/LinkTracker.AiAgent.Api/Program.cs) с помощью команд.
 ```
 docker compose -f docker-compose.yml up
 dotnet run --project src/LinkTracker.Scrapper.Api
@@ -78,8 +86,8 @@ dotnet run --project src/LinkTracker.AiAgent.Api
 ```
 
 ### Для запуска в контейнерах
-7. В [bot.Docker.appesettings](src/LinkTracker.Bot.Api/appsettings.Docker.json), [scrapper.Docker.appsettings](src/LinkTracker.Scrapper.Api/appsettings.Docker.json) и [aiagent.Docker.appesettings](src/LinkTracker.AiAgent.Api/appsettings.Docker.json) в ветках Scrapper, Bot и AiAgent соответственно выбрать валидные параметры.
-8. Выполнить поочердено запуск сначала [docker-compose](docker-compose.yml), [Scrapper](src/LinkTracker.Scrapper.Api/Program.cs), а затем [Bot](src/LinkTracker.Bot.Api/Program.cs) с помощью команд.
+9. В [bot.Docker.appesettings](src/LinkTracker.Bot.Api/appsettings.Docker.json), [scrapper.Docker.appsettings](src/LinkTracker.Scrapper.Api/appsettings.Docker.json) и [aiagent.Docker.appesettings](src/LinkTracker.AiAgent.Api/appsettings.Docker.json) в ветках Scrapper, Bot и AiAgent соответственно выбрать валидные параметры.
+10. Выполнить поочердено запуск сначала [docker-compose](docker-compose.yml), [Scrapper](src/LinkTracker.Scrapper.Api/Program.cs), а затем [Bot](src/LinkTracker.Bot.Api/Program.cs) с помощью команд.
 ```
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up 
 ```

@@ -1,6 +1,6 @@
 namespace LinkTracker.Shared.Infrastructure.RateLimiting;
 
-public sealed class IpRateLimitingOptions
+public sealed class ApiRateLimitingOptions
 {
     public const string SectionName = "RateLimiting";
 
@@ -10,5 +10,9 @@ public sealed class IpRateLimitingOptions
 
     public int SegmentsPerWindow { get; set; } = 6;
 
-    public int QueueLimit { get; set; } = 0;
+    public int QueueLimit { get; set; }
+
+    public string PartitionHeaderName { get; set; } = "Tg-Chat-Id";
+
+    public IReadOnlyList<string> TrustedNetworks { get; set; } = [];
 }

@@ -144,7 +144,7 @@ public sealed class MetricsEndpointTests
             .ConfigureServices(services =>
             {
                 services.AddRouting();
-                services.AddIpRateLimiting(configuration);
+                services.AddApiRateLimiting(configuration);
                 services.AddOpenTelemetryMetrics("test", meterName);
             })
             .Configure(app =>

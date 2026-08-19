@@ -1,3 +1,4 @@
+using LinkTracker.Shared.Infrastructure.Telemetry;
 using Microsoft.AspNetCore.Http;
 
 namespace LinkTracker.Scrapper.Infrastructure.Telemetry.Middleware;
@@ -10,7 +11,7 @@ public sealed class ApiRequestsMiddleware(
     {
         metrics.ApiRequests.Add(
             1,
-            new KeyValuePair<string, object?>("source", context.Request.Path.ToString()));
+            new KeyValuePair<string, object?>("source", HttpRouteLabel.Resolve(context)));
 
         await next(context);
     }

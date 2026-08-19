@@ -1,3 +1,6 @@
+x-service-auth-env: &service-auth-env
+  ServiceAuth__Secret: "${SERVICE_AUTH_SECRET:?SERVICE_AUTH_SECRET must be set in the root .env file}"
+
 services:
   scrapper:
     build:
@@ -15,12 +18,13 @@ services:
         condition: service_started
       valkey-cluster-init:
         condition: service_completed_successfully
-    ports:
-      - "8081:8081"
-      - "8082:8082"
+    expose:
+      - "8081"
+      - "8082"
     env_file:
       - src/LinkTracker.Scrapper.Api/.env
     environment:
+      <<: *service-auth-env
       ASPNETCORE_ENVIRONMENT: "Docker"
 
   bot:
@@ -37,13 +41,14 @@ services:
         condition: service_completed_successfully
       schema-registry:
         condition: service_started
-    ports:
-      - "8091:8091"
-      - "8092:8092"
-      - "8011:8011"
+    expose:
+      - "8091"
+      - "8092"
+      - "8011"
     env_file:
       - src/LinkTracker.Bot.Api/.env
     environment:
+      <<: *service-auth-env
       ASPNETCORE_ENVIRONMENT: "Docker"
 
   aiagent:
@@ -64,9 +69,9 @@ services:
         condition: service_healthy
       kafka-3:
         condition: service_healthy
-    ports:
-      - "8101:8101"
-      - "8102:8102"
+    expose:
+      - "8101"
+      - "8102"
     env_file:
       - src/LinkTracker.AiAgent.Api/.env
     environment:
