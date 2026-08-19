@@ -11,4 +11,8 @@ public interface IAiAgentMetrics
     void IncrementKafkaDeadLetter(string topic);
 
     void IncrementKafkaDeadLetterError(string topic);
+
+    void IncrementSummarization();
+
+    void IncrementSummarizationFallback(string reason);
 }

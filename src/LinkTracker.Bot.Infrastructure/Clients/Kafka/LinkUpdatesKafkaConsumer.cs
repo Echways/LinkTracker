@@ -16,15 +16,17 @@ internal sealed class LinkUpdatesKafkaConsumer(
     IBotMetrics metrics,
     ILogger<LinkUpdatesKafkaConsumer> logger) : BackgroundService
 {
+    private static readonly TimeSpan PollTimeout = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan ConsumeErrorBackoff = TimeSpan.FromSeconds(1);
+
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return ConsumeLoopAsync(stoppingToken);
-    }
-
-    public override Task StopAsync(CancellationToken cancellationToken)
-    {
-        consumer.Close();
-        return base.StopAsync(cancellationToken);
+        return Task.Factory.StartNew(
+                () => ConsumeLoopAsync(stoppingToken),
+                stoppingToken,
+                TaskCreationOptions.LongRunning | TaskCreationOptions.DenyChildAttach,
+                TaskScheduler.Default)
+            .Unwrap();
     }
 
     private async Task ConsumeLoopAsync(CancellationToken stoppingToken)
@@ -45,11 +47,12 @@ internal sealed class LinkUpdatesKafkaConsumer(
 
                 try
                 {
-                    result = consumer.Consume(stoppingToken);
+                    result = consumer.Consume(PollTimeout);
                 }
                 catch (ConsumeException ex)
                 {
-                    logger.LogWarning(ex, "Kafka consume завершился ошибкой.");
+                    logger.LogWarning(ex, "Kafka consume завершился ошибкой. Пауза перед повтором.");
+                    await Task.Delay(ConsumeErrorBackoff, stoppingToken);
                     continue;
                 }
 
@@ -64,6 +67,10 @@ internal sealed class LinkUpdatesKafkaConsumer(
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
             logger.LogInformation("Kafka consumer остановлен.");
+        }
+        finally
+        {
+            consumer.Close();
         }
     }
 

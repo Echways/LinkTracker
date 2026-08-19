@@ -29,7 +29,13 @@ public sealed class LinkEntityConfiguration : IEntityTypeConfiguration<LinkEntit
         builder.Property(x => x.LastEventKey)
             .HasColumnName("last_event_key");
 
+        builder.Property(x => x.LastCheckedAt)
+            .HasColumnName("last_checked_at");
+
         builder.HasIndex(x => x.NormalizedUrl)
             .IsUnique();
+
+        builder.HasIndex(x => new { x.LastCheckedAt, x.Id })
+            .HasDatabaseName("ix_links_last_checked_at");
     }
 }

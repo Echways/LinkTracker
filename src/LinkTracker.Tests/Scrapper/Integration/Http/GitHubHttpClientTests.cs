@@ -134,7 +134,7 @@ public sealed class GitHubHttpClientTests(WireMockContainerFixture wireMock) : I
 
         await wireMock.StubAsync(new
         {
-            request = new { method = "GET", url = "/repos/user/repo/issues" },
+            request = new { method = "GET", urlPath = "/repos/user/repo/issues" },
             response = new
             {
                 status = 200,
@@ -174,7 +174,7 @@ public sealed class GitHubHttpClientTests(WireMockContainerFixture wireMock) : I
 
         await wireMock.StubAsync(new
         {
-            request = new { method = "GET", url = "/repos/user/repo/issues" },
+            request = new { method = "GET", urlPath = "/repos/user/repo/issues" },
             response = new
             {
                 status = (int)HttpStatusCode.BadGateway,
@@ -204,7 +204,7 @@ public sealed class GitHubHttpClientTests(WireMockContainerFixture wireMock) : I
 
         await wireMock.StubAsync(new
         {
-            request = new { method = "GET", url = "/repos/user/repo/pulls" },
+            request = new { method = "GET", urlPath = "/repos/user/repo/pulls" },
             response = new
             {
                 status = 200,
@@ -244,7 +244,7 @@ public sealed class GitHubHttpClientTests(WireMockContainerFixture wireMock) : I
 
         await wireMock.StubAsync(new
         {
-            request = new { method = "GET", url = "/repos/user/repo/pulls" },
+            request = new { method = "GET", urlPath = "/repos/user/repo/pulls" },
             response = new
             {
                 status = (int)HttpStatusCode.BadGateway,

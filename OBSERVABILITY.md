@@ -32,7 +32,8 @@ Rate limiter применяется точечно, политикой `public-a
 | `api_requests_total` | Counter | `source` | Счётчик запросов к API (лейбл — шаблон маршрута, не сырой путь) |
 | `request_duration_ms_total` | Histogram | `scope`, `scope_type` | Длительность операции в мс (RED: Duration) |
 | `errors_total` | Counter | `scope`, `scope_type`, `reason` | **Ошибки (RED: Errors)** |
-| `sent_updates_total` | Counter | — | Количество обновлений, отправленных в Bot |
+| `sent_updates_total` | Counter | — | Количество обновлений, фактически отправленных в Bot (в outbox-режиме инкрементируется при успешной отправке из outbox) |
+| `outbox_enqueued_updates_total` | Counter | — | Количество обновлений, записанных в transactional outbox |
 | `db_queries_total` | Counter | `operation` | Количество запросов к БД |
 | `db_errors_total` | Counter | `operation` | Количество ошибок БД |
 | `db_query_duration_ms_total` | Histogram | `operation` | Длительность запроса к БД в мс |
@@ -55,6 +56,20 @@ Rate limiter применяется точечно, политикой `public-a
 | `kafka_consumed_total` | Counter | `topic` | Сообщений обработано из Kafka |
 | `kafka_consume_errors_total` | Counter | `topic` | Ошибок обработки из Kafka |
 | `kafka_consume_duration_ms_total` | Histogram | `topic` | Длительность обработки из Kafka в мс |
+| `process_memory_working_set_bytes` | Gauge | — | **Потребление RAM (working set), метрика для алерта** |
+| `process_memory_managed_bytes` | Gauge | — | Управляемая память (GC) |
+
+### AI Agent
+
+| Метрика | Тип | Лейблы | Описание |
+|---|---|---|---|
+| `kafka_consumed_total` | Counter | `topic` | Сообщений обработано из Kafka |
+| `kafka_consume_errors_total` | Counter | `topic` | Ошибок обработки из Kafka |
+| `kafka_consume_duration_ms_total` | Histogram | `topic` | Длительность обработки из Kafka в мс |
+| `kafka_dead_letter_total` | Counter | `topic` | Сообщений отправлено в DLQ |
+| `kafka_dead_letter_errors_total` | Counter | `topic` | Неудачных отправок в DLQ |
+| `summarizations_total` | Counter | — | Успешных суммаризаций через Yandex AI |
+| `summarization_fallbacks_total` | Counter | `reason` | **Суммаризаций, деградировавших до обрезки текста** |
 | `process_memory_working_set_bytes` | Gauge | — | **Потребление RAM (working set), метрика для алерта** |
 | `process_memory_managed_bytes` | Gauge | — | Управляемая память (GC) |
 

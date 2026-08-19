@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace LinkTracker.Bot.Application.Dialogs.Abstractions;
 
 public sealed class DialogContext
@@ -7,10 +9,9 @@ public sealed class DialogContext
     public string? ActiveDialogId { get; set; }
     public string? ActiveNodeId { get; set; }
 
-    public Dictionary<string, string> Data { get; } = new();
+    public Dictionary<string, string> Data { get; init; } = new();
 
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
-
+    [JsonIgnore]
     public bool HasActiveDialog =>
         !string.IsNullOrWhiteSpace(ActiveDialogId) && !string.IsNullOrWhiteSpace(ActiveNodeId);
 

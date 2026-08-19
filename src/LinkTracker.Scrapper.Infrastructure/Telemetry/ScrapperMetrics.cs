@@ -33,7 +33,11 @@ public sealed class ScrapperMetrics : IDisposable
 
         SentUpdates = _meter.CreateCounter<long>(
             "sent_updates_total",
-            description: "Количество обновлений, отправленных в Bot Service");
+            description: "Количество обновлений, фактически отправленных в Bot Service");
+
+        OutboxEnqueuedUpdates = _meter.CreateCounter<long>(
+            "outbox_enqueued_updates_total",
+            description: "Количество обновлений, записанных в transactional outbox");
 
         RequestDuration = _meter.CreateHistogram(
             "request_duration_ms_total",
@@ -89,6 +93,8 @@ public sealed class ScrapperMetrics : IDisposable
     public Counter<long> ApiRequests { get; }
 
     public Counter<long> SentUpdates { get; }
+
+    public Counter<long> OutboxEnqueuedUpdates { get; }
 
     public Histogram<double> RequestDuration { get; }
 

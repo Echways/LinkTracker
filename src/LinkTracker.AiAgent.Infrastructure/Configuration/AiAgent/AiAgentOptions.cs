@@ -2,9 +2,9 @@ namespace LinkTracker.AiAgent.Infrastructure.Configuration.AiAgent;
 
 public sealed class AiAgentOptions
 {
-    public FilteringOptions? Filtering { get; set; }
-    public SummarizationOptions? Summarization { get; set; }
-    public PrioritizationOptions? Prioritization { get; set; }
+    public FilteringOptions Filtering { get; set; } = new();
+    public SummarizationOptions Summarization { get; set; } = new();
+    public PrioritizationOptions Prioritization { get; set; } = new();
     public GroupingOptions Grouping { get; set; } = new();
 }
 

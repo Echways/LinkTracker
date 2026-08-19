@@ -47,12 +47,46 @@ public sealed class StackOverflowLinkUpdateHandlerTests
     }
 
     [Fact]
-    public async Task CheckAsync_WhenNoNewAnswersOrComments_ReturnsNoChangesAndKeepsLastUpdatedAt()
+    public async Task CheckAsync_WhenQuestionHasNoActivitySinceCursor_SkipsAnswerAndCommentRequests()
     {
         var stackOverflowClient = Substitute.For<IStackOverflowClient>();
         var logger = Substitute.For<ILogger<StackOverflowLinkUpdateHandler>>();
 
         var lastSeenAt = new DateTimeOffset(2025, 3, 9, 12, 0, 0, TimeSpan.Zero);
+
+        stackOverflowClient.GetQuestionAsync(123, Arg.Any<CancellationToken>())
+            .Returns(new StackOverflowQuestionResponse { QuestionId = 123, Title = "How to test this?", Link = new Uri("https://stackoverflow.com/questions/123/how-to-test-this"), LastActivityDateUnix = lastSeenAt.AddMinutes(-1).ToUnixTimeSeconds() });
+
+        var subscription = new TrackedLinkSubscription { Id = 1, Url = new Uri("https://stackoverflow.com/questions/123/how-to-test-this"), TgChatIds = [1001L], LastUpdatedAt = lastSeenAt };
+
+        var sut = new StackOverflowLinkUpdateHandler(stackOverflowClient, logger);
+
+        var result = await sut.CheckAsync(subscription);
+
+        Assert.False(result.HasChanges);
+        Assert.Empty(result.Events);
+        Assert.Equal(lastSeenAt, result.NewLastUpdatedAt);
+
+        await stackOverflowClient.Received(1)
+            .GetQuestionAsync(123, Arg.Any<CancellationToken>());
+
+        await stackOverflowClient.DidNotReceive()
+            .GetAnswersAsync(Arg.Any<long>(), Arg.Any<CancellationToken>());
+
+        await stackOverflowClient.DidNotReceive()
+            .GetCommentsAsync(Arg.Any<long>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task CheckAsync_WhenActivityIsNewerButItemsAreOld_ReturnsNoChanges()
+    {
+        var stackOverflowClient = Substitute.For<IStackOverflowClient>();
+        var logger = Substitute.For<ILogger<StackOverflowLinkUpdateHandler>>();
+
+        var lastSeenAt = new DateTimeOffset(2025, 3, 9, 12, 0, 0, TimeSpan.Zero);
+
+        stackOverflowClient.GetQuestionAsync(123, Arg.Any<CancellationToken>())
+            .Returns(new StackOverflowQuestionResponse { QuestionId = 123, Title = "How to test this?", Link = new Uri("https://stackoverflow.com/questions/123/how-to-test-this"), LastActivityDateUnix = lastSeenAt.AddMinutes(5).ToUnixTimeSeconds() });
 
         stackOverflowClient.GetAnswersAsync(123, Arg.Any<CancellationToken>())
             .Returns(
@@ -89,9 +123,6 @@ public sealed class StackOverflowLinkUpdateHandlerTests
         Assert.False(result.HasChanges);
         Assert.Empty(result.Events);
         Assert.Equal(lastSeenAt, result.NewLastUpdatedAt);
-
-        await stackOverflowClient.DidNotReceive()
-            .GetQuestionAsync(Arg.Any<long>(), Arg.Any<CancellationToken>());
     }
 
     [Theory]

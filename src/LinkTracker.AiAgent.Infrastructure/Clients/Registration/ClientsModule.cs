@@ -24,11 +24,10 @@ public static class ClientsModule
         services
             .AddOptions<AiAgentOptions>()
             .Bind(configuration.GetSection("AiAgent"))
-            .Validate(o => o.Filtering != null, "AiAgent:Filtering must be set")
-            .Validate(o => o.Summarization != null, "AiAgent:Summarization must be set")
-            .Validate(o => o.Prioritization != null, "AiAgent:Prioritization must be set")
-            .Validate(o => o.Grouping.WindowMs > 0, "AiAgent:Grouping:WindowMs must be greater that 0")
-            .Validate(o => o.Grouping.FlushIntervalMs > 0, "AiAgent:Grouping.FlushIntervalMs must be greater that 0")
+            .Validate(o => o.Filtering.MinLength >= 0, "AiAgent:Filtering:MinLength must not be negative")
+            .Validate(o => o.Summarization.Threshold > 0, "AiAgent:Summarization:Threshold must be greater than 0")
+            .Validate(o => o.Grouping.WindowMs > 0, "AiAgent:Grouping:WindowMs must be greater than 0")
+            .Validate(o => o.Grouping.FlushIntervalMs > 0, "AiAgent:Grouping:FlushIntervalMs must be greater than 0")
             .ValidateOnStart();
 
         services
@@ -52,6 +51,13 @@ public static class ClientsModule
         services
             .AddOptions<YandexAiOptions>()
             .Bind(configuration.GetSection("YandexAi"))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ApiKey), "YandexAi:ApiKey must be set")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.FolderId), "YandexAi:FolderId must be set")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ModelId), "YandexAi:ModelId must be set")
+            .Validate(
+                o => Uri.TryCreate(o.BaseUrl, UriKind.Absolute, out _),
+                "YandexAi:BaseUrl must be an absolute URI")
+            .Validate(o => o.TimeoutSeconds > 0, "YandexAi:TimeoutSeconds must be greater than 0")
             .ValidateOnStart();
 
         services.AddSingleton<KafkaOffsetTracker>();

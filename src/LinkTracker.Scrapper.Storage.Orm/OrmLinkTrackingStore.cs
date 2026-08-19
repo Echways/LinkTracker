@@ -398,26 +398,8 @@ public sealed class OrmLinkTrackingStore(IDbContextFactory<AppDbContext> dbConte
         }
     }
 
-    public async Task<IReadOnlyList<TrackedLinkSubscription>> GetAllSubscriptionsAsync(CancellationToken ct = default)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
-
-        return await dbContext.Subscriptions
-            .AsNoTracking()
-            .GroupBy(x => new { x.LinkId, x.Link.Url, x.Link.LastUpdatedAt })
-            .Select(group => new TrackedLinkSubscription
-            {
-                Id = group.Key.LinkId,
-                Url = new Uri(group.Key.Url),
-                LastUpdatedAt = group.Key.LastUpdatedAt,
-                LastEventKey = group.First().Link.LastEventKey,
-                TgChatIds = group.Select(x => x.ChatId).Distinct().ToArray()
-            })
-            .ToArrayAsync(ct);
-    }
-
-    public async Task<IReadOnlyList<TrackedLinkSubscription>> GetSubscriptionsBatchAsync(
-        long? afterLinkId,
+    public async Task<IReadOnlyList<TrackedLinkSubscription>> GetSubscriptionsDueForCheckAsync(
+        DateTimeOffset checkedBefore,
         int batchSize,
         CancellationToken ct = default)
     {
@@ -426,8 +408,9 @@ public sealed class OrmLinkTrackingStore(IDbContextFactory<AppDbContext> dbConte
         return await dbContext.Links
             .AsNoTracking()
             .Where(x => x.Subscriptions.Any())
-            .Where(x => afterLinkId == null || x.Id > afterLinkId.Value)
-            .OrderBy(x => x.Id)
+            .Where(x => x.LastCheckedAt < checkedBefore)
+            .OrderBy(x => x.LastCheckedAt)
+            .ThenBy(x => x.Id)
             .Take(batchSize)
             .Select(x => new TrackedLinkSubscription
             {
@@ -441,6 +424,25 @@ public sealed class OrmLinkTrackingStore(IDbContextFactory<AppDbContext> dbConte
                     .ToArray()
             })
             .ToArrayAsync(ct);
+    }
+
+    public async Task MarkCheckedAsync(
+        IReadOnlyCollection<long> linkIds,
+        DateTimeOffset checkedAt,
+        CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(linkIds);
+
+        if (linkIds.Count == 0)
+        {
+            return;
+        }
+
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(ct);
+
+        await dbContext.Links
+            .Where(x => linkIds.Contains(x.Id))
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.LastCheckedAt, checkedAt), ct);
     }
 
     public async Task SetCursorAsync(long linkId, DateTimeOffset lastUpdatedAt, string? lastEventKey, CancellationToken ct = default)

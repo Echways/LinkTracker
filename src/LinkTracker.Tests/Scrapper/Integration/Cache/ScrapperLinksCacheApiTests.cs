@@ -318,7 +318,7 @@ public sealed class ScrapperLinksCacheApiTests(ValkeyTestContainerFixture fixtur
 
     private static string BuildLinksCacheKey(long chatId)
     {
-        return $"{InstanceName}:{{linktracker-links}}:links:chat:{chatId}";
+        return $"{InstanceName}:links:{{chat:{chatId}}}";
     }
 
     private static async Task WaitUntilAsync(Func<Task<bool>> condition)

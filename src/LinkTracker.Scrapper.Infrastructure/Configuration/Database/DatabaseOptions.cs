@@ -13,7 +13,6 @@ public sealed class DatabaseOptions
     public string MigrationsPath { get; init; } = "migrations";
     public bool RunMigrations { get; init; } = true;
     public SslMode SslMode { get; init; } = SslMode.Disable;
-    public bool TrustServerCertificate { get; init; }
 
     public string BuildConnectionString()
     {
@@ -24,8 +23,7 @@ public sealed class DatabaseOptions
             Database = Name,
             Username = User,
             Password = Password,
-            SslMode = SslMode,
-            TrustServerCertificate = TrustServerCertificate
+            SslMode = SslMode
         };
 
         return builder.ConnectionString;

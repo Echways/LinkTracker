@@ -48,19 +48,6 @@ internal static class SqlLinkTrackingStoreCommands
         ORDER BY l.id;
         """;
 
-    public const string GetSubscriptionRows =
-        """
-        SELECT
-            l.id AS Id,
-            l.url AS Url,
-            l.last_updated_at AS LastUpdatedAt,
-            l.last_event_key AS LastEventKey,
-            s.chat_id AS ChatId
-        FROM subscriptions s
-        JOIN links l ON l.id = s.link_id
-        ORDER BY l.id, s.chat_id;
-        """;
-
     public const string SetCursor =
         """
         UPDATE links
@@ -252,22 +239,23 @@ internal static class SqlLinkTrackingStoreCommands
           );
         """;
 
-    public const string GetSubscriptionBatchRows =
+    public const string GetSubscriptionsDueForCheckRows =
         """
         WITH target_links AS (
             SELECT
                 l.id AS Id,
                 l.url AS Url,
                 l.last_updated_at AS LastUpdatedAt,
-                l.last_event_key AS LastEventKey
+                l.last_event_key AS LastEventKey,
+                l.last_checked_at AS LastCheckedAt
             FROM links l
-            WHERE (@afterLinkId IS NULL OR l.id > @afterLinkId)
+            WHERE l.last_checked_at < @checkedBefore
               AND EXISTS (
                   SELECT 1
                   FROM subscriptions s
                   WHERE s.link_id = l.id
               )
-            ORDER BY l.id
+            ORDER BY l.last_checked_at, l.id
             LIMIT @batchSize
         )
         SELECT
@@ -278,6 +266,13 @@ internal static class SqlLinkTrackingStoreCommands
             s.chat_id AS ChatId
         FROM target_links tl
         JOIN subscriptions s ON s.link_id = tl.Id
-        ORDER BY tl.Id, s.chat_id;
+        ORDER BY tl.LastCheckedAt, tl.Id, s.chat_id;
+        """;
+
+    public const string MarkChecked =
+        """
+        UPDATE links
+        SET last_checked_at = @checkedAt
+        WHERE id = ANY(@linkIds);
         """;
 }

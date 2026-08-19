@@ -4,6 +4,8 @@ namespace LinkTracker.Tests.Scrapper.Integration.Storage;
 
 public abstract class LinkTrackingStoreContractTests
 {
+    private static readonly DateTimeOffset FarFuture = new(2100, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
     protected abstract Task ExecuteWithSut(Func<ILinkTrackingStore, Task> test);
 
     [Fact]
@@ -93,7 +95,7 @@ public abstract class LinkTrackingStoreContractTests
             var removed = await sut.TryRemoveAsync(firstChatId, url);
             var firstChatLinks = await sut.GetAllTrackedLinkRecordsAsync(firstChatId);
             var secondChatLinks = await sut.GetAllTrackedLinkRecordsAsync(secondChatId);
-            var subscriptions = await sut.GetAllSubscriptionsAsync();
+            var subscriptions = await sut.GetSubscriptionsDueForCheckAsync(FarFuture, 100);
 
             Assert.NotNull(removed);
             Assert.Equal(url, removed!.Url);
@@ -148,7 +150,7 @@ public abstract class LinkTrackingStoreContractTests
             Assert.Equal(updatedAt, only.LastUpdatedAt);
             Assert.Equal(eventKey, only.LastEventKey);
 
-            var subscriptions = await sut.GetAllSubscriptionsAsync();
+            var subscriptions = await sut.GetSubscriptionsDueForCheckAsync(FarFuture, 100);
             var subscription = Assert.Single(subscriptions);
 
             Assert.Equal(updatedAt, subscription.LastUpdatedAt);
@@ -191,7 +193,7 @@ public abstract class LinkTrackingStoreContractTests
             Assert.Equal(updatedAt, secondOnly.LastUpdatedAt);
             Assert.Equal(eventKey, secondOnly.LastEventKey);
 
-            var subscriptions = await sut.GetAllSubscriptionsAsync();
+            var subscriptions = await sut.GetSubscriptionsDueForCheckAsync(FarFuture, 100);
             var subscription = Assert.Single(subscriptions);
 
             Assert.Equal(firstAdded.Id, subscription.Id);
@@ -222,7 +224,7 @@ public abstract class LinkTrackingStoreContractTests
             Assert.Equal(updatedAt, only.LastUpdatedAt);
             Assert.Null(only.LastEventKey);
 
-            var subscriptions = await sut.GetAllSubscriptionsAsync();
+            var subscriptions = await sut.GetSubscriptionsDueForCheckAsync(FarFuture, 100);
             var subscription = Assert.Single(subscriptions);
 
             Assert.Equal(updatedAt, subscription.LastUpdatedAt);
@@ -337,7 +339,7 @@ public abstract class LinkTrackingStoreContractTests
     }
 
     [Fact]
-    public async Task GetSubscriptionsBatchAsync_ReturnsSubscriptionsOrderedById()
+    public async Task GetSubscriptionsDueForCheckAsync_ReturnsSubscriptionsOrderedById()
     {
         await ExecuteWithSut(async sut =>
         {
@@ -368,7 +370,7 @@ public abstract class LinkTrackingStoreContractTests
             Assert.NotNull(second);
             Assert.NotNull(third);
 
-            var batch = await sut.GetSubscriptionsBatchAsync(null, 10);
+            var batch = await sut.GetSubscriptionsDueForCheckAsync(FarFuture, 10);
 
             Assert.Equal(3, batch.Count);
 
@@ -380,13 +382,16 @@ public abstract class LinkTrackingStoreContractTests
     }
 
     [Fact]
-    public async Task GetSubscriptionsBatchAsync_ReturnsOnlyItemsAfterLinkId()
+    public async Task GetSubscriptionsDueForCheckAsync_SkipsLinksCheckedAfterTheCutoff()
     {
         await ExecuteWithSut(async sut =>
         {
             const long firstChatId = 8101;
             const long secondChatId = 8102;
             const long thirdChatId = 8103;
+
+            var checkedAt = new DateTimeOffset(2026, 3, 22, 12, 0, 0, TimeSpan.Zero);
+            var cutoff = checkedAt.AddMinutes(-1);
 
             await sut.TryRegisterChatAsync(firstChatId);
             await sut.TryRegisterChatAsync(secondChatId);
@@ -411,10 +416,42 @@ public abstract class LinkTrackingStoreContractTests
             Assert.NotNull(second);
             Assert.NotNull(third);
 
-            var batch = await sut.GetSubscriptionsBatchAsync(first!.Id, 10);
+            await sut.MarkCheckedAsync([first!.Id], checkedAt);
+
+            var batch = await sut.GetSubscriptionsDueForCheckAsync(cutoff, 10);
 
             Assert.Equal(
                 [second!.Id, third!.Id],
+                batch.Select(x => x.Id).ToArray());
+        });
+    }
+
+    [Fact]
+    public async Task GetSubscriptionsDueForCheckAsync_ReturnsLeastRecentlyCheckedFirst()
+    {
+        await ExecuteWithSut(async sut =>
+        {
+            const long firstChatId = 8501;
+            const long secondChatId = 8502;
+
+            await sut.TryRegisterChatAsync(firstChatId);
+            await sut.TryRegisterChatAsync(secondChatId);
+
+            var first = await sut.TryAddAsync(firstChatId, new Uri("https://github.com/user/repo-1"), []);
+            var second = await sut.TryAddAsync(secondChatId, new Uri("https://github.com/user/repo-2"), []);
+
+            Assert.NotNull(first);
+            Assert.NotNull(second);
+
+            var recent = new DateTimeOffset(2026, 3, 22, 12, 0, 0, TimeSpan.Zero);
+
+            await sut.MarkCheckedAsync([first!.Id], recent);
+            await sut.MarkCheckedAsync([second!.Id], recent.AddHours(-1));
+
+            var batch = await sut.GetSubscriptionsDueForCheckAsync(recent.AddHours(1), 10);
+
+            Assert.Equal(
+                [second.Id, first.Id],
                 batch.Select(x => x.Id).ToArray());
         });
     }
@@ -423,7 +460,7 @@ public abstract class LinkTrackingStoreContractTests
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
-    public async Task GetSubscriptionsBatchAsync_RespectsBatchSize(int batchSize)
+    public async Task GetSubscriptionsDueForCheckAsync_RespectsBatchSize(int batchSize)
     {
         await ExecuteWithSut(async sut =>
         {
@@ -442,14 +479,14 @@ public abstract class LinkTrackingStoreContractTests
             await sut.TryAddAsync(thirdChatId, new Uri("https://github.com/user/repo-3"), []);
             await sut.TryAddAsync(fourthChatId, new Uri("https://github.com/user/repo-4"), []);
 
-            var batch = await sut.GetSubscriptionsBatchAsync(null, batchSize);
+            var batch = await sut.GetSubscriptionsDueForCheckAsync(FarFuture, batchSize);
 
             Assert.Equal(batchSize, batch.Count);
         });
     }
 
     [Fact]
-    public async Task GetSubscriptionsBatchAsync_ReturnsSharedLinkOnceWithAllSubscribers()
+    public async Task GetSubscriptionsDueForCheckAsync_ReturnsSharedLinkOnceWithAllSubscribers()
     {
         await ExecuteWithSut(async sut =>
         {
@@ -467,7 +504,7 @@ public abstract class LinkTrackingStoreContractTests
             Assert.NotNull(second);
             Assert.Equal(first!.Id, second!.Id);
 
-            var batch = await sut.GetSubscriptionsBatchAsync(null, 10);
+            var batch = await sut.GetSubscriptionsDueForCheckAsync(FarFuture, 10);
 
             var subscription = Assert.Single(batch);
 
@@ -480,7 +517,7 @@ public abstract class LinkTrackingStoreContractTests
     }
 
     [Fact]
-    public async Task GetSubscriptionsBatchAsync_ReturnsCursorFields()
+    public async Task GetSubscriptionsDueForCheckAsync_ReturnsCursorFields()
     {
         await ExecuteWithSut(async sut =>
         {
@@ -496,7 +533,7 @@ public abstract class LinkTrackingStoreContractTests
 
             await sut.SetCursorAsync(added!.Id, updatedAt, eventKey);
 
-            var batch = await sut.GetSubscriptionsBatchAsync(null, 10);
+            var batch = await sut.GetSubscriptionsDueForCheckAsync(FarFuture, 10);
 
             var subscription = Assert.Single(batch);
 

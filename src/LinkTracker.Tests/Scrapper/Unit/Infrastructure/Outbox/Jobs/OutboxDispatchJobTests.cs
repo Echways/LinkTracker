@@ -4,6 +4,7 @@ using LinkTracker.Scrapper.Infrastructure.Configuration.Bot;
 using LinkTracker.Scrapper.Infrastructure.Outbox.Abstractions;
 using LinkTracker.Scrapper.Infrastructure.Outbox.Configuration;
 using LinkTracker.Scrapper.Infrastructure.Outbox.Jobs;
+using LinkTracker.Scrapper.Infrastructure.Telemetry;
 using LinkTracker.Scrapper.Infrastructure.Outbox.Models;
 using LinkTracker.Shared.Contracts.Bot;
 using LinkTracker.Shared.Infrastructure;
@@ -180,6 +181,7 @@ public sealed class OutboxDispatchJobTests
             outboxStore,
             botClient,
             outboxOptions,
+            new ScrapperMetrics(),
             NullLogger<OutboxDispatchJob>.Instance);
     }
 

@@ -1,7 +1,5 @@
-using LinkTracker.Bot.Application.Updates.Abstractions;
 using LinkTracker.Bot.Presentation.Telegram.Configuration;
 using LinkTracker.Bot.Presentation.Telegram.Hosting;
-using LinkTracker.Bot.Presentation.Telegram.Notifications;
 using LinkTracker.Bot.Presentation.Telegram.Updates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,8 +28,6 @@ public static class TelegramPresentationModule
 
         services.AddSingleton<UpdateMapper>();
         services.AddSingleton<UpdateReceiver>();
-
-        services.AddSingleton<ILinkUpdateNotifier, LinkUpdateNotifier>();
 
         services.AddHostedService<TelegramCommandsHostedService>();
         services.AddHostedService<TelegramPollingHostedService>();

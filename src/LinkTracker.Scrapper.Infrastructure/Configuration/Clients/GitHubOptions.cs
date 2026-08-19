@@ -5,4 +5,11 @@ public sealed class GitHubOptions
     public string BaseUrl { get; init; } = "https://api.github.com";
 
     public string? Token { get; init; }
+
+    public ExternalApiRateLimitOptions RateLimit { get; init; } = new()
+    {
+        TokenLimit = 200,
+        TokensPerPeriod = 80,
+        ReplenishmentPeriodSeconds = 60
+    };
 }

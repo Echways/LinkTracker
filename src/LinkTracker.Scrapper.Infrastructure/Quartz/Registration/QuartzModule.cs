@@ -4,6 +4,7 @@ using LinkTracker.Scrapper.Infrastructure.Quartz.Configuration;
 using LinkTracker.Scrapper.Infrastructure.Quartz.Jobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Quartz;
 
 namespace LinkTracker.Scrapper.Infrastructure.Quartz.Registration;
@@ -26,6 +27,8 @@ public static class QuartzModule
                 o => o.MaxDegreeOfParallelism > 0,
                 "Scheduling:MaxDegreeOfParallelism must be greater than zero.")
             .ValidateOnStart();
+
+        services.TryAddSingleton(TimeProvider.System);
 
         var schedulingOptions = schedulingSection.Get<LinkUpdatesSchedulingOptions>() ?? new LinkUpdatesSchedulingOptions();
         var outboxOptions = outboxSection.Get<OutboxOptions>() ?? new OutboxOptions();

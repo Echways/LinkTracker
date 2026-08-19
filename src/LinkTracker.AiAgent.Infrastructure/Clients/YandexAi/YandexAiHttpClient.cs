@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using LinkTracker.AiAgent.Application.Abstractions;
+using LinkTracker.AiAgent.Application.Telemetry.Abstractions;
 using LinkTracker.AiAgent.Infrastructure.Clients.YandexAi.Contracts;
 using LinkTracker.AiAgent.Infrastructure.Configuration.AiAgent;
 using LinkTracker.AiAgent.Infrastructure.Configuration.YandexAi;
@@ -13,8 +14,11 @@ internal sealed class YandexAiHttpClient(
     IHttpClientFactory httpClientFactory,
     IOptions<YandexAiOptions> yandexOptions,
     IOptions<AiAgentOptions> agentOptions,
+    IAiAgentMetrics metrics,
     ILogger<YandexAiHttpClient> logger) : ILinkUpdateSummarizer
 {
+    private const string Instructions = "You are a concise summarizer. Summarize the given update in 2-3 sentences.";
+
     public async Task<string> SummarizeAsync(string text, CancellationToken ct)
     {
         var threshold = agentOptions.Value.Summarization.Threshold;
@@ -26,7 +30,18 @@ internal sealed class YandexAiHttpClient(
 
         try
         {
-            return await CallApiAsync(text, ct);
+            var summary = await CallApiAsync(text, ct);
+
+            if (string.IsNullOrWhiteSpace(summary))
+            {
+                logger.LogWarning("Yandex AI вернул пустой ответ. Используется обрезка текста.");
+                metrics.IncrementSummarizationFallback("empty_response");
+
+                return FallbackTruncate(text, threshold);
+            }
+
+            metrics.IncrementSummarization();
+            return summary;
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
@@ -34,16 +49,18 @@ internal sealed class YandexAiHttpClient(
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Yandex AI суммаризация завершилась ошибкой ({Type}). Используется заглушка.", ex.GetType().Name);
+            logger.LogWarning(ex, "Yandex AI суммаризация завершилась ошибкой ({Type}). Используется обрезка текста.", ex.GetType().Name);
+            metrics.IncrementSummarizationFallback(ex.GetType().Name);
+
             return FallbackTruncate(text, threshold);
         }
     }
 
-    private async Task<string> CallApiAsync(string text, CancellationToken ct)
+    private async Task<string?> CallApiAsync(string text, CancellationToken ct)
     {
         var opts = yandexOptions.Value;
 
-        var requestBody = new YandexResponsesRequest { Model = $"gpt://{opts.FolderId}/{opts.ModelId}/latest", Instructions = "You are a concise summarizer. Summarize the given update in 2-3 sentences.", Input = text };
+        var requestBody = new YandexResponsesRequest { Model = $"gpt://{opts.FolderId}/{opts.ModelId}/latest", Instructions = Instructions, Input = text };
 
         var httpClient = httpClientFactory.CreateClient(nameof(YandexAiHttpClient));
 
@@ -57,15 +74,7 @@ internal sealed class YandexAiHttpClient(
 
         var result = await response.Content.ReadFromJsonAsync<YandexResponsesResponse>(ct);
 
-        var responseText = result?.Output?.FirstOrDefault()?.Content?.FirstOrDefault()?.Text;
-
-        if (!string.IsNullOrWhiteSpace(responseText))
-        {
-            return responseText;
-        }
-
-        logger.LogWarning("Yandex AI вернул пустой ответ.");
-        return text;
+        return result?.Output?.FirstOrDefault()?.Content?.FirstOrDefault()?.Text;
     }
 
     private static string FallbackTruncate(string text, int threshold)

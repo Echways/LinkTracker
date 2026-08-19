@@ -46,11 +46,8 @@ public sealed class LinkUpdatesJobTests
             LastEventKey = "issue:122"
         };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([subscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(subscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(subscription), Batch());
 
         githubHandler.CanHandle(subscription.Url).Returns(true);
         stackOverflowHandler.CanHandle(subscription.Url).Returns(false);
@@ -124,11 +121,8 @@ public sealed class LinkUpdatesJobTests
 
         var subscription = new TrackedLinkSubscription { Id = 10, Url = new Uri("https://github.com/user/repo"), TgChatIds = [1001L] };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([subscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(subscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(subscription), Batch());
 
         githubHandler.CanHandle(subscription.Url).Returns(true);
         stackOverflowHandler.CanHandle(subscription.Url).Returns(false);
@@ -188,11 +182,8 @@ public sealed class LinkUpdatesJobTests
             LastEventKey = "issue:120"
         };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([subscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(subscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(subscription), Batch());
 
         githubHandler.CanHandle(subscription.Url).Returns(true);
         stackOverflowHandler.CanHandle(subscription.Url).Returns(false);
@@ -278,11 +269,8 @@ public sealed class LinkUpdatesJobTests
             LastEventKey = "issue:122"
         };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([subscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(subscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(subscription), Batch());
 
         githubHandler.CanHandle(subscription.Url).Returns(true);
         stackOverflowHandler.CanHandle(subscription.Url).Returns(false);
@@ -337,11 +325,8 @@ public sealed class LinkUpdatesJobTests
 
         var subscription = new TrackedLinkSubscription { Id = 10, Url = new Uri("https://example.com/page"), TgChatIds = [1001L] };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([subscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(subscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(subscription), Batch());
 
         githubHandler.CanHandle(subscription.Url).Returns(false);
         stackOverflowHandler.CanHandle(subscription.Url).Returns(false);
@@ -388,14 +373,8 @@ public sealed class LinkUpdatesJobTests
 
         var second = new TrackedLinkSubscription { Id = 20, Url = new Uri("https://github.com/user/repo2"), TgChatIds = [1002L] };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, 1, Arg.Any<CancellationToken>())
-            .Returns([first]);
-
-        trackingStore.GetSubscriptionsBatchAsync(first.Id, 1, Arg.Any<CancellationToken>())
-            .Returns([second]);
-
-        trackingStore.GetSubscriptionsBatchAsync(second.Id, 1, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), 1, Arg.Any<CancellationToken>())
+            .Returns(Batch(first), Batch(second), Batch());
 
         handler.CanHandle(first.Url).Returns(true);
         handler.CanHandle(second.Url).Returns(true);
@@ -419,14 +398,8 @@ public sealed class LinkUpdatesJobTests
 
         await sut.Execute(quartzContext);
 
-        await trackingStore.Received(1)
-            .GetSubscriptionsBatchAsync(null, 1, Arg.Any<CancellationToken>());
-
-        await trackingStore.Received(1)
-            .GetSubscriptionsBatchAsync(first.Id, 1, Arg.Any<CancellationToken>());
-
-        await trackingStore.Received(1)
-            .GetSubscriptionsBatchAsync(second.Id, 1, Arg.Any<CancellationToken>());
+        await trackingStore.Received(3)
+            .GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), 1, Arg.Any<CancellationToken>());
 
         await handler.Received(1)
             .CheckAsync(first, Arg.Any<CancellationToken>());
@@ -450,11 +423,8 @@ public sealed class LinkUpdatesJobTests
 
         var eventCreatedAt = new DateTimeOffset(2025, 3, 10, 12, 0, 0, TimeSpan.Zero);
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([failedSubscription, successfulSubscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(successfulSubscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(failedSubscription, successfulSubscription), Batch());
 
         handler.CanHandle(failedSubscription.Url).Returns(true);
         handler.CanHandle(successfulSubscription.Url).Returns(true);
@@ -545,8 +515,8 @@ public sealed class LinkUpdatesJobTests
         var outboxStore = Substitute.For<IOutboxStore>();
         var logger = Substitute.For<ILogger<LinkUpdatesJob>>();
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch());
 
         var quartzContext = Substitute.For<IJobExecutionContext>();
         quartzContext.CancellationToken.Returns(CancellationToken.None);
@@ -579,8 +549,8 @@ public sealed class LinkUpdatesJobTests
         var outboxStore = Substitute.For<IOutboxStore>();
         var logger = Substitute.For<ILogger<LinkUpdatesJob>>();
 
-        trackingStore.GetSubscriptionsBatchAsync(null, configuredBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), configuredBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch());
 
         var quartzContext = Substitute.For<IJobExecutionContext>();
         quartzContext.CancellationToken.Returns(CancellationToken.None);
@@ -596,7 +566,7 @@ public sealed class LinkUpdatesJobTests
         await sut.Execute(quartzContext);
 
         await trackingStore.Received(1)
-            .GetSubscriptionsBatchAsync(null, configuredBatchSize, Arg.Any<CancellationToken>());
+            .GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), configuredBatchSize, Arg.Any<CancellationToken>());
     }
 
     [Theory]
@@ -615,11 +585,8 @@ public sealed class LinkUpdatesJobTests
 
         var secondSubscription = new TrackedLinkSubscription { Id = 20, Url = new Uri("https://github.com/user/repo2"), TgChatIds = [1002L] };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([firstSubscription, secondSubscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(secondSubscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(firstSubscription, secondSubscription), Batch());
 
         handler.CanHandle(firstSubscription.Url).Returns(true);
         handler.CanHandle(secondSubscription.Url).Returns(true);
@@ -643,8 +610,8 @@ public sealed class LinkUpdatesJobTests
 
         await sut.Execute(quartzContext);
 
-        await trackingStore.Received(1)
-            .GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>());
+        await trackingStore.Received(2)
+            .GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>());
 
         await handler.Received(1)
             .CheckAsync(firstSubscription, Arg.Any<CancellationToken>());
@@ -666,11 +633,8 @@ public sealed class LinkUpdatesJobTests
 
         var secondSubscription = new TrackedLinkSubscription { Id = 20, Url = new Uri("https://github.com/user/repo2"), TgChatIds = [1002L] };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([firstSubscription, secondSubscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(secondSubscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(firstSubscription, secondSubscription), Batch());
 
         handler.CanHandle(firstSubscription.Url).Returns(true);
         handler.CanHandle(secondSubscription.Url).Returns(true);
@@ -724,11 +688,8 @@ public sealed class LinkUpdatesJobTests
 
         var secondFailedSubscription = new TrackedLinkSubscription { Id = 20, Url = new Uri("https://github.com/user/repo2"), TgChatIds = [1002L] };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([firstFailedSubscription, secondFailedSubscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(secondFailedSubscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(firstFailedSubscription, secondFailedSubscription), Batch());
 
         handler.CanHandle(firstFailedSubscription.Url).Returns(true);
         handler.CanHandle(secondFailedSubscription.Url).Returns(true);
@@ -796,11 +757,8 @@ public sealed class LinkUpdatesJobTests
 
         var subscription = new TrackedLinkSubscription { Id = 10, Url = new Uri("https://github.com/user/repo"), TgChatIds = [1001L] };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([subscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(subscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(subscription), Batch());
 
         handler.CanHandle(subscription.Url).Returns(true);
 
@@ -868,11 +826,8 @@ public sealed class LinkUpdatesJobTests
             LastEventKey = "issue:122"
         };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([subscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(subscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(subscription), Batch());
 
         handler.CanHandle(subscription.Url).Returns(true);
 
@@ -945,11 +900,8 @@ public sealed class LinkUpdatesJobTests
 
         var subscription = new TrackedLinkSubscription { Id = 10, Url = new Uri("https://github.com/user/repo"), TgChatIds = [1001L] };
 
-        trackingStore.GetSubscriptionsBatchAsync(null, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([subscription]);
-
-        trackingStore.GetSubscriptionsBatchAsync(subscription.Id, DefaultBatchSize, Arg.Any<CancellationToken>())
-            .Returns([]);
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(subscription), Batch());
 
         handler.CanHandle(subscription.Url).Returns(true);
 
@@ -985,6 +937,90 @@ public sealed class LinkUpdatesJobTests
             Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Execute_MarksEveryProcessedLinkAsChecked_EvenWhenTheCheckFails()
+    {
+        var trackingStore = Substitute.For<ILinkTrackingStore>();
+        var handler = Substitute.For<ILinkUpdateHandler>();
+        var botClient = Substitute.For<IBotClient>();
+        var outboxStore = Substitute.For<IOutboxStore>();
+        var logger = Substitute.For<ILogger<LinkUpdatesJob>>();
+
+        var failing = new TrackedLinkSubscription { Id = 10, Url = new Uri("https://github.com/user/repo-1"), TgChatIds = [1001L] };
+        var succeeding = new TrackedLinkSubscription { Id = 20, Url = new Uri("https://github.com/user/repo-2"), TgChatIds = [1002L] };
+
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), DefaultBatchSize, Arg.Any<CancellationToken>())
+            .Returns(Batch(failing, succeeding), Batch());
+
+        handler.CanHandle(Arg.Any<Uri>()).Returns(true);
+
+        handler.CheckAsync(failing, Arg.Any<CancellationToken>())
+            .Returns<LinkCheckResult>(_ => throw new HttpRequestException("boom"));
+
+        handler.CheckAsync(succeeding, Arg.Any<CancellationToken>())
+            .Returns(new LinkCheckResult());
+
+        var quartzContext = Substitute.For<IJobExecutionContext>();
+        quartzContext.CancellationToken.Returns(CancellationToken.None);
+
+        var sut = CreateSut(trackingStore, [handler], botClient, outboxStore, logger);
+
+        await sut.Execute(quartzContext);
+
+        await trackingStore.Received(1)
+            .MarkCheckedAsync(
+                Arg.Is<IReadOnlyCollection<long>>(ids => ids.SequenceEqual(new[] { failing.Id, succeeding.Id })),
+                Arg.Any<DateTimeOffset>(),
+                Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Execute_QueriesEveryBatchWithTheSameCutoff()
+    {
+        var trackingStore = Substitute.For<ILinkTrackingStore>();
+        var handler = Substitute.For<ILinkUpdateHandler>();
+        var botClient = Substitute.For<IBotClient>();
+        var outboxStore = Substitute.For<IOutboxStore>();
+        var logger = Substitute.For<ILogger<LinkUpdatesJob>>();
+
+        var first = new TrackedLinkSubscription { Id = 10, Url = new Uri("https://github.com/user/repo-1"), TgChatIds = [1001L] };
+        var second = new TrackedLinkSubscription { Id = 20, Url = new Uri("https://github.com/user/repo-2"), TgChatIds = [1002L] };
+
+        var cutoffs = new List<DateTimeOffset>();
+
+        trackingStore.GetSubscriptionsDueForCheckAsync(Arg.Any<DateTimeOffset>(), 1, Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                cutoffs.Add(callInfo.Arg<DateTimeOffset>());
+
+                return cutoffs.Count switch
+                {
+                    1 => Batch(first),
+                    2 => Batch(second),
+                    _ => Batch()
+                };
+            });
+
+        handler.CanHandle(Arg.Any<Uri>()).Returns(true);
+        handler.CheckAsync(Arg.Any<TrackedLinkSubscription>(), Arg.Any<CancellationToken>())
+            .Returns(new LinkCheckResult());
+
+        var quartzContext = Substitute.For<IJobExecutionContext>();
+        quartzContext.CancellationToken.Returns(CancellationToken.None);
+
+        var sut = CreateSut(trackingStore, [handler], botClient, outboxStore, logger, batchSize: 1);
+
+        await sut.Execute(quartzContext);
+
+        Assert.Equal(3, cutoffs.Count);
+        Assert.Single(cutoffs.Distinct());
+    }
+
+    private static IReadOnlyList<TrackedLinkSubscription> Batch(params TrackedLinkSubscription[] subscriptions)
+    {
+        return subscriptions;
+    }
+
     private static LinkUpdatesJob CreateSut(
         ILinkTrackingStore trackingStore,
         IEnumerable<ILinkUpdateHandler> handlers,
@@ -1008,6 +1044,7 @@ public sealed class LinkUpdatesJobTests
             outboxStore,
             schedulingOptions,
             outboxOptions,
+            TimeProvider.System,
             logger,
             metrics);
     }

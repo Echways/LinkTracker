@@ -1,6 +1,7 @@
 using LinkTracker.Scrapper.Infrastructure.Clients.Bot;
 using LinkTracker.Scrapper.Infrastructure.Outbox.Abstractions;
 using LinkTracker.Scrapper.Infrastructure.Outbox.Configuration;
+using LinkTracker.Scrapper.Infrastructure.Telemetry;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Quartz;
@@ -12,6 +13,7 @@ internal sealed class OutboxDispatchJob(
     IOutboxStore outboxStore,
     IBotDirectClient botClient,
     IOptions<OutboxOptions> outboxOptions,
+    ScrapperMetrics metrics,
     ILogger<OutboxDispatchJob> logger) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
@@ -38,6 +40,8 @@ internal sealed class OutboxDispatchJob(
             {
                 await botClient.SendUpdateAsync(message.Payload, ct);
                 await outboxStore.MarkProcessedAsync(message.Id, ct);
+
+                metrics.SentUpdates.Add(1);
 
                 logger.LogDebug(
                     "Outbox сообщение отправлено. OutboxMessageId={OutboxMessageId}",

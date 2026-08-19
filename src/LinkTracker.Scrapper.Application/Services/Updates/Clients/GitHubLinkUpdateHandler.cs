@@ -34,7 +34,7 @@ public sealed class GitHubLinkUpdateHandler(
     {
         TryParseRepository(subscription.Url, out var owner, out var repository);
 
-        var issuesTask = gitHubClient.GetIssuesAsync(owner, repository, ct);
+        var issuesTask = gitHubClient.GetIssuesAsync(owner, repository, lastSeenAt, ct);
         var pullRequestsTask = gitHubClient.GetPullRequestsAsync(owner, repository, ct);
 
         await Task.WhenAll(issuesTask, pullRequestsTask);

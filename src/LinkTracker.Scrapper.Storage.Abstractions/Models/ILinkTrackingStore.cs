@@ -28,11 +28,14 @@ public interface ILinkTrackingStore
 
     Task<bool> TryDeleteTagAsync(long chatId, string tag, CancellationToken ct = default);
 
-    Task<IReadOnlyList<TrackedLinkSubscription>> GetAllSubscriptionsAsync(CancellationToken ct = default);
-
-    Task<IReadOnlyList<TrackedLinkSubscription>> GetSubscriptionsBatchAsync(
-        long? afterLinkId,
+    Task<IReadOnlyList<TrackedLinkSubscription>> GetSubscriptionsDueForCheckAsync(
+        DateTimeOffset checkedBefore,
         int batchSize,
+        CancellationToken ct = default);
+
+    Task MarkCheckedAsync(
+        IReadOnlyCollection<long> linkIds,
+        DateTimeOffset checkedAt,
         CancellationToken ct = default);
 
     Task SetCursorAsync(

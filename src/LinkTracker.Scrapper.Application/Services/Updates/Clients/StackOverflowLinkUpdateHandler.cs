@@ -37,6 +37,13 @@ public sealed class StackOverflowLinkUpdateHandler(
     {
         TryParseQuestionId(subscription.Url, out var questionId);
 
+        var questionResponse = await stackOverflowClient.GetQuestionAsync(questionId, ct);
+
+        if (questionResponse is null || questionResponse.LastActivityDate <= lastSeenAt)
+        {
+            return [];
+        }
+
         var answersTask = stackOverflowClient.GetAnswersAsync(questionId, ct);
         var commentsTask = stackOverflowClient.GetCommentsAsync(questionId, ct);
 
@@ -45,19 +52,7 @@ public sealed class StackOverflowLinkUpdateHandler(
         var answers = await answersTask;
         var comments = await commentsTask;
 
-        var hasNewAnswers = answers.Any(x =>
-            IsAfterCursor(x.CreationDate, $"answer:{x.AnswerId}", lastSeenAt, lastEventKey));
-
-        var hasNewComments = comments.Any(x =>
-            IsAfterCursor(x.CreationDate, $"comment:{x.CommentId}", lastSeenAt, lastEventKey));
-
-        if (!hasNewAnswers && !hasNewComments)
-        {
-            return [];
-        }
-
-        var questionResponse = await stackOverflowClient.GetQuestionAsync(questionId, ct);
-        var title = questionResponse?.Title ?? subscription.Url.AbsoluteUri;
+        var title = questionResponse.Title;
 
         var events = new List<LinkEvent>();
 
