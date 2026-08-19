@@ -2,6 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 COPY ["linktracker.sln", "./"]
+COPY ["src/Directory.Build.props", "src/"]
 
 COPY ["src/LinkTracker.AiAgent.Api", "src/LinkTracker.AiAgent.Api/"]
 COPY ["src/LinkTracker.AiAgent.Application/LinkTracker.AiAgent.Application.csproj", "src/LinkTracker.AiAgent.Application/"]
