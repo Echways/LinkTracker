@@ -37,7 +37,7 @@ public sealed class GitHubLinkUpdateHandlerTests
             .GetRepositoryAsync("user", "repo", Arg.Any<CancellationToken>());
 
         await gitHubClient.DidNotReceive()
-            .GetIssuesAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+            .GetIssuesAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>());
 
         await gitHubClient.DidNotReceive()
             .GetPullRequestsAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
@@ -51,7 +51,7 @@ public sealed class GitHubLinkUpdateHandlerTests
 
         var lastSeenAt = new DateTimeOffset(2025, 3, 9, 12, 0, 0, TimeSpan.Zero);
 
-        gitHubClient.GetIssuesAsync("user", "repo", Arg.Any<CancellationToken>())
+        gitHubClient.GetIssuesAsync("user", "repo", Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
             .Returns(
             [
                 new GitHubIssueResponse
@@ -106,7 +106,7 @@ public sealed class GitHubLinkUpdateHandlerTests
 
         if (expectedKind == LinkEventKind.Issue)
         {
-            gitHubClient.GetIssuesAsync("user", "repo", Arg.Any<CancellationToken>())
+            gitHubClient.GetIssuesAsync("user", "repo", Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
                 .Returns(
                 [
                     new GitHubIssueResponse
@@ -124,7 +124,7 @@ public sealed class GitHubLinkUpdateHandlerTests
         }
         else
         {
-            gitHubClient.GetIssuesAsync("user", "repo", Arg.Any<CancellationToken>())
+            gitHubClient.GetIssuesAsync("user", "repo", Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
                 .Returns(Array.Empty<GitHubIssueResponse>());
 
             gitHubClient.GetPullRequestsAsync("user", "repo", Arg.Any<CancellationToken>())
@@ -184,7 +184,7 @@ public sealed class GitHubLinkUpdateHandlerTests
         var issueCreatedAt = new DateTimeOffset(2025, 3, 10, 10, 0, 0, TimeSpan.Zero);
         var prCreatedAt = new DateTimeOffset(2025, 3, 10, 11, 0, 0, TimeSpan.Zero);
 
-        gitHubClient.GetIssuesAsync("user", "repo", Arg.Any<CancellationToken>())
+        gitHubClient.GetIssuesAsync("user", "repo", Arg.Any<DateTimeOffset?>(), Arg.Any<CancellationToken>())
             .Returns(
             [
                 new GitHubIssueResponse

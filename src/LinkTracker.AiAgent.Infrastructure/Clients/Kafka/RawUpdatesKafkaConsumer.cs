@@ -17,10 +17,16 @@ internal sealed class RawUpdatesKafkaConsumer(
     ILogger<RawUpdatesKafkaConsumer> logger) : BackgroundService
 {
     private static readonly TimeSpan PollTimeout = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan ConsumeErrorBackoff = TimeSpan.FromSeconds(1);
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return Task.Run(() => ConsumeLoopAsync(stoppingToken), stoppingToken);
+        return Task.Factory.StartNew(
+                () => ConsumeLoopAsync(stoppingToken),
+                stoppingToken,
+                TaskCreationOptions.LongRunning | TaskCreationOptions.DenyChildAttach,
+                TaskScheduler.Default)
+            .Unwrap();
     }
 
     private async Task ConsumeLoopAsync(CancellationToken stoppingToken)
@@ -45,7 +51,8 @@ internal sealed class RawUpdatesKafkaConsumer(
                 }
                 catch (ConsumeException ex)
                 {
-                    logger.LogWarning(ex, "Kafka consume завершился ошибкой.");
+                    logger.LogWarning(ex, "Kafka consume завершился ошибкой. Пауза перед повтором.");
+                    await Task.Delay(ConsumeErrorBackoff, stoppingToken);
                     continue;
                 }
 

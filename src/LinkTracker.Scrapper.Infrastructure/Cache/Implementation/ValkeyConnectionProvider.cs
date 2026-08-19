@@ -1,5 +1,6 @@
 using LinkTracker.Scrapper.Infrastructure.Cache.Abstractions;
 using LinkTracker.Scrapper.Infrastructure.Configuration.Valkey;
+using LinkTracker.Shared.Infrastructure.Valkey;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
@@ -41,17 +42,7 @@ public sealed class ValkeyConnectionProvider(
 
             current?.Dispose();
 
-            var configuration = ConfigurationOptions.Parse(options.Value.ConnectionString);
-
-            configuration.AbortOnConnectFail = false;
-            configuration.AllowAdmin = true;
-            configuration.ConnectRetry = 10;
-            configuration.ConnectTimeout = 15000;
-            configuration.SyncTimeout = 15000;
-            configuration.AsyncTimeout = 15000;
-            configuration.ResolveDns = true;
-            configuration.KeepAlive = 30;
-            configuration.ReconnectRetryPolicy = new ExponentialRetry(1000);
+            var configuration = ValkeyConfiguration.Parse(options.Value.ConnectionString);
 
             logger.LogInformation(
                 "Подключение к Valkey. Endpoints={Endpoints}",

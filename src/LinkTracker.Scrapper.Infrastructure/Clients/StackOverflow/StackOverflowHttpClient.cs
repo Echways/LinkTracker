@@ -10,6 +10,7 @@ public sealed class StackOverflowHttpClient(HttpClient httpClient, ScrapperMetri
 {
     private const string Scope = "external_source";
     private const string ScopeType = "stackoverflow.com";
+    private const int PageSize = 100;
 
     public async Task<StackOverflowQuestionResponse?> GetQuestionAsync(long questionId, CancellationToken ct = default)
     {
@@ -48,7 +49,7 @@ public sealed class StackOverflowHttpClient(HttpClient httpClient, ScrapperMetri
         try
         {
             using var response = await httpClient.GetAsync(
-                $"/2.3/questions/{questionId}/answers?site=stackoverflow&sort=creation&order=desc&filter=withbody",
+                $"/2.3/questions/{questionId}/answers?site=stackoverflow&sort=creation&order=desc&pagesize={PageSize}&filter=withbody",
                 ct);
             response.EnsureSuccessStatusCode();
 
@@ -80,7 +81,7 @@ public sealed class StackOverflowHttpClient(HttpClient httpClient, ScrapperMetri
         try
         {
             using var response = await httpClient.GetAsync(
-                $"/2.3/questions/{questionId}/comments?site=stackoverflow&sort=creation&order=desc&filter=withbody",
+                $"/2.3/questions/{questionId}/comments?site=stackoverflow&sort=creation&order=desc&pagesize={PageSize}&filter=withbody",
                 ct);
             response.EnsureSuccessStatusCode();
 

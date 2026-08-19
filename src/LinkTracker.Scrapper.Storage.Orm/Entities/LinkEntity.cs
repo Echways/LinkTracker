@@ -10,6 +10,7 @@ public sealed class LinkEntity
 
     public DateTimeOffset? LastUpdatedAt { get; set; }
     public string? LastEventKey { get; set; }
+    public DateTimeOffset LastCheckedAt { get; set; } = DateTimeOffset.MinValue;
 
     public ICollection<SubscriptionEntity> Subscriptions { get; set; } = [];
 }

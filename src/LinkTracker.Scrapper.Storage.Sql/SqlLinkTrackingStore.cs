@@ -381,20 +381,8 @@ public sealed class SqlLinkTrackingStore(NpgsqlDataSource dataSource) : ILinkTra
         }
     }
 
-    public async Task<IReadOnlyList<TrackedLinkSubscription>> GetAllSubscriptionsAsync(CancellationToken ct = default)
-    {
-        await using var connection = await dataSource.OpenConnectionAsync(ct);
-
-        var rows = await connection.QueryAsync<SubscriptionRow>(
-            new CommandDefinition(
-                SqlLinkTrackingStoreCommands.GetSubscriptionRows,
-                cancellationToken: ct));
-
-        return MapSubscriptions(rows);
-    }
-
-    public async Task<IReadOnlyList<TrackedLinkSubscription>> GetSubscriptionsBatchAsync(
-        long? afterLinkId,
+    public async Task<IReadOnlyList<TrackedLinkSubscription>> GetSubscriptionsDueForCheckAsync(
+        DateTimeOffset checkedBefore,
         int batchSize,
         CancellationToken ct = default)
     {
@@ -402,11 +390,32 @@ public sealed class SqlLinkTrackingStore(NpgsqlDataSource dataSource) : ILinkTra
 
         var rows = await connection.QueryAsync<SubscriptionRow>(
             new CommandDefinition(
-                SqlLinkTrackingStoreCommands.GetSubscriptionBatchRows,
-                new { afterLinkId, batchSize },
+                SqlLinkTrackingStoreCommands.GetSubscriptionsDueForCheckRows,
+                new { checkedBefore, batchSize },
                 cancellationToken: ct));
 
         return MapSubscriptions(rows);
+    }
+
+    public async Task MarkCheckedAsync(
+        IReadOnlyCollection<long> linkIds,
+        DateTimeOffset checkedAt,
+        CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(linkIds);
+
+        if (linkIds.Count == 0)
+        {
+            return;
+        }
+
+        await using var connection = await dataSource.OpenConnectionAsync(ct);
+
+        await connection.ExecuteAsync(
+            new CommandDefinition(
+                SqlLinkTrackingStoreCommands.MarkChecked,
+                new { linkIds = linkIds.ToArray(), checkedAt },
+                cancellationToken: ct));
     }
 
     public async Task SetCursorAsync(long linkId, DateTimeOffset lastUpdatedAt, string? lastEventKey, CancellationToken ct = default)

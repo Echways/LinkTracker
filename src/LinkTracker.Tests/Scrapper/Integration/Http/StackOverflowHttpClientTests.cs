@@ -85,7 +85,7 @@ public sealed class StackOverflowHttpClientTests(WireMockContainerFixture wireMo
 
         await wireMock.StubAsync(new
         {
-            request = new { method = "GET", url = "/2.3/questions/123/answers?site=stackoverflow&sort=creation&order=desc&filter=withbody" },
+            request = new { method = "GET", urlPath = "/2.3/questions/123/answers" },
             response = new
             {
                 status = 200,
@@ -129,7 +129,7 @@ public sealed class StackOverflowHttpClientTests(WireMockContainerFixture wireMo
 
         await wireMock.StubAsync(new
         {
-            request = new { method = "GET", url = "/2.3/questions/123/comments?site=stackoverflow&sort=creation&order=desc&filter=withbody" },
+            request = new { method = "GET", urlPath = "/2.3/questions/123/comments" },
             response = new
             {
                 status = 200,

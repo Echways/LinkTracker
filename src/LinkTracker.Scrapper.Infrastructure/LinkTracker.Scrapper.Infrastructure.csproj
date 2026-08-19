@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
         <ProjectReference Include="..\LinkTracker.Scrapper.Application\LinkTracker.Scrapper.Application.csproj"/>
@@ -29,11 +29,5 @@
         <PackageReference Include="Confluent.Kafka" Version="2.14.0"/>
         <PackageReference Include="StackExchange.Redis" Version="2.12.14"/>
     </ItemGroup>
-
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
 
 </Project>

@@ -16,6 +16,8 @@ public sealed class AiAgentMetrics : IAiAgentMetrics, IDisposable
     private readonly Counter<long> _kafkaConsumeErrors;
     private readonly Counter<long> _kafkaDeadLetterErrors;
     private readonly Counter<long> _kafkaDeadLetters;
+    private readonly Counter<long> _summarizationFallbacks;
+    private readonly Counter<long> _summarizations;
 
     private readonly Meter _meter;
 
@@ -44,6 +46,14 @@ public sealed class AiAgentMetrics : IAiAgentMetrics, IDisposable
             null,
             "Длительность обработки сообщения из Kafka в миллисекундах",
             advice: new InstrumentAdvice<double> { HistogramBucketBoundaries = DurationBuckets });
+
+        _summarizations = _meter.CreateCounter<long>(
+            "summarizations_total",
+            description: "Количество успешных суммаризаций через Yandex AI");
+
+        _summarizationFallbacks = _meter.CreateCounter<long>(
+            "summarization_fallbacks_total",
+            description: "Количество суммаризаций, деградировавших до обрезки текста, с разбивкой по причине");
 
         _meter.CreateObservableGauge(
             "process_memory_working_set_bytes",
@@ -91,6 +101,18 @@ public sealed class AiAgentMetrics : IAiAgentMetrics, IDisposable
         _kafkaDeadLetterErrors.Add(
             1,
             new KeyValuePair<string, object?>("topic", topic));
+    }
+
+    public void IncrementSummarization()
+    {
+        _summarizations.Add(1);
+    }
+
+    public void IncrementSummarizationFallback(string reason)
+    {
+        _summarizationFallbacks.Add(
+            1,
+            new KeyValuePair<string, object?>("reason", reason));
     }
 
     public void Dispose()

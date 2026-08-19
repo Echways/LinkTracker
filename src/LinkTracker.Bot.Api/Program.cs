@@ -29,7 +29,7 @@ builder.Services.AddServiceAuthClients(builder.Configuration);
 builder.Services.AddCommands();
 builder.Services.AddUpdateRouting();
 builder.Services.AddDialogs();
-builder.Services.AddDialogStorage();
+builder.Services.AddDialogStorage(builder.Configuration);
 builder.Services.AddClients(builder.Configuration);
 builder.Services.AddTelegramPresentation(builder.Configuration);
 builder.Services.AddTelegramNotifications();

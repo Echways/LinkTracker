@@ -8,10 +8,4 @@
         <ProjectReference Include="..\LinkTracker.EnvReader\LinkTracker.EnvReader.csproj"/>
     </ItemGroup>
 
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
-
 </Project>

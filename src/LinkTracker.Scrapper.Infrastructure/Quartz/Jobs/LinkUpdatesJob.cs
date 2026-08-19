@@ -23,6 +23,7 @@ internal sealed class LinkUpdatesJob(
     IOutboxStore outboxStore,
     IOptions<LinkUpdatesSchedulingOptions> schedulingOptions,
     IOptions<OutboxOptions> outboxOptions,
+    TimeProvider timeProvider,
     ILogger<LinkUpdatesJob> logger,
     ScrapperMetrics metrics) : IJob
 {
@@ -33,12 +34,12 @@ internal sealed class LinkUpdatesJob(
     public async Task Execute(IJobExecutionContext context)
     {
         var ct = context.CancellationToken;
-        var afterLinkId = (long?)null;
+        var runStartedAt = timeProvider.GetUtcNow();
         var linkCountBySource = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         while (!ct.IsCancellationRequested)
         {
-            var batch = await trackingStore.GetSubscriptionsBatchAsync(afterLinkId, _batchSize, ct);
+            var batch = await trackingStore.GetSubscriptionsDueForCheckAsync(runStartedAt, _batchSize, ct);
 
             if (batch.Count == 0)
             {
@@ -52,8 +53,8 @@ internal sealed class LinkUpdatesJob(
             }
 
             logger.LogDebug(
-                "Начата обработка батча ссылок. AfterLinkId={AfterLinkId}, BatchSize={BatchSize}, ActualCount={ActualCount}, MaxDegreeOfParallelism={MaxDegreeOfParallelism}",
-                afterLinkId,
+                "Начата обработка батча ссылок. CheckedBefore={CheckedBefore}, BatchSize={BatchSize}, ActualCount={ActualCount}, MaxDegreeOfParallelism={MaxDegreeOfParallelism}",
+                runStartedAt,
                 _batchSize,
                 batch.Count,
                 _maxDegreeOfParallelism);
@@ -81,6 +82,11 @@ internal sealed class LinkUpdatesJob(
                     }
                 });
 
+            await trackingStore.MarkCheckedAsync(
+                batch.Select(x => x.Id).ToArray(),
+                timeProvider.GetUtcNow(),
+                ct);
+
             if (!failedSubscriptions.IsEmpty)
             {
                 var failed = failedSubscriptions
@@ -97,8 +103,6 @@ internal sealed class LinkUpdatesJob(
 
                 await SendFailedReportsAsync(failed, ct);
             }
-
-            afterLinkId = batch[^1].Id;
         }
 
         foreach (var (source, count) in linkCountBySource)
@@ -259,7 +263,7 @@ internal sealed class LinkUpdatesJob(
             updates,
             ct);
 
-        metrics.SentUpdates.Add(updates.Count);
+        metrics.OutboxEnqueuedUpdates.Add(updates.Count);
 
         logger.LogDebug(
             "Обновления сохранены в transactional outbox. LinkId={LinkId}, Url={Url}, UpdateCount={UpdateCount}, ChatCount={ChatCount}",
