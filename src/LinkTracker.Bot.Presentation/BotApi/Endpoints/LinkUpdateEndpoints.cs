@@ -10,8 +10,10 @@ namespace LinkTracker.Bot.Presentation.BotApi.Endpoints;
 
 public static class LinkUpdateEndpoints
 {
-    public static IEndpointRouteBuilder MapBotApi(this IEndpointRouteBuilder app)
+    public static RouteGroupBuilder MapBotApi(this IEndpointRouteBuilder builder)
     {
+        var app = builder.MapGroup(string.Empty);
+
         app.MapPost("/updates", HandleUpdateAsync)
             .WithName("HandleUpdate")
             .WithSummary("Отправить обновление")

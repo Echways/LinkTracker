@@ -60,8 +60,13 @@ public sealed class DialogManager(IDialogStateStore store, IEnumerable<IDialog> 
         return "Ок, отменил. Напиши /help";
     }
 
-    public async Task ResetAsync(long chatId, CancellationToken ct)
+    public async Task<bool> ResetAsync(long chatId, CancellationToken ct)
     {
+        var ctx = await store.GetOrCreateAsync(chatId, ct);
+        var hadActiveDialog = ctx.HasActiveDialog;
+
         await store.ResetAsync(chatId, ct);
+
+        return hadActiveDialog;
     }
 }

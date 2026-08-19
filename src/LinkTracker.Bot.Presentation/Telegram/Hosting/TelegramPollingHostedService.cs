@@ -17,7 +17,7 @@ public sealed class TelegramPollingHostedService(
         var receiverOptions = new ReceiverOptions { AllowedUpdates = Array.Empty<UpdateType>() };
 
         var me = await bot.GetMe(stoppingToken);
-        logger.LogInformation("Бот {Username} успешно запущен. Нажми Enter чтобы остановить.", me.Username);
+        logger.LogInformation("Бот {Username} успешно запущен, начат приём обновлений.", me.Username);
 
         try
         {

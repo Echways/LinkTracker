@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using LinkTracker.Shared.Infrastructure.Telemetry;
 using Microsoft.AspNetCore.Http;
 
 namespace LinkTracker.Scrapper.Infrastructure.Telemetry.Middleware;
@@ -10,6 +11,7 @@ public sealed class RequestDurationMiddleware(
     public async Task InvokeAsync(HttpContext context)
     {
         var sw = Stopwatch.StartNew();
+        var route = HttpRouteLabel.Resolve(context);
 
         try
         {
@@ -20,7 +22,7 @@ public sealed class RequestDurationMiddleware(
             metrics.Errors.Add(
                 1,
                 new KeyValuePair<string, object?>("scope", "http_api"),
-                new KeyValuePair<string, object?>("scope_type", context.Request.Path.ToString()),
+                new KeyValuePair<string, object?>("scope_type", route),
                 new KeyValuePair<string, object?>("reason", "exception"));
             throw;
         }
@@ -28,19 +30,17 @@ public sealed class RequestDurationMiddleware(
         {
             sw.Stop();
 
-            var path = context.Request.Path.ToString();
-
             metrics.RequestDuration.Record(
                 sw.Elapsed.TotalMilliseconds,
                 new KeyValuePair<string, object?>("scope", "http_api"),
-                new KeyValuePair<string, object?>("scope_type", path));
+                new KeyValuePair<string, object?>("scope_type", route));
 
             if (context.Response.StatusCode >= 500)
             {
                 metrics.Errors.Add(
                     1,
                     new KeyValuePair<string, object?>("scope", "http_api"),
-                    new KeyValuePair<string, object?>("scope_type", path),
+                    new KeyValuePair<string, object?>("scope_type", route),
                     new KeyValuePair<string, object?>("reason", "5xx"));
             }
         }

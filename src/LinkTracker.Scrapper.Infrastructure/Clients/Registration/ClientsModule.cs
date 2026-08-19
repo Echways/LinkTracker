@@ -3,6 +3,7 @@ using Avro.Generic;
 using Confluent.Kafka;
 using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
+using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 using LinkTracker.Grpc;
 using LinkTracker.Scrapper.Application.Clients.GitHub;
@@ -16,6 +17,7 @@ using LinkTracker.Scrapper.Infrastructure.Configuration.Kafka;
 using LinkTracker.Scrapper.Infrastructure.Kafka.Abstractions;
 using LinkTracker.Scrapper.Infrastructure.Kafka.Serialization;
 using LinkTracker.Shared.Infrastructure;
+using LinkTracker.Shared.Infrastructure.Authentication;
 using LinkTracker.Shared.Infrastructure.Resilience;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,6 +57,7 @@ public static class ClientsModule
                 var options = sp.GetRequiredService<IOptions<BotOptions>>().Value;
                 client.BaseAddress = new Uri(options.BaseUrl);
             })
+            .AddHttpMessageHandler<ServiceAuthHeaderHandler>()
             .AddConfiguredHttpResilience("scrapper-to-bot", httpResilienceOptions);
 
         services.AddSingleton(sp =>
@@ -65,8 +68,11 @@ public static class ClientsModule
 
         services.AddSingleton(sp =>
         {
-            var channel = sp.GetRequiredService<GrpcChannel>();
-            return new BotUpdatesGrpc.BotUpdatesGrpcClient(channel);
+            var invoker = sp.GetRequiredService<GrpcChannel>()
+                .CreateCallInvoker()
+                .Intercept(sp.GetRequiredService<ServiceAuthClientInterceptor>());
+
+            return new BotUpdatesGrpc.BotUpdatesGrpcClient(invoker);
         });
 
         services.AddSingleton<BotGrpcClient>();

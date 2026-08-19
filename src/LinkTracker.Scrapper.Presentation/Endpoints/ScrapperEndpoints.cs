@@ -14,8 +14,10 @@ namespace LinkTracker.Scrapper.Presentation.Endpoints;
 
 public static class ScrapperEndpoints
 {
-    public static IEndpointRouteBuilder MapScrapperEndpoints(this IEndpointRouteBuilder app)
+    public static RouteGroupBuilder MapScrapperEndpoints(this IEndpointRouteBuilder builder)
     {
+        var app = builder.MapGroup(string.Empty);
+
         app.MapPost("/tg-chat/{id:long}", RegisterChat)
             .WithName("RegisterChat")
             .WithSummary("Register chat")

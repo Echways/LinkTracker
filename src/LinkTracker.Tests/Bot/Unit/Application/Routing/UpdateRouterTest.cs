@@ -13,6 +13,8 @@ namespace LinkTracker.Tests.Bot.Unit.Application.Routing;
 [Trait("Category", "Unit")]
 public sealed class UpdateRouterTests
 {
+    private const string DialogInterruptedNotice = "Прерван незавершённый диалог, введённые данные не сохранены.";
+
     [Fact]
     public async Task Route_WhenCommandAndDialogActive_RoutesToCommandFirst()
     {
@@ -48,7 +50,8 @@ public sealed class UpdateRouterTests
 
         var result = await sut.RouteAsync(request, CancellationToken.None);
 
-        Assert.Equal("command handled", result.Text);
+        Assert.StartsWith(DialogInterruptedNotice, result.Text, StringComparison.Ordinal);
+        Assert.EndsWith("command handled", result.Text, StringComparison.Ordinal);
 
         await command.Received(1).ExecuteAsync(chatId, "/help", Arg.Any<CancellationToken>());
         await dialogNode.DidNotReceive()
@@ -124,7 +127,8 @@ public sealed class UpdateRouterTests
 
         var result = await sut.RouteAsync(request, CancellationToken.None);
 
-        Assert.Equal("command handled", result.Text);
+        Assert.StartsWith(DialogInterruptedNotice, result.Text, StringComparison.Ordinal);
+        Assert.EndsWith("command handled", result.Text, StringComparison.Ordinal);
 
         await command.Received(1)
             .ExecuteAsync(chatId, "/track", Arg.Any<CancellationToken>());

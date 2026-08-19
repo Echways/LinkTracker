@@ -2,11 +2,13 @@ using LinkTracker.AiAgent.Application.Registration;
 using LinkTracker.AiAgent.Infrastructure.Clients.Registration;
 using LinkTracker.AiAgent.Infrastructure.Telemetry.Registration;
 using LinkTracker.EnvReader;
+using LinkTracker.Shared.Infrastructure.Logging;
 using LinkTracker.Shared.Infrastructure.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddLocalDotEnv();
+builder.AddSharedSerilog("aiagent");
 
 builder.Services.AddAiAgentApplication();
 builder.Services.AddAiAgentInfrastructure(builder.Configuration);

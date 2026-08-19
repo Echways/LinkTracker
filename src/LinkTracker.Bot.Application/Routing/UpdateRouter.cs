@@ -11,14 +11,20 @@ public sealed class UpdateRouter(
     DialogManager dialogManager,
     IBotMetrics metrics)
 {
+    private const string DialogInterruptedNotice = "Прерван незавершённый диалог, введённые данные не сохранены.";
+
     public async Task<OutgoingMessage> RouteAsync(BotRequest request, CancellationToken ct)
     {
         metrics.IncrementRequest(request.Type.ToString());
 
         if (IsCommand(request))
         {
-            await dialogManager.ResetAsync(request.ChatId, ct);
-            return await RouteCommandAsync(request, ct);
+            var dialogInterrupted = await dialogManager.ResetAsync(request.ChatId, ct);
+            var message = await RouteCommandAsync(request, ct);
+
+            return dialogInterrupted
+                ? message with { Text = $"{DialogInterruptedNotice}{Environment.NewLine}{Environment.NewLine}{message.Text}" }
+                : message;
         }
 
         var (handled, replyText) = await dialogManager.TryHandleAsync(request, ct);
