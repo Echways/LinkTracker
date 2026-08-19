@@ -69,17 +69,17 @@ cp src/LinkTracker.AiAgent.Api/.env.template src/LinkTracker.AiAgent.Api/.env
 7. Задать общий сервисный секрет. Bot и Scrapper аутентифицируют друг друга по нему,
    поэтому значение должно совпадать в обоих сервисах.
 ```
-cp .env.template .env
+cp deploy/.env.template deploy/.env
 ```
-8. Поставить в корневой .env своё значение `SERVICE_AUTH_SECRET`, а в
+8. Поставить в `deploy/.env` своё значение `SERVICE_AUTH_SECRET`, а в
    `src/LinkTracker.Bot.Api/.env` и `src/LinkTracker.Scrapper.Api/.env` — то же самое
    значение в `ServiceAuth__Secret` (нужно для локального запуска без Docker).
 
 ### Для локального запуска
 9. В [bot.Api.appsettings](src/LinkTracker.Bot.Api/appsettings.json), [scrapper.Api.appsettings](src/LinkTracker.Scrapper.Api/appsettings.json) и [aiagent.Api.appsettings](src/LinkTracker.AiAgent.Api/appsettings.json) в ветках Scrapper, Bot и AiAgent соответственно выбрать валидные параметры.
-10. Выполнить поочердено запуск сначала [docker-compose](docker-compose.yml), [Scrapper](src/LinkTracker.Scrapper.Api/Program.cs), [Bot](src/LinkTracker.Bot.Api/Program.cs) и [AiAgent](src/LinkTracker.AiAgent.Api/Program.cs) с помощью команд.
+10. Выполнить поочердено запуск сначала [docker-compose](deploy/docker-compose.yml), [Scrapper](src/LinkTracker.Scrapper.Api/Program.cs), [Bot](src/LinkTracker.Bot.Api/Program.cs) и [AiAgent](src/LinkTracker.AiAgent.Api/Program.cs) с помощью команд.
 ```
-docker compose -f docker-compose.yml up
+docker compose -f deploy/docker-compose.yml up
 dotnet run --project src/LinkTracker.Scrapper.Api
 dotnet run --project src/LinkTracker.Bot.Api
 dotnet run --project src/LinkTracker.AiAgent.Api
@@ -89,7 +89,7 @@ dotnet run --project src/LinkTracker.AiAgent.Api
 9. В [bot.Docker.appesettings](src/LinkTracker.Bot.Api/appsettings.Docker.json), [scrapper.Docker.appsettings](src/LinkTracker.Scrapper.Api/appsettings.Docker.json) и [aiagent.Docker.appesettings](src/LinkTracker.AiAgent.Api/appsettings.Docker.json) в ветках Scrapper, Bot и AiAgent соответственно выбрать валидные параметры.
 10. Поднять инфраструктуру и все три сервиса одной командой — порядок запуска обеспечивают `depends_on` в compose-файлах.
 ```
-docker compose -f docker-compose.yml -f docker-compose.apps.yml up
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.apps.yml up
 ```
 
 
@@ -116,3 +116,13 @@ dotnet test
 | p99 | 283.45 ms | 19.76 ms | -93.03% |
 | Успешные ответы 200 | 25 507 | 29 482 | +3 975 |
 | Ошибки 500/502/504 | 0 | 0 | без изменений |
+
+---
+## Структура репозитория
+
+| Путь | Содержимое |
+|---|---|
+| [src/](src/) | Исходный код сервисов, общие библиотеки и тесты |
+| [migrations/](migrations/) | SQL-миграции схемы Postgres (применяются DbUp при старте Scrapper) |
+| [deploy/](deploy/) | Compose-файлы, конфигурация Prometheus и Grafana, шаблон корневого `.env` |
+| [docs/](docs/) | [Наблюдаемость](docs/OBSERVABILITY.md) и [примеры PromQL](docs/example-pql.txt) |

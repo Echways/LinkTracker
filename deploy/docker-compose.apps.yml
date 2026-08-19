@@ -1,10 +1,12 @@
+name: linktracker
+
 x-service-auth-env: &service-auth-env
-  ServiceAuth__Secret: "${SERVICE_AUTH_SECRET:?SERVICE_AUTH_SECRET must be set in the root .env file}"
+  ServiceAuth__Secret: "${SERVICE_AUTH_SECRET:?SERVICE_AUTH_SECRET must be set in deploy/.env}"
 
 services:
   scrapper:
     build:
-      context: .
+      context: ..
       dockerfile: src/LinkTracker.Scrapper.Api/Dockerfile
       network: host
     container_name: linktracker-scrapper
@@ -22,14 +24,14 @@ services:
       - "8081"
       - "8082"
     env_file:
-      - src/LinkTracker.Scrapper.Api/.env
+      - ../src/LinkTracker.Scrapper.Api/.env
     environment:
       <<: *service-auth-env
       ASPNETCORE_ENVIRONMENT: "Docker"
 
   bot:
     build:
-      context: .
+      context: ..
       dockerfile: src/LinkTracker.Bot.Api/Dockerfile
       network: host
     container_name: linktracker-bot
@@ -48,14 +50,14 @@ services:
       - "8092"
       - "8011"
     env_file:
-      - src/LinkTracker.Bot.Api/.env
+      - ../src/LinkTracker.Bot.Api/.env
     environment:
       <<: *service-auth-env
       ASPNETCORE_ENVIRONMENT: "Docker"
 
   aiagent:
     build:
-      context: .
+      context: ..
       dockerfile: src/LinkTracker.AiAgent.Api/Dockerfile
       network: host
     container_name: linktracker-aiagent
@@ -75,6 +77,6 @@ services:
       - "8101"
       - "8102"
     env_file:
-      - src/LinkTracker.AiAgent.Api/.env
+      - ../src/LinkTracker.AiAgent.Api/.env
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"

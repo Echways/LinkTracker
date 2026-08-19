@@ -77,7 +77,7 @@ Rate limiter применяется точечно, политикой `public-a
 
 ## Конфигурация сбора
 
-Настраивается на стороне Prometheus в `monitoring/prometheus.yml` — приложениям
+Настраивается на стороне Prometheus в `deploy/monitoring/prometheus.yml` — приложениям
 никакой конфигурации телеметрии не требуется. Лейбл `job` берётся из имени scrape-job
 (`scrapper` / `bot` / `aiagent`), `instance` — из адреса цели.
 
@@ -89,27 +89,27 @@ Rate limiter применяется точечно, политикой `public-a
 
 ## Grafana
 
-Дашборд и алерты провижинятся автоматически из `monitoring/grafana/provisioning`:
+Дашборд и алерты провижинятся автоматически из `deploy/monitoring/grafana/provisioning`:
 
 - **Datasource**: Prometheus (`uid: prometheus`).
-- **Dashboard**: `LinkTracker Observability` (`monitoring/.../dashboards/linktracker-dashboard.json`) —
+- **Dashboard**: `LinkTracker Observability` (`deploy/monitoring/.../dashboards/linktracker-dashboard.json`) —
   панели RED, БД, Kafka, RAM и бизнес-метрики.
 - **Alert (требование задания)**: правило `High process memory usage`
-  (`monitoring/.../alerting/rules.yaml`) на метрику `process_memory_working_set_bytes`.
+  (`deploy/monitoring/.../alerting/rules.yml`) на метрику `process_memory_working_set_bytes`.
   Срабатывает, когда RAM сервиса (`scrapper`/`bot`) превышает 500 MB дольше 2 минут.
 
 ## PromQL запросы
 
-Примеры PromQL для визуализаций — в `example-pql.txt`.
+Примеры PromQL для визуализаций — в `docs/example-pql.txt`.
 
 ## Запуск мониторинга
 
 ```bash
 # Поднять инфраструктуру (Kafka, Postgres, Valkey, Prometheus, Grafana)
-docker compose -f docker-compose.yml up -d
+docker compose -f deploy/docker-compose.yml up -d
 
 # Поднять приложения
-docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.apps.yml up -d
 ```
 
 После запуска:

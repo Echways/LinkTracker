@@ -1,3 +1,5 @@
+name: linktracker
+
 x-kafka-common-env: &kafka-common-env
   KAFKA_PROCESS_ROLES: "broker,controller"
   KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
