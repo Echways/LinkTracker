@@ -21,6 +21,7 @@ public sealed class ScrapperErrorMessageMapperTests
         Assert.True(result);
         Assert.Contains("GitHub", message);
         Assert.Contains("StackOverflow", message);
+        Assert.Contains("Reddit", message);
     }
 
     [Fact]

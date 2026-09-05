@@ -82,6 +82,6 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.BadRequest,
             ScrapperErrorCodes.UnsupportedLink,
-            $"Ссылка '{link}' не поддерживается. Сейчас поддерживаются только GitHub repository и StackOverflow question.");
+            $"Ссылка '{link}' не поддерживается. Сейчас поддерживаются только GitHub repository, StackOverflow question и Reddit subreddit.");
     }
 }

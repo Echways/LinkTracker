@@ -4,9 +4,11 @@ namespace LinkTracker.Scrapper.Application.Services.Helpers;
 
 internal static class LinkUpdateResultBuilder
 {
-    public static LinkCheckResult InitialState(DateTimeOffset actualLastUpdatedAt)
+    public static LinkCheckResult InitialState(
+        DateTimeOffset actualLastUpdatedAt,
+        string? actualLastEventKey = null)
     {
-        return Build(actualLastUpdatedAt, null, []);
+        return Build(actualLastUpdatedAt, actualLastEventKey, []);
     }
 
     public static LinkCheckResult NoChanges(
