@@ -28,7 +28,7 @@ public sealed class UpdateMapper(UpdateRouter router, ILogger<UpdateMapper> logg
 
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken ct)
     {
-        logger.LogError(exception, "Ошибка при Polling");
+        logger.LogError(exception, "Polling failed.");
         return Task.CompletedTask;
     }
 

@@ -27,7 +27,7 @@ internal sealed class ValkeyLinksResponseCache(
         if (string.IsNullOrWhiteSpace(value))
         {
             logger.LogDebug(
-                "Valkey кэш MISS. ChatId={ChatId}, Key={Key}",
+                "Valkey cache MISS. ChatId={ChatId}, Key={Key}",
                 chatId,
                 key);
 
@@ -35,7 +35,7 @@ internal sealed class ValkeyLinksResponseCache(
         }
 
         logger.LogDebug(
-            "Valkey кэш HIT. ChatId={ChatId}, Key={Key}",
+            "Valkey cache HIT. ChatId={ChatId}, Key={Key}",
             chatId,
             key);
 
@@ -47,7 +47,7 @@ internal sealed class ValkeyLinksResponseCache(
         {
             logger.LogWarning(
                 ex,
-                "Ошибка десериализации ответа links из Valkey кэша для чата {ChatId}. Key={Key}",
+                "Failed to deserialize links response from Valkey cache. ChatId={ChatId}, Key={Key}",
                 chatId,
                 key);
 
@@ -86,7 +86,7 @@ internal sealed class ValkeyLinksResponseCache(
         await keyValueCache.SetStringAsync(key, value, ttl, ct);
 
         logger.LogDebug(
-            "Valkey кэш SET. ChatId={ChatId}, Key={Key}, TtlSeconds={TtlSeconds}",
+            "Valkey cache SET. ChatId={ChatId}, Key={Key}, TtlSeconds={TtlSeconds}",
             chatId,
             key,
             ttl.TotalSeconds);
@@ -99,7 +99,7 @@ internal sealed class ValkeyLinksResponseCache(
         await keyValueCache.DeleteAsync(key, ct);
 
         logger.LogDebug(
-            "Valkey кэш INVALIDATE. ChatId={ChatId}, Key={Key}",
+            "Valkey cache INVALIDATE. ChatId={ChatId}, Key={Key}",
             chatId,
             key);
     }

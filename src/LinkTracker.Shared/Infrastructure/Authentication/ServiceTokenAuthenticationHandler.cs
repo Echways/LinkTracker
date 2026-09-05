@@ -33,7 +33,7 @@ public sealed class ServiceTokenAuthenticationHandler : AuthenticationHandler<Au
 
         if (!IsKnownSecret(values.ToString()))
         {
-            return Task.FromResult(AuthenticateResult.Fail("Передан неизвестный сервисный токен."));
+            return Task.FromResult(AuthenticateResult.Fail("Unknown service token."));
         }
 
         var identity = new ClaimsIdentity(

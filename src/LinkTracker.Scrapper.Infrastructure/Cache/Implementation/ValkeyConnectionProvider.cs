@@ -45,13 +45,13 @@ public sealed class ValkeyConnectionProvider(
             var configuration = ValkeyConfiguration.Parse(options.Value.ConnectionString);
 
             logger.LogInformation(
-                "Подключение к Valkey. Endpoints={Endpoints}",
+                "Connecting to Valkey. Endpoints={Endpoints}",
                 string.Join(", ", configuration.EndPoints));
 
             _connection = await ConnectionMultiplexer.ConnectAsync(configuration);
 
             logger.LogInformation(
-                "Подключение к Valkey установлено. IsConnected={IsConnected}",
+                "Connected to Valkey. IsConnected={IsConnected}",
                 _connection.IsConnected);
 
             return _connection;

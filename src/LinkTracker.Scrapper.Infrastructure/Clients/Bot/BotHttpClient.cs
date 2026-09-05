@@ -60,7 +60,6 @@ internal sealed class BotHttpClient(HttpClient httpClient) : IBotTransportClient
         }
         catch
         {
-            // ignored
         }
 
         var message = error?.Description ?? $"Bot request failed with status code {(int)response.StatusCode}.";
@@ -72,7 +71,7 @@ internal sealed class BotHttpClient(HttpClient httpClient) : IBotTransportClient
     {
         return new BotClientException(
             HttpStatusCode.ServiceUnavailable,
-            "Bot сейчас недоступен по HTTP.",
+            "Bot is currently unavailable over HTTP.",
             innerException: innerException);
     }
 }

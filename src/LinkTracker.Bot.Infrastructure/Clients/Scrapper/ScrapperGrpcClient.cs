@@ -23,16 +23,16 @@ public sealed class ScrapperGrpcClient(
 
         try
         {
-            logger.LogInformation("Клиент gRPC Scrapper: вызов RegisterChat. ChatId={ChatId}", chatId);
+            logger.LogInformation("Scrapper gRPC client: RegisterChat called. ChatId={ChatId}", chatId);
 
             try
             {
                 await client.RegisterChatAsync(new ChatRequest { ChatId = chatId }, cancellationToken: ct);
-                logger.LogInformation("Клиент gRPC Scrapper: RegisterChat успешно выполнен. ChatId={ChatId}", chatId);
+                logger.LogInformation("Scrapper gRPC client: RegisterChat succeeded. ChatId={ChatId}", chatId);
             }
             catch (RpcException ex)
             {
-                logger.LogWarning(ex, "Клиент gRPC Scrapper: RegisterChat завершился с ошибкой. ChatId={ChatId}", chatId);
+                logger.LogWarning(ex, "Scrapper gRPC client: RegisterChat failed. ChatId={ChatId}", chatId);
                 throw ToClientException(ex);
             }
         }
@@ -48,16 +48,16 @@ public sealed class ScrapperGrpcClient(
 
         try
         {
-            logger.LogInformation("Клиент gRPC Scrapper: вызов DeleteChat. ChatId={ChatId}", chatId);
+            logger.LogInformation("Scrapper gRPC client: DeleteChat called. ChatId={ChatId}", chatId);
 
             try
             {
                 await client.DeleteChatAsync(new ChatRequest { ChatId = chatId }, cancellationToken: ct);
-                logger.LogInformation("Клиент gRPC Scrapper: DeleteChat успешно выполнен. ChatId={ChatId}", chatId);
+                logger.LogInformation("Scrapper gRPC client: DeleteChat succeeded. ChatId={ChatId}", chatId);
             }
             catch (RpcException ex)
             {
-                logger.LogWarning(ex, "Клиент gRPC Scrapper: DeleteChat завершился с ошибкой. ChatId={ChatId}", chatId);
+                logger.LogWarning(ex, "Scrapper gRPC client: DeleteChat failed. ChatId={ChatId}", chatId);
                 throw ToClientException(ex);
             }
         }
@@ -73,7 +73,7 @@ public sealed class ScrapperGrpcClient(
 
         try
         {
-            logger.LogInformation("Клиент gRPC Scrapper: вызов GetLinks. ChatId={ChatId}", chatId);
+            logger.LogInformation("Scrapper gRPC client: GetLinks called. ChatId={ChatId}", chatId);
 
             try
             {
@@ -82,7 +82,7 @@ public sealed class ScrapperGrpcClient(
                     cancellationToken: ct);
 
                 logger.LogInformation(
-                    "Клиент gRPC Scrapper: GetLinks успешно выполнен. ChatId={ChatId}, КоличествоСсылок={Count}",
+                    "Scrapper gRPC client: GetLinks succeeded. ChatId={ChatId}, LinksCount={Count}",
                     chatId,
                     response.Size);
 
@@ -90,7 +90,7 @@ public sealed class ScrapperGrpcClient(
             }
             catch (RpcException ex)
             {
-                logger.LogWarning(ex, "Клиент gRPC Scrapper: GetLinks завершился с ошибкой. ChatId={ChatId}", chatId);
+                logger.LogWarning(ex, "Scrapper gRPC client: GetLinks failed. ChatId={ChatId}", chatId);
                 throw ToClientException(ex);
             }
         }
@@ -111,7 +111,7 @@ public sealed class ScrapperGrpcClient(
         try
         {
             logger.LogInformation(
-                "Клиент gRPC Scrapper: вызов AddLink. ChatId={ChatId}, Ссылка={Link}, КоличествоТегов={TagsCount}",
+                "Scrapper gRPC client: AddLink called. ChatId={ChatId}, Link={Link}, TagsCount={TagsCount}",
                 chatId,
                 link,
                 tags.Count);
@@ -125,7 +125,7 @@ public sealed class ScrapperGrpcClient(
                 var response = await client.AddLinkAsync(request, cancellationToken: ct);
 
                 logger.LogInformation(
-                    "Клиент gRPC Scrapper: AddLink успешно выполнен. ChatId={ChatId}, LinkId={LinkId}",
+                    "Scrapper gRPC client: AddLink succeeded. ChatId={ChatId}, LinkId={LinkId}",
                     chatId,
                     response.Id);
 
@@ -133,7 +133,7 @@ public sealed class ScrapperGrpcClient(
             }
             catch (RpcException ex)
             {
-                logger.LogWarning(ex, "Клиент gRPC Scrapper: AddLink завершился с ошибкой. ChatId={ChatId}, Ссылка={Link}", chatId, link);
+                logger.LogWarning(ex, "Scrapper gRPC client: AddLink failed. ChatId={ChatId}, Link={Link}", chatId, link);
                 throw ToClientException(ex);
             }
         }
@@ -149,7 +149,7 @@ public sealed class ScrapperGrpcClient(
 
         try
         {
-            logger.LogInformation("Клиент gRPC Scrapper: вызов RemoveLink. ChatId={ChatId}, Ссылка={Link}", chatId, link);
+            logger.LogInformation("Scrapper gRPC client: RemoveLink called. ChatId={ChatId}, Link={Link}", chatId, link);
 
             try
             {
@@ -158,7 +158,7 @@ public sealed class ScrapperGrpcClient(
                     cancellationToken: ct);
 
                 logger.LogInformation(
-                    "Клиент gRPC Scrapper: RemoveLink успешно выполнен. ChatId={ChatId}, LinkId={LinkId}",
+                    "Scrapper gRPC client: RemoveLink succeeded. ChatId={ChatId}, LinkId={LinkId}",
                     chatId,
                     response.Id);
 
@@ -166,7 +166,7 @@ public sealed class ScrapperGrpcClient(
             }
             catch (RpcException ex)
             {
-                logger.LogWarning(ex, "Клиент gRPC Scrapper: RemoveLink завершился с ошибкой. ChatId={ChatId}, Ссылка={Link}", chatId, link);
+                logger.LogWarning(ex, "Scrapper gRPC client: RemoveLink failed. ChatId={ChatId}, Link={Link}", chatId, link);
                 throw ToClientException(ex);
             }
         }

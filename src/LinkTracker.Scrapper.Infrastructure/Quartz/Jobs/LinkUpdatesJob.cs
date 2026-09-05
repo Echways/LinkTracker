@@ -53,7 +53,7 @@ internal sealed class LinkUpdatesJob(
             }
 
             logger.LogDebug(
-                "Начата обработка батча ссылок. CheckedBefore={CheckedBefore}, BatchSize={BatchSize}, ActualCount={ActualCount}, MaxDegreeOfParallelism={MaxDegreeOfParallelism}",
+                "Started processing link batch. CheckedBefore={CheckedBefore}, BatchSize={BatchSize}, ActualCount={ActualCount}, MaxDegreeOfParallelism={MaxDegreeOfParallelism}",
                 runStartedAt,
                 _batchSize,
                 batch.Count,
@@ -76,7 +76,7 @@ internal sealed class LinkUpdatesJob(
 
                         logger.LogError(
                             ex,
-                            "Не удалось обработать ссылку. LinkId={LinkId}, Url={Url}",
+                            "Failed to process link. LinkId={LinkId}, Url={Url}",
                             subscription.Id,
                             subscription.Url);
                     }
@@ -96,7 +96,7 @@ internal sealed class LinkUpdatesJob(
                     .ToArray();
 
                 logger.LogWarning(
-                    "Батч обработан с ошибками. FailedCount={FailedCount}, FailedLinkIds={FailedLinkIds}, FailedUrls={FailedUrls}",
+                    "Batch processed with errors. FailedCount={FailedCount}, FailedLinkIds={FailedLinkIds}, FailedUrls={FailedUrls}",
                     failed.Length,
                     failed.Select(x => x.Id).ToArray(),
                     failed.Select(x => x.Url.ToString()).ToArray());
@@ -120,7 +120,7 @@ internal sealed class LinkUpdatesJob(
         if (handler is null)
         {
             logger.LogDebug(
-                "Не найден обработчик для ссылки. LinkId={LinkId}, Url={Url}",
+                "No handler found for link. LinkId={LinkId}, Url={Url}",
                 subscription.Id,
                 subscription.Url);
 
@@ -150,7 +150,7 @@ internal sealed class LinkUpdatesJob(
             await botClient.SendUpdateAsync(update, ct);
 
             logger.LogDebug(
-                "Отправлено обновление. LinkId={LinkId}, Url={Url}, ChatCount={ChatCount}",
+                "Update sent. LinkId={LinkId}, Url={Url}, ChatCount={ChatCount}",
                 subscription.Id,
                 subscription.Url,
                 subscription.TgChatIds.Count);
@@ -220,7 +220,7 @@ internal sealed class LinkUpdatesJob(
             {
                 logger.LogError(
                     ex,
-                    "Не удалось отправить отчет о проблемных ссылках. ChatId={ChatId}, UrlCount={UrlCount}",
+                    "Failed to send the failed-links report. ChatId={ChatId}, UrlCount={UrlCount}",
                     report.ChatId,
                     report.Urls.Length);
             }
@@ -253,7 +253,7 @@ internal sealed class LinkUpdatesJob(
         if (checkResult.NewLastUpdatedAt is null)
         {
             throw new InvalidOperationException(
-                $"Невозможно сохранить обновление ссылки в outbox без курсора. LinkId={subscription.Id}");
+                $"Cannot save a link update to the outbox without a cursor. LinkId={subscription.Id}");
         }
 
         await outboxStore.AddRangeAndSetCursorAsync(
@@ -266,7 +266,7 @@ internal sealed class LinkUpdatesJob(
         metrics.OutboxEnqueuedUpdates.Add(updates.Count);
 
         logger.LogDebug(
-            "Обновления сохранены в transactional outbox. LinkId={LinkId}, Url={Url}, UpdateCount={UpdateCount}, ChatCount={ChatCount}",
+            "Updates saved to the transactional outbox. LinkId={LinkId}, Url={Url}, UpdateCount={UpdateCount}, ChatCount={ChatCount}",
             subscription.Id,
             subscription.Url,
             updates.Count,

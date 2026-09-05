@@ -10,19 +10,19 @@ internal sealed class KafkaLinkUpdateMessageParser
 
         if (update is null)
         {
-            error = "Сообщение не удалось десериализовать.";
+            error = "Failed to deserialize the message.";
             return false;
         }
 
         if (update.Id < 0)
         {
-            error = "Поле 'id' не может быть отрицательным.";
+            error = "Field 'id' must not be negative.";
             return false;
         }
 
         if (update.Url is null || !update.Url.IsAbsoluteUri)
         {
-            error = "Поле 'url' должно содержать абсолютный URI.";
+            error = "Field 'url' must contain an absolute URI.";
             return false;
         }
 
@@ -31,7 +31,7 @@ internal sealed class KafkaLinkUpdateMessageParser
             return true;
         }
 
-        error = "Поле 'tgChatIds' должно содержать хотя бы один chat id.";
+        error = "Field 'tgChatIds' must contain at least one chat id.";
         return false;
     }
 }

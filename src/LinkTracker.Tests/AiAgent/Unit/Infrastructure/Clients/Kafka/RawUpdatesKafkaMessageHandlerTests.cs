@@ -92,7 +92,7 @@ public sealed class RawUpdatesKafkaMessageHandlerTests
 
         await deadLetterPublisher.Received(1).PublishAsync(
             message,
-            "Исчерпаны попытки обработки Kafka сообщения.",
+            "Kafka message processing retries exhausted.",
             Arg.Is<InvalidOperationException>(ex => ex.Message == "YandexAi failed"),
             Arg.Any<CancellationToken>());
     }

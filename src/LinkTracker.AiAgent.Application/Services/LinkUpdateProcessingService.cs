@@ -24,7 +24,7 @@ public sealed class LinkUpdateProcessingService(
         if (filter.ShouldFilter(update))
         {
             logger.LogDebug(
-                "Обновление отфильтровано. UpdateId={UpdateId}, Author={Author}",
+                "Update filtered out. UpdateId={UpdateId}, Author={Author}",
                 update.Id, update.Author);
             return;
         }
@@ -48,7 +48,7 @@ public sealed class LinkUpdateProcessingService(
         }
 
         logger.LogDebug(
-            "Обновление добавлено в буфер. UpdateId={UpdateId}, Priority={Priority}",
+            "Update added to the buffer. UpdateId={UpdateId}, Priority={Priority}",
             update.Id, priority);
     }
 
@@ -69,6 +69,6 @@ public sealed class LinkUpdateProcessingService(
                 ct);
         }
 
-        logger.LogDebug("Служебный отчёт опубликован без обработки. UpdateId={UpdateId}", update.Id);
+        logger.LogDebug("System report published without processing. UpdateId={UpdateId}", update.Id);
     }
 }

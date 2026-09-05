@@ -23,7 +23,6 @@ public sealed class DatabaseMigrationTests(PostgresSqlStorageFixture fixture)
         Assert.Contains("dbup_schema_versions", tables);
         Assert.Contains("outbox_messages", tables);
 
-        // 005_drop_filters.sql: фича фильтров удалена, таблицы не должны возвращаться.
         Assert.DoesNotContain("filters", tables);
         Assert.DoesNotContain("subscription_filters", tables);
 

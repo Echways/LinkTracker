@@ -31,7 +31,7 @@ public static class ApiExceptionHandler
             _ => (
                 (int)HttpStatusCode.InternalServerError,
                 ApiErrorResponseFactory.Create(
-                    "Внутренняя ошибка сервера.",
+                    "Internal server error.",
                     "internal_error",
                     exception,
                     includeExceptionDetails))
@@ -44,7 +44,7 @@ public static class ApiExceptionHandler
                 .CreateLogger(LoggerName)
                 .LogError(
                     exception,
-                    "Необработанная ошибка при обработке запроса {Method} {Path}.",
+                    "Unhandled error while processing request {Method} {Path}.",
                     context.Request.Method,
                     context.Request.Path);
         }

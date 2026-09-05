@@ -74,7 +74,6 @@ public sealed class KafkaTestContainerFixture : IAsyncLifetime
         catch (CreateTopicsException ex)
             when (ex.Results.Any(result => result.Error.Code == ErrorCode.TopicAlreadyExists))
         {
-            // Topic already exists. Nothing to do.
         }
     }
 

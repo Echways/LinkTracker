@@ -17,13 +17,13 @@ public static class StorageModule
 
         if (!databaseSection.Exists())
         {
-            throw new InvalidOperationException("Секция 'Database' не найдена.");
+            throw new InvalidOperationException("Section 'Database' was not found.");
         }
 
         services.Configure<DatabaseOptions>(databaseSection);
 
         var databaseOptions = databaseSection.Get<DatabaseOptions>()
-                              ?? throw new InvalidOperationException("Не удалось прочитать настройки базы данных.");
+                              ?? throw new InvalidOperationException("Failed to read database settings.");
 
         switch (databaseOptions.AccessType)
         {
@@ -35,7 +35,7 @@ public static class StorageModule
                 break;
             default:
                 throw new InvalidOperationException(
-                    $"Неподдерживаемый тип доступа к БД: '{databaseOptions.AccessType}'.");
+                    $"Unsupported database access type: '{databaseOptions.AccessType}'.");
         }
 
         return services;

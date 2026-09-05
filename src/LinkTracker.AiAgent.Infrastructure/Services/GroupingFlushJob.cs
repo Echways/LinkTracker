@@ -33,9 +33,7 @@ internal sealed class GroupingFlushJob(
         }
     }
 
-    // Окна, не успевшие закрыться, публикуются на остановке: иначе они умрут вместе
-    // с процессом, а сообщения будут переигрываться с последнего подтвержденного оффсета.
-    public override async Task StopAsync(CancellationToken cancellationToken)
+   public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await base.StopAsync(cancellationToken);
         await FlushAsync(true, cancellationToken);
@@ -78,7 +76,7 @@ internal sealed class GroupingFlushJob(
                 await publisher.PublishAsync(group, ct);
 
                 logger.LogInformation(
-                    "Группа опубликована. ChatId={ChatId}, UpdateId={UpdateId}, Priority={Priority}",
+                    "Group published. ChatId={ChatId}, UpdateId={UpdateId}, Priority={Priority}",
                     bucket.ChatId, group.Id, group.Priority);
             }
         }
@@ -86,13 +84,12 @@ internal sealed class GroupingFlushJob(
         {
             logger.LogError(
                 ex,
-                "Ошибка публикации сгруппированного обновления, окно возвращено в буфер. ChatId={ChatId}",
+                "Failed to publish the grouped update, the window was returned to the buffer. ChatId={ChatId}",
                 bucket.ChatId);
 
             return false;
         }
 
-        // Оффсеты исходных сообщений подтверждаются только после успешной публикации.
         foreach (var buffered in bucket.Updates)
         {
             buffered.Ack.Release();

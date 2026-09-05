@@ -16,7 +16,7 @@ internal sealed class BotGrpcClient(
     public async Task SendUpdateAsync(LinkUpdate update, CancellationToken ct = default)
     {
         logger.LogInformation(
-            "Клиент gRPC Bot: вызов SendUpdate. UpdateId={UpdateId}, Ссылка={Url}, КоличествоЧатов={ChatsCount}",
+            "Bot gRPC client: SendUpdate called. UpdateId={UpdateId}, Url={Url}, ChatsCount={ChatsCount}",
             update.Id,
             update.Url,
             update.TgChatIds.Count);
@@ -30,13 +30,13 @@ internal sealed class BotGrpcClient(
             await client.SendUpdateAsync(request, cancellationToken: ct);
 
             logger.LogInformation(
-                "Клиент gRPC Bot: SendUpdate успешно выполнен. UpdateId={UpdateId}, КоличествоЧатов={ChatsCount}",
+                "Bot gRPC client: SendUpdate succeeded. UpdateId={UpdateId}, ChatsCount={ChatsCount}",
                 update.Id,
                 update.TgChatIds.Count);
         }
         catch (RpcException ex)
         {
-            logger.LogWarning(ex, "Клиент gRPC Bot: SendUpdate завершился с ошибкой. UpdateId={UpdateId}", update.Id);
+            logger.LogWarning(ex, "Bot gRPC client: SendUpdate failed. UpdateId={UpdateId}", update.Id);
             throw ToClientException(ex);
         }
     }

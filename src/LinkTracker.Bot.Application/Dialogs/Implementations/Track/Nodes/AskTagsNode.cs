@@ -76,7 +76,7 @@ public sealed class AskTagsNode : IDialogNode
 
     private static string BuildConfirmText(DialogContext ctx)
     {
-        var url = ctx.GetPendingUrl() ?? "(unknown)";
+        var url = ctx.GetPendingUrl() ?? "(неизвестно)";
         var tagsCsv = ctx.GetTagsCsv();
         var tagsText = string.IsNullOrWhiteSpace(tagsCsv) ? "—" : string.Join(", ", tagsCsv.Split(','));
 

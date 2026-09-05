@@ -32,7 +32,7 @@ internal sealed class OutboxDispatchJob(
             return;
         }
 
-        logger.LogInformation("Начата отправка outbox сообщений. Count={Count}", messages.Count);
+        logger.LogInformation("Started dispatching outbox messages. Count={Count}", messages.Count);
 
         foreach (var message in messages)
         {
@@ -44,7 +44,7 @@ internal sealed class OutboxDispatchJob(
                 metrics.SentUpdates.Add(1);
 
                 logger.LogDebug(
-                    "Outbox сообщение отправлено. OutboxMessageId={OutboxMessageId}",
+                    "Outbox message dispatched. OutboxMessageId={OutboxMessageId}",
                     message.Id);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -57,7 +57,7 @@ internal sealed class OutboxDispatchJob(
 
                 logger.LogWarning(
                     ex,
-                    "Не удалось отправить outbox сообщение. OutboxMessageId={OutboxMessageId}, RetryCount={RetryCount}",
+                    "Failed to dispatch outbox message. OutboxMessageId={OutboxMessageId}, RetryCount={RetryCount}",
                     message.Id,
                     message.RetryCount + 1);
             }

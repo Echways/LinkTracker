@@ -10,7 +10,7 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.BadRequest,
             ScrapperErrorCodes.MissingHeader,
-            "Отсутствует обязательный заголовок 'Tg-Chat-Id'.");
+            "Required header 'Tg-Chat-Id' is missing.");
     }
 
     public static ApiException RequestLinkIsRequired()
@@ -18,7 +18,7 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.BadRequest,
             ScrapperErrorCodes.InvalidRequest,
-            "Поле 'link' обязательно.");
+            "Field 'link' is required.");
     }
 
     public static ApiException ChatAlreadyExists(long chatId)
@@ -26,7 +26,7 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.Conflict,
             ScrapperErrorCodes.ChatAlreadyExists,
-            $"Чат с id={chatId} уже зарегистрирован.");
+            $"Chat with id={chatId} is already registered.");
     }
 
     public static ApiException ChatNotFound(long chatId)
@@ -34,7 +34,7 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.NotFound,
             ScrapperErrorCodes.ChatNotFound,
-            $"Чат с id={chatId} не существует.");
+            $"Chat with id={chatId} does not exist.");
     }
 
     public static ApiException LinkAlreadyExists(Uri link)
@@ -42,7 +42,7 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.Conflict,
             ScrapperErrorCodes.LinkAlreadyExists,
-            $"Ссылка '{link}' уже отслеживается.");
+            $"Link '{link}' is already tracked.");
     }
 
     public static ApiException LinkNotFound(Uri link)
@@ -50,7 +50,7 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.NotFound,
             ScrapperErrorCodes.LinkNotFound,
-            $"Ссылка '{link}' не найдена.");
+            $"Link '{link}' was not found.");
     }
 
     public static ApiException InvalidChatId()
@@ -58,7 +58,7 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.BadRequest,
             ScrapperErrorCodes.InvalidChatId,
-            "Идентификатор чата должен быть положительным числом.");
+            "Chat id must be a positive number.");
     }
 
     public static ApiException InvalidLink()
@@ -66,7 +66,7 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.BadRequest,
             ScrapperErrorCodes.InvalidLink,
-            "Ссылка должна быть абсолютным URI.");
+            "Link must be an absolute URI.");
     }
 
     public static ApiException InvalidLinkScheme()
@@ -74,7 +74,7 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.BadRequest,
             ScrapperErrorCodes.InvalidLinkScheme,
-            "Поддерживаются только ссылки с http/https.");
+            "Only http/https links are supported.");
     }
 
     public static ApiException UnsupportedLink(Uri link)
@@ -82,6 +82,6 @@ public static class ScrapperErrors
         return new ApiException(
             HttpStatusCode.BadRequest,
             ScrapperErrorCodes.UnsupportedLink,
-            $"Ссылка '{link}' не поддерживается. Сейчас поддерживаются только GitHub repository, StackOverflow question и Reddit subreddit.");
+            $"Link '{link}' is not supported. Only GitHub repositories, StackOverflow questions and Reddit subreddits are supported.");
     }
 }

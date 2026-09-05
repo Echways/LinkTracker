@@ -14,7 +14,7 @@ public static class DotEnv
                 return new Dictionary<string, string?>();
             }
 
-            throw new FileNotFoundException($"'.env' не найден: {path}");
+            throw new FileNotFoundException($"'.env' was not found: {path}");
         }
 
         var result = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);

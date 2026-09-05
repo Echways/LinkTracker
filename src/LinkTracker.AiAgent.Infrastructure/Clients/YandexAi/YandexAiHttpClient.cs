@@ -17,7 +17,7 @@ internal sealed class YandexAiHttpClient(
     IAiAgentMetrics metrics,
     ILogger<YandexAiHttpClient> logger) : ILinkUpdateSummarizer
 {
-    private const string Instructions = "You are a concise summarizer. Summarize the given update in 2-3 sentences.";
+    private const string Instructions = "You are a concise summarizer. Summarize the given update in 2-3 sentences. Always answer in Russian.";
 
     public async Task<string> SummarizeAsync(string text, CancellationToken ct)
     {
@@ -34,7 +34,7 @@ internal sealed class YandexAiHttpClient(
 
             if (string.IsNullOrWhiteSpace(summary))
             {
-                logger.LogWarning("Yandex AI вернул пустой ответ. Используется обрезка текста.");
+                logger.LogWarning("Yandex AI returned an empty response, falling back to text truncation.");
                 metrics.IncrementSummarizationFallback("empty_response");
 
                 return FallbackTruncate(text, threshold);
@@ -49,7 +49,7 @@ internal sealed class YandexAiHttpClient(
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Yandex AI суммаризация завершилась ошибкой ({Type}). Используется обрезка текста.", ex.GetType().Name);
+            logger.LogWarning(ex, "Yandex AI summarization failed ({Type}), falling back to text truncation.", ex.GetType().Name);
             metrics.IncrementSummarizationFallback(ex.GetType().Name);
 
             return FallbackTruncate(text, threshold);

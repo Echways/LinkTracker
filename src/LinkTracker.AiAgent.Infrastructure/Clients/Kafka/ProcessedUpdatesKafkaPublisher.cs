@@ -24,7 +24,7 @@ internal sealed class ProcessedUpdatesKafkaPublisher(
         var result = await producer.ProduceAsync(topic, message, ct);
 
         logger.LogInformation(
-            "Kafka: обновление опубликовано. Topic={Topic}, Partition={Partition}, Offset={Offset}, UpdateId={UpdateId}",
+            "Kafka: update published. Topic={Topic}, Partition={Partition}, Offset={Offset}, UpdateId={UpdateId}",
             result.Topic, result.Partition.Value, result.Offset.Value, update.Id);
     }
 }
