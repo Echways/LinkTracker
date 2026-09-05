@@ -33,7 +33,7 @@ internal sealed class GroupingFlushJob(
         }
     }
 
-   public override async Task StopAsync(CancellationToken cancellationToken)
+    public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await base.StopAsync(cancellationToken);
         await FlushAsync(true, cancellationToken);
