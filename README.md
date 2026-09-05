@@ -27,7 +27,10 @@ Scrapper Service
 Осуществляет мониторинг контента:
 
 Периодическая проверка отслеживаемых URL на наличие изменений
-Парсинг контента с различных источников (GitHub, Stack Overflow, Reddit и др.)
+Парсинг контента с поддерживаемых источников:
+- GitHub-репозитории — новые issue и pull request: `https://github.com/owner/repo`
+- вопросы Stack Overflow — новые ответы и комментарии: `https://stackoverflow.com/questions/12345/...`
+- сабреддиты Reddit — новые посты: `https://reddit.com/r/dotnet`
 Определение изменений (diff detection)
 Отправка уведомлений в Bot Service при обнаружении обновлений
 Хранение информации о подписках и состоянии контента
@@ -60,7 +63,8 @@ cp src/LinkTracker.Bot.Api/.env.template src/LinkTracker.Bot.Api/.env
 ```
 cp src/LinkTracker.Scrapper.Api/.env.template src/LinkTracker.Scrapper.Api/.env
 ```
-4. Поставить действительные параметры в .env.
+4. Поставить действительные параметры в .env. Для Reddit нужны `Reddit__ClientId` и
+   `Reddit__ClientSecret` — создаются на https://www.reddit.com/prefs/apps как приложение типа `script`.
 5. Создать копию [.env.template](src/LinkTracker.AiAgent.Api/.env.template) с именем .env в каталоге ии-агента.
 ```
 cp src/LinkTracker.AiAgent.Api/.env.template src/LinkTracker.AiAgent.Api/.env

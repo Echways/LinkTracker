@@ -14,6 +14,7 @@ public static class ApplicationModule
 
         services.AddSingleton<ILinkUpdateHandler, GitHubLinkUpdateHandler>();
         services.AddSingleton<ILinkUpdateHandler, StackOverflowLinkUpdateHandler>();
+        services.AddSingleton<ILinkUpdateHandler, RedditLinkUpdateHandler>();
 
         return services;
     }

@@ -11,7 +11,8 @@ internal static class ScrapperErrorMessages
                 "Эта ссылка не поддерживается.\n" +
                 "Сейчас можно отслеживать только:\n" +
                 "• GitHub-репозитории: https://github.com/owner/repo\n" +
-                "• вопросы StackOverflow: https://stackoverflow.com/questions/12345/...",
+                "• вопросы StackOverflow: https://stackoverflow.com/questions/12345/...\n" +
+                "• сабреддиты Reddit: https://reddit.com/r/dotnet",
             [ScrapperErrorCodes.ChatAlreadyExists] =
                 "Привет! Чат уже зарегистрирован. Используй справку /help для просмотра команд",
             [ScrapperErrorCodes.LinkAlreadyExists] =

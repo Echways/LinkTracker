@@ -7,10 +7,12 @@ using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 using LinkTracker.Grpc;
 using LinkTracker.Scrapper.Application.Clients.GitHub;
+using LinkTracker.Scrapper.Application.Clients.Reddit;
 using LinkTracker.Scrapper.Application.Clients.StackOverflow;
 using LinkTracker.Scrapper.Infrastructure.Clients.Bot;
 using LinkTracker.Scrapper.Infrastructure.Clients.GitHub;
 using LinkTracker.Scrapper.Infrastructure.Clients.RateLimiting;
+using LinkTracker.Scrapper.Infrastructure.Clients.Reddit;
 using LinkTracker.Scrapper.Infrastructure.Clients.StackOverflow;
 using LinkTracker.Scrapper.Infrastructure.Configuration.Bot;
 using LinkTracker.Scrapper.Infrastructure.Configuration.Clients;
@@ -33,6 +35,7 @@ public static class ClientsModule
 {
     private const string GitHubApiName = "github.com";
     private const string StackOverflowApiName = "stackoverflow.com";
+    private const string RedditApiName = "reddit.com";
 
     public static IServiceCollection AddClients(this IServiceCollection services, IConfiguration configuration)
     {
@@ -61,6 +64,15 @@ public static class ClientsModule
             .Validate(o => !string.IsNullOrWhiteSpace(o.BaseUrl), "StackOverflow:BaseUrl must be set")
             .ValidateOnStart();
 
+        services
+            .AddOptions<RedditOptions>()
+            .Bind(configuration.GetSection("Reddit"))
+            .Validate(o => !string.IsNullOrWhiteSpace(o.BaseUrl), "Reddit:BaseUrl must be set")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.TokenUrl), "Reddit:TokenUrl must be set")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ClientId), "Reddit:ClientId must be set")
+            .Validate(o => !string.IsNullOrWhiteSpace(o.ClientSecret), "Reddit:ClientSecret must be set")
+            .ValidateOnStart();
+
         var httpResilienceOptions = configuration.GetHttpResilienceOptions();
 
         services.TryAddSingleton(TimeProvider.System);
@@ -71,8 +83,12 @@ public static class ClientsModule
         var stackOverflowRateLimit = configuration.GetSection("StackOverflow").Get<StackOverflowOptions>()?.RateLimit
                                      ?? new StackOverflowOptions().RateLimit;
 
+        var redditRateLimit = configuration.GetSection("Reddit").Get<RedditOptions>()?.RateLimit
+                              ?? new RedditOptions().RateLimit;
+
         services.AddExternalApiRateLimiter(GitHubApiName, gitHubRateLimit);
         services.AddExternalApiRateLimiter(StackOverflowApiName, stackOverflowRateLimit);
+        services.AddExternalApiRateLimiter(RedditApiName, redditRateLimit);
 
         services.AddHttpClient<BotHttpClient>((sp, client) =>
             {
@@ -161,6 +177,29 @@ public static class ClientsModule
             })
             .AddConfiguredHttpResilience("stackoverflow", httpResilienceOptions)
             .AddExternalApiRateLimiting(StackOverflowApiName, stackOverflowRateLimit);
+
+        services.AddHttpClient(RedditAccessTokenProvider.HttpClientName, client =>
+            {
+                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("LinkTracker", "1.0"));
+            })
+            .AddConfiguredHttpResilience("reddit-token", httpResilienceOptions);
+
+        services.AddSingleton<IRedditAccessTokenProvider>(sp => new RedditAccessTokenProvider(
+            sp.GetRequiredService<IHttpClientFactory>(),
+            sp.GetRequiredService<IOptions<RedditOptions>>(),
+            sp.GetRequiredService<TimeProvider>()));
+
+        services.AddTransient<RedditAccessTokenHandler>();
+
+        services.AddHttpClient<IRedditClient, RedditHttpClient>((sp, client) =>
+            {
+                var options = sp.GetRequiredService<IOptions<RedditOptions>>().Value;
+                client.BaseAddress = new Uri(options.BaseUrl);
+                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("LinkTracker", "1.0"));
+            })
+            .AddHttpMessageHandler<RedditAccessTokenHandler>()
+            .AddConfiguredHttpResilience("reddit", httpResilienceOptions)
+            .AddExternalApiRateLimiting(RedditApiName, redditRateLimit);
 
         return services;
     }

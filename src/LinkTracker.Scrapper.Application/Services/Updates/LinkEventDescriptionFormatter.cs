@@ -50,6 +50,7 @@ internal static class LinkEventDescriptionFormatter
             LinkEventKind.QuestionActivity => "question-activity",
             LinkEventKind.Answer => "answer",
             LinkEventKind.Comment => "comment",
+            LinkEventKind.Post => "post",
             _ => eventKind.ToString()
         };
     }
@@ -60,6 +61,7 @@ internal static class LinkEventDescriptionFormatter
         {
             LinkSourceKind.GitHub => "GitHub",
             LinkSourceKind.StackOverflow => "Stack Overflow",
+            LinkSourceKind.Reddit => "Reddit",
             _ => sourceKind.ToString()
         };
     }

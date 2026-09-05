@@ -6,5 +6,6 @@ public enum LinkEventKind
     PullRequest = 2,
     QuestionActivity = 3,
     Answer = 4,
-    Comment = 5
+    Comment = 5,
+    Post = 6
 }
