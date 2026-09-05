@@ -15,7 +15,7 @@ public sealed class BotUpdatesGrpcService(
     public override async Task<Empty> SendUpdate(LinkUpdateGrpcRequest request, ServerCallContext context)
     {
         logger.LogInformation(
-            "gRPC вызов SendUpdate. UpdateId={UpdateId}, Ссылка={Url}, КоличествоЧатов={ChatsCount}",
+            "gRPC SendUpdate called. UpdateId={UpdateId}, Url={Url}, ChatsCount={ChatsCount}",
             request.Id,
             request.Url,
             request.TgChatIds.Count);
@@ -23,11 +23,11 @@ public sealed class BotUpdatesGrpcService(
         if (request.TgChatIds.Count == 0)
         {
             logger.LogWarning(
-                "gRPC SendUpdate отклонён: список tg_chat_ids пуст. UpdateId={UpdateId}",
+                "gRPC SendUpdate rejected: tg_chat_ids is empty. UpdateId={UpdateId}",
                 request.Id);
 
             throw new RpcException(
-                new Status(StatusCode.InvalidArgument, "Список tg_chat_ids не должен быть пустым"));
+                new Status(StatusCode.InvalidArgument, "tg_chat_ids must not be empty"));
         }
 
         try
@@ -37,7 +37,7 @@ public sealed class BotUpdatesGrpcService(
                 context.CancellationToken);
 
             logger.LogInformation(
-                "gRPC SendUpdate успешно выполнен. UpdateId={UpdateId}, КоличествоЧатов={ChatsCount}",
+                "gRPC SendUpdate succeeded. UpdateId={UpdateId}, ChatsCount={ChatsCount}",
                 request.Id,
                 request.TgChatIds.Count);
 
@@ -47,12 +47,12 @@ public sealed class BotUpdatesGrpcService(
         {
             logger.LogWarning(
                 ex,
-                "gRPC SendUpdate отклонён: некорректный формат ссылки. UpdateId={UpdateId}, Url={Url}",
+                "gRPC SendUpdate rejected: invalid link format. UpdateId={UpdateId}, Url={Url}",
                 request.Id,
                 request.Url);
 
             throw new RpcException(
-                new Status(StatusCode.InvalidArgument, "Некорректный формат ссылки"));
+                new Status(StatusCode.InvalidArgument, "Invalid link format"));
         }
     }
 }

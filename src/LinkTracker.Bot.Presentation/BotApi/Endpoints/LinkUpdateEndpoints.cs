@@ -16,8 +16,8 @@ public static class LinkUpdateEndpoints
 
         app.MapPost("/updates", HandleUpdateAsync)
             .WithName("HandleUpdate")
-            .WithSummary("Отправить обновление")
-            .WithDescription("Получает обновление ссылки от Scrapper и отправляет его в телеграм")
+            .WithSummary("Send update")
+            .WithDescription("Receives a link update from Scrapper and sends it to Telegram.")
             .Accepts<LinkUpdate>("application/json")
             .Produces(StatusCodes.Status200OK)
             .Produces<ApiErrorResponse>(StatusCodes.Status400BadRequest);
@@ -32,12 +32,12 @@ public static class LinkUpdateEndpoints
     {
         if (update is null)
         {
-            return Results.BadRequest(new ApiErrorResponse { Description = "Тело запроса обязательно.", Code = "invalid_request" });
+            return Results.BadRequest(new ApiErrorResponse { Description = "Request body is required.", Code = "invalid_request" });
         }
 
         if (update.TgChatIds.Count == 0)
         {
-            return Results.BadRequest(new ApiErrorResponse { Description = "Поле 'tgChatIds' должно содержать хотя бы один chat id.", Code = "invalid_request" });
+            return Results.BadRequest(new ApiErrorResponse { Description = "Field 'tgChatIds' must contain at least one chat id.", Code = "invalid_request" });
         }
 
         await notifier.NotifyAsync(update, ct);

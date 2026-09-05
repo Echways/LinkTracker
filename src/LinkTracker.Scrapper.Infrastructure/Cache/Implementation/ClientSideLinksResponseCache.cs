@@ -25,7 +25,7 @@ internal sealed class ClientSideLinksResponseCache(
         if (localCache.TryGet(key, out var localResponse))
         {
             logger.LogDebug(
-                "Client-side кэш HIT. ChatId={ChatId}, Key={Key}",
+                "Client-side cache HIT. ChatId={ChatId}, Key={Key}",
                 chatId,
                 key);
 
@@ -33,7 +33,7 @@ internal sealed class ClientSideLinksResponseCache(
         }
 
         logger.LogDebug(
-            "Client-side кэш MISS. ChatId={ChatId}, Key={Key}",
+            "Client-side cache MISS. ChatId={ChatId}, Key={Key}",
             chatId,
             key);
 
@@ -101,7 +101,7 @@ internal sealed class ClientSideLinksResponseCache(
         localCache.Set(key, response, ttl);
 
         logger.LogDebug(
-            "Client-side кэш SET. ChatId={ChatId}, Key={Key}, TtlSeconds={TtlSeconds}",
+            "Client-side cache SET. ChatId={ChatId}, Key={Key}, TtlSeconds={TtlSeconds}",
             chatId,
             key,
             ttl.TotalSeconds);
@@ -115,7 +115,7 @@ internal sealed class ClientSideLinksResponseCache(
         await distributedCache.InvalidateAsync(chatId, ct);
 
         logger.LogDebug(
-            "Client-side кэш INVALIDATE. ChatId={ChatId}, Key={Key}",
+            "Client-side cache INVALIDATE. ChatId={ChatId}, Key={Key}",
             chatId,
             key);
     }

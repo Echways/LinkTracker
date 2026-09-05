@@ -7,8 +7,6 @@ namespace LinkTracker.Tests.Shared.Unit.Contracts;
 [Trait("Category", "Unit")]
 public sealed class LinkUpdateAvroSchemaTests
 {
-    // Avro-ветка обязана переносить тот же контракт, что и JSON, иначе выбор
-    // сериализации молча меняет данные (так терялся author).
     [Fact]
     public void Schema_CoversEveryLinkUpdateProperty()
     {

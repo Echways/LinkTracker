@@ -22,7 +22,7 @@ public sealed class ValkeyKeyValueCache(
         {
             logger.LogWarning(
                 ex,
-                "Ошибка при чтении значения из Valkey. Key={Key}",
+                "Failed to read value from Valkey. Key={Key}",
                 key);
 
             return null;
@@ -44,7 +44,7 @@ public sealed class ValkeyKeyValueCache(
         {
             logger.LogWarning(
                 ex,
-                "Ошибка при записи значения в Valkey. Key={Key}",
+                "Failed to write value to Valkey. Key={Key}",
                 key);
         }
     }
@@ -60,7 +60,7 @@ public sealed class ValkeyKeyValueCache(
         {
             logger.LogWarning(
                 ex,
-                "Ошибка при удалении значения из Valkey. Key={Key}",
+                "Failed to delete value from Valkey. Key={Key}",
                 key);
         }
     }

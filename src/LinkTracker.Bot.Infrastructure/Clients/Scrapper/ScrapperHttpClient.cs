@@ -96,7 +96,7 @@ public sealed class ScrapperHttpClient(HttpClient httpClient, IBotMetrics metric
 
                     var body = await response.Content.ReadFromJsonAsync<LinkResponse>(token);
 
-                    return body ?? throw new InvalidOperationException("Scrapper вернул пустое тело ответа.");
+                    return body ?? throw new InvalidOperationException("Scrapper returned an empty response body.");
                 },
                 ct);
         }
@@ -124,7 +124,7 @@ public sealed class ScrapperHttpClient(HttpClient httpClient, IBotMetrics metric
 
                     var body = await response.Content.ReadFromJsonAsync<LinkResponse>(token);
 
-                    return body ?? throw new InvalidOperationException("Scrapper вернул пустое тело ответа.");
+                    return body ?? throw new InvalidOperationException("Scrapper returned an empty response body.");
                 },
                 ct);
         }
@@ -202,7 +202,6 @@ public sealed class ScrapperHttpClient(HttpClient httpClient, IBotMetrics metric
         }
         catch
         {
-            // ignored
         }
 
         var message = error?.Description ?? $"Scrapper request failed with status code {(int)response.StatusCode}.";
@@ -223,7 +222,7 @@ public sealed class ScrapperHttpClient(HttpClient httpClient, IBotMetrics metric
     {
         return new ScrapperClientException(
             HttpStatusCode.ServiceUnavailable,
-            "Scrapper сейчас недоступен.",
+            "Scrapper is currently unavailable.",
             innerException: innerException)
         { FallbackCode = ScrapperErrorCodes.ScrapperServiceUnavailable };
     }

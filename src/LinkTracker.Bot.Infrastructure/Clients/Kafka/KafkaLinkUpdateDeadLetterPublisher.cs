@@ -39,7 +39,7 @@ internal sealed class KafkaLinkUpdateDeadLetterPublisher(
             ct);
 
         logger.LogWarning(
-            "Kafka сообщение отправлено в DLQ. Topic={Topic}, Partition={Partition}, Offset={Offset}, Reason={Reason}",
+            "Kafka message sent to DLQ. Topic={Topic}, Partition={Partition}, Offset={Offset}, Reason={Reason}",
             result.Topic,
             result.Partition.Value,
             result.Offset.Value,

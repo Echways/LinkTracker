@@ -163,7 +163,6 @@ public sealed class LinkUpdateProcessingServiceTests
             Kind = LinkUpdateKind.SystemReport
         };
 
-        // Стоп-слово в тексте отчета не должно приводить к его отбрасыванию.
         _filter.ShouldFilter(Arg.Any<LinkUpdate>()).Returns(true);
 
         await CreateService().ProcessAsync(update, _ack, CancellationToken.None);

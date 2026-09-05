@@ -162,7 +162,7 @@ public sealed class RawUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerFi
             var root = document.RootElement;
 
             Assert.Equal(topic, root.GetProperty("sourceTopic").GetString());
-            Assert.Contains("десериализовать", root.GetProperty("reason").GetString());
+            Assert.Contains("deserialize", root.GetProperty("reason").GetString());
             Assert.Equal(
                 "{ this is not valid json !!!",
                 Encoding.UTF8.GetString(Convert.FromBase64String(root.GetProperty("payload").GetString()!)));

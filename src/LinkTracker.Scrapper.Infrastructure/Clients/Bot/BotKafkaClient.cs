@@ -42,7 +42,7 @@ internal sealed class BotKafkaClient(
                 new KeyValuePair<string, object?>("topic", options.Topic));
 
             logger.LogInformation(
-                "Kafka: уведомление для Bot опубликовано. Topic={Topic}, Partition={Partition}, Offset={Offset}, UpdateId={UpdateId}",
+                "Kafka: Bot notification published. Topic={Topic}, Partition={Partition}, Offset={Offset}, UpdateId={UpdateId}",
                 result.Topic,
                 result.Partition.Value,
                 result.Offset.Value,
@@ -64,13 +64,13 @@ internal sealed class BotKafkaClient(
 
             logger.LogWarning(
                 ex,
-                "Kafka: ошибка публикации уведомления для Bot. Topic={Topic}, UpdateId={UpdateId}",
+                "Kafka: failed to publish Bot notification. Topic={Topic}, UpdateId={UpdateId}",
                 options.Topic,
                 update.Id);
 
             throw new BotClientException(
                 HttpStatusCode.InternalServerError,
-                $"Kafka produce завершился с ошибкой: {ex.Error.Reason}");
+                $"Kafka produce failed: {ex.Error.Reason}");
         }
     }
 }

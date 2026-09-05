@@ -210,7 +210,7 @@ public sealed class LinkUpdatesKafkaConsumerIntegrationTests(KafkaTestContainerF
                 Convert.FromBase64String(deadLetterMessage.Payload));
 
             Assert.Equal(invalidPayload, originalPayload);
-            Assert.StartsWith("Kafka сообщение не удалось десериализовать:", deadLetterMessage.Reason);
+            Assert.StartsWith("Failed to deserialize Kafka message:", deadLetterMessage.Reason);
             Assert.Equal(topic, deadLetterMessage.SourceTopic);
 
             await notifier.DidNotReceive().NotifyAsync(

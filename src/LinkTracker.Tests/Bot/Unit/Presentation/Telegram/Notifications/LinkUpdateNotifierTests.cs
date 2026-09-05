@@ -42,7 +42,6 @@ public sealed class LinkUpdateNotifierTests
         var (botClient, sentTexts) = CreateBotClient();
         var sut = new LinkUpdateNotifier(botClient, Substitute.For<IBotMetrics>());
 
-        // Сырой путь Scrapper -> Bot приоритет не проставляет.
         await sut.NotifyAsync(
             new LinkUpdate { Id = 1, Url = Url, Description = "Новый issue", TgChatIds = [42] },
             CancellationToken.None);

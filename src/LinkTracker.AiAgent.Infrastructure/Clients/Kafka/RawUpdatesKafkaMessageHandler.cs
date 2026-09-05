@@ -36,7 +36,7 @@ internal sealed class RawUpdatesKafkaMessageHandler(
         {
             return await TryPublishToDeadLetterAsync(
                 result,
-                $"Kafka сообщение не удалось десериализовать: {ex.Message}",
+                $"Failed to deserialize Kafka message: {ex.Message}",
                 ex,
                 ct);
         }
@@ -45,7 +45,7 @@ internal sealed class RawUpdatesKafkaMessageHandler(
         {
             return await TryPublishToDeadLetterAsync(
                 result,
-                "Kafka сообщение десериализовалось в null.",
+                "Kafka message deserialized to null.",
                 null,
                 ct);
         }
@@ -56,13 +56,13 @@ internal sealed class RawUpdatesKafkaMessageHandler(
         {
             return await TryPublishToDeadLetterAsync(
                 result,
-                "Исчерпаны попытки обработки Kafka сообщения.",
+                "Kafka message processing retries exhausted.",
                 processingError,
                 ct);
         }
 
         logger.LogInformation(
-            "Kafka сообщение обработано. Topic={Topic}, Partition={Partition}, Offset={Offset}, UpdateId={UpdateId}",
+            "Kafka message processed. Topic={Topic}, Partition={Partition}, Offset={Offset}, UpdateId={UpdateId}",
             result.Topic,
             result.Partition.Value,
             result.Offset.Value,
@@ -94,7 +94,7 @@ internal sealed class RawUpdatesKafkaMessageHandler(
             {
                 logger.LogWarning(
                     ex,
-                    "Ошибка обработки Kafka сообщения. Будет повторная попытка. Attempt={Attempt}, MaxAttempts={MaxAttempts}, UpdateId={UpdateId}",
+                    "Failed to process Kafka message, retrying. Attempt={Attempt}, MaxAttempts={MaxAttempts}, UpdateId={UpdateId}",
                     attempt,
                     attempts,
                     update.Id);
@@ -108,7 +108,7 @@ internal sealed class RawUpdatesKafkaMessageHandler(
             {
                 logger.LogWarning(
                     ex,
-                    "Ошибка обработки Kafka сообщения. Повторные попытки закончились. Attempts={Attempts}, UpdateId={UpdateId}",
+                    "Failed to process Kafka message, no retries left. Attempts={Attempts}, UpdateId={UpdateId}",
                     attempts,
                     update.Id);
 
@@ -143,7 +143,7 @@ internal sealed class RawUpdatesKafkaMessageHandler(
 
             logger.LogError(
                 ex,
-                "Не удалось отправить Kafka сообщение в DLQ. Offset не будет подтвержден, сообщение будет переигрываться. Topic={Topic}, Partition={Partition}, Offset={Offset}, DeadLetterTopic={DeadLetterTopic}",
+                "Failed to send Kafka message to DLQ. Offset will not be committed, the message will be replayed. Topic={Topic}, Partition={Partition}, Offset={Offset}, DeadLetterTopic={DeadLetterTopic}",
                 result.Topic,
                 result.Partition.Value,
                 result.Offset.Value,

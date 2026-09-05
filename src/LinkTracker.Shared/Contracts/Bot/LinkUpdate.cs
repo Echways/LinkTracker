@@ -14,10 +14,6 @@ public sealed class LinkUpdate
 
     public IReadOnlyList<long> TgChatIds { get; init; } = [];
 
-    /// <summary>
-    /// Проставляется AI-агентом. На сыром пути Scrapper -> Bot остаётся Medium:
-    /// приоритет там просто ещё не вычислен.
-    /// </summary>
     public LinkUpdatePriority Priority { get; init; } = LinkUpdatePriority.Medium;
 
     public LinkUpdateKind Kind { get; init; } = LinkUpdateKind.Content;

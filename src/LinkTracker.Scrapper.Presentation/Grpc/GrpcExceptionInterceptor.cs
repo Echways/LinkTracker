@@ -21,7 +21,7 @@ public sealed class GrpcExceptionInterceptor(ILogger<GrpcExceptionInterceptor> l
         {
             logger.LogWarning(
                 ex,
-                "gRPC {Method} завершился с ошибкой. Code={Code}",
+                "gRPC {Method} failed. Code={Code}",
                 context.Method,
                 ex.Code);
 
@@ -29,8 +29,8 @@ public sealed class GrpcExceptionInterceptor(ILogger<GrpcExceptionInterceptor> l
         }
         catch (UriFormatException ex)
         {
-            logger.LogWarning(ex, "gRPC {Method}: некорректный формат ссылки.", context.Method);
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "Некорректный формат ссылки"));
+            logger.LogWarning(ex, "gRPC {Method}: invalid link format.", context.Method);
+            throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid link format"));
         }
         catch (RpcException)
         {
@@ -38,8 +38,8 @@ public sealed class GrpcExceptionInterceptor(ILogger<GrpcExceptionInterceptor> l
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "gRPC {Method}: неизвестная ошибка", context.Method);
-            throw new RpcException(new Status(StatusCode.Internal, "Внутренняя ошибка scrapper"));
+            logger.LogError(ex, "gRPC {Method}: unknown error.", context.Method);
+            throw new RpcException(new Status(StatusCode.Internal, "Internal scrapper error"));
         }
     }
 

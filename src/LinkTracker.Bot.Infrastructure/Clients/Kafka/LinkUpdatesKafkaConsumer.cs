@@ -35,7 +35,7 @@ internal sealed class LinkUpdatesKafkaConsumer(
         consumer.Subscribe(topic);
 
         logger.LogInformation(
-            "Kafka consumer запущен. Topic={Topic}, GroupId={GroupId}",
+            "Kafka consumer started. Topic={Topic}, GroupId={GroupId}",
             topic,
             kafkaOptions.Value.GroupId);
 
@@ -51,7 +51,7 @@ internal sealed class LinkUpdatesKafkaConsumer(
                 }
                 catch (ConsumeException ex)
                 {
-                    logger.LogWarning(ex, "Kafka consume завершился ошибкой. Пауза перед повтором.");
+                    logger.LogWarning(ex, "Kafka consume failed, backing off before retry.");
                     await Task.Delay(ConsumeErrorBackoff, stoppingToken);
                     continue;
                 }
@@ -66,7 +66,7 @@ internal sealed class LinkUpdatesKafkaConsumer(
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
-            logger.LogInformation("Kafka consumer остановлен.");
+            logger.LogInformation("Kafka consumer stopped.");
         }
         finally
         {
@@ -106,7 +106,7 @@ internal sealed class LinkUpdatesKafkaConsumer(
 
             logger.LogError(
                 ex,
-                "Ошибка обработки Kafka сообщения. Offset не будет подтвержден. Topic={Topic}, Partition={Partition}, Offset={Offset}",
+                "Failed to process Kafka message. Offset will not be committed. Topic={Topic}, Partition={Partition}, Offset={Offset}",
                 result.Topic,
                 result.Partition.Value,
                 result.Offset.Value);
@@ -124,7 +124,7 @@ internal sealed class LinkUpdatesKafkaConsumer(
         {
             logger.LogError(
                 ex,
-                "Не удалось подтвердить Kafka offset. Topic={Topic}, Partition={Partition}, Offset={Offset}",
+                "Failed to commit Kafka offset. Topic={Topic}, Partition={Partition}, Offset={Offset}",
                 result.Topic,
                 result.Partition.Value,
                 result.Offset.Value);

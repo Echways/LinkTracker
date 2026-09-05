@@ -18,7 +18,7 @@ public abstract class LinkUpdateHandlerBase(ILogger logger) : ILinkUpdateHandler
     {
         if (!CanHandle(subscription.Url))
         {
-            Logger.LogDebug("Пропускаю неподдерживаемую ссылку {Url}", subscription.Url);
+            Logger.LogDebug("Skipping unsupported link {Url}", subscription.Url);
             return LinkUpdateResultBuilder.NoChanges();
         }
 

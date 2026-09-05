@@ -67,7 +67,7 @@ public sealed class ExternalApiRateLimitingHandler(
         }
 
         logger.LogWarning(
-            "Ожидание сброса лимита внешнего API. Api={Api}, DelaySeconds={DelaySeconds}",
+            "Waiting for external API rate limit reset. Api={Api}, DelaySeconds={DelaySeconds}",
             rateLimiter.ApiName,
             remaining.TotalSeconds);
 
@@ -92,7 +92,7 @@ public sealed class ExternalApiRateLimitingHandler(
             new KeyValuePair<string, object?>("reason", "rate_limited"));
 
         logger.LogWarning(
-            "Внешний API сообщил об исчерпании лимита. Api={Api}, Status={Status}, CooldownUntil={CooldownUntil}",
+            "External API reported rate limit exhaustion. Api={Api}, Status={Status}, CooldownUntil={CooldownUntil}",
             rateLimiter.ApiName,
             (int)response.StatusCode,
             cooldownUntil.Value);

@@ -5,10 +5,6 @@ using LinkTracker.Shared.Contracts.Bot;
 
 namespace LinkTracker.Tests.Shared.Unit.Contracts;
 
-/// <summary>
-/// AI-агент публикует ProcessedLinkUpdate, а Bot читает то же сообщение как LinkUpdate.
-/// Контракты разные, связь между ними — только формат на проводе, поэтому она проверяется явно.
-/// </summary>
 [Trait("Module", "Shared")]
 [Trait("Category", "Unit")]
 public sealed class ProcessedUpdateWireCompatibilityTests

@@ -80,7 +80,7 @@ public sealed class LinkUpdatesKafkaMessageHandlerTests
 
         await deadLetterPublisher.Received(1).PublishAsync(
             message,
-            Arg.Is<string>(reason => reason.StartsWith("Kafka сообщение не удалось десериализовать:")),
+            Arg.Is<string>(reason => reason.StartsWith("Failed to deserialize Kafka message:")),
             Arg.Any<JsonException>(),
             Arg.Any<CancellationToken>());
     }
@@ -154,7 +154,7 @@ public sealed class LinkUpdatesKafkaMessageHandlerTests
 
         await deadLetterPublisher.Received(1).PublishAsync(
             message,
-            "Исчерпаны попытки обработки Kafka сообщения.",
+            "Kafka message processing retries exhausted.",
             Arg.Is<InvalidOperationException>(ex => ex.Message == "Telegram failed"),
             Arg.Any<CancellationToken>());
     }

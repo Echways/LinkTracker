@@ -38,7 +38,6 @@ public sealed class KafkaOffsetTrackerTests
         var tracker = new KafkaOffsetTracker();
         var ack = tracker.Track(CreateResult(0));
 
-        // Копия обновления лежит в буфере группировки.
         ack.Retain();
         ack.Release();
 

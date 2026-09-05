@@ -39,7 +39,7 @@ internal sealed class ValkeyDialogStateStore(
         {
             logger.LogError(
                 ex,
-                "Не удалось прочитать состояние диалога. Диалог начнётся заново. ChatId={ChatId}, Key={Key}",
+                "Failed to read dialog state, the dialog will restart. ChatId={ChatId}, Key={Key}",
                 chatId,
                 key);
 
@@ -65,7 +65,7 @@ internal sealed class ValkeyDialogStateStore(
         {
             logger.LogError(
                 ex,
-                "Не удалось сохранить состояние диалога. ChatId={ChatId}, Key={Key}",
+                "Failed to save dialog state. ChatId={ChatId}, Key={Key}",
                 ctx.ChatId,
                 key);
         }
@@ -85,7 +85,7 @@ internal sealed class ValkeyDialogStateStore(
         {
             logger.LogError(
                 ex,
-                "Не удалось сбросить состояние диалога. ChatId={ChatId}, Key={Key}",
+                "Failed to reset dialog state. ChatId={ChatId}, Key={Key}",
                 chatId,
                 key);
         }

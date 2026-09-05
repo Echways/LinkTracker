@@ -17,7 +17,7 @@ public sealed class TelegramPollingHostedService(
         var receiverOptions = new ReceiverOptions { AllowedUpdates = Array.Empty<UpdateType>() };
 
         var me = await bot.GetMe(stoppingToken);
-        logger.LogInformation("Бот {Username} успешно запущен, начат приём обновлений.", me.Username);
+        logger.LogInformation("Bot {Username} started, receiving updates.", me.Username);
 
         try
         {
@@ -25,7 +25,7 @@ public sealed class TelegramPollingHostedService(
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
-            logger.LogInformation("Polling остановлен.");
+            logger.LogInformation("Polling stopped.");
         }
     }
 }

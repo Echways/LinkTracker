@@ -37,7 +37,7 @@ public sealed class KafkaLinkUpdateMessageParserTests
         var result = _sut.TryValidate(null, out var error);
 
         Assert.False(result);
-        Assert.Equal("Сообщение не удалось десериализовать.", error);
+        Assert.Equal("Failed to deserialize the message.", error);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public sealed class KafkaLinkUpdateMessageParserTests
         var result = _sut.TryValidate(update, out var error);
 
         Assert.False(result);
-        Assert.Equal("Поле 'id' не может быть отрицательным.", error);
+        Assert.Equal("Field 'id' must not be negative.", error);
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public sealed class KafkaLinkUpdateMessageParserTests
         var result = _sut.TryValidate(update, out var error);
 
         Assert.False(result);
-        Assert.Equal("Поле 'url' должно содержать абсолютный URI.", error);
+        Assert.Equal("Field 'url' must contain an absolute URI.", error);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public sealed class KafkaLinkUpdateMessageParserTests
         var result = _sut.TryValidate(update, out var error);
 
         Assert.False(result);
-        Assert.Equal("Поле 'tgChatIds' должно содержать хотя бы один chat id.", error);
+        Assert.Equal("Field 'tgChatIds' must contain at least one chat id.", error);
     }
 
     private static LinkUpdate CreateValidUpdate(

@@ -18,7 +18,7 @@ public sealed class DbUpMigrator(
     {
         if (ShouldSkipMigrations())
         {
-            logger.LogInformation("Пропускаю миграции базы данных.");
+            logger.LogInformation("Skipping database migrations.");
             return Task.CompletedTask;
         }
 
@@ -30,7 +30,7 @@ public sealed class DbUpMigrator(
         if (Directory.Exists(migrationsPath) is false)
         {
             throw new DirectoryNotFoundException(
-                $"Директория миграций не была найдена: {migrationsPath}");
+                $"Migrations directory was not found: {migrationsPath}");
         }
 
         EnsureDatabase.For.PostgresqlDatabase(connectionString);
@@ -47,11 +47,11 @@ public sealed class DbUpMigrator(
 
         if (result.Successful is false)
         {
-            logger.LogError(result.Error, "Ошибка применения миграций");
+            logger.LogError(result.Error, "Failed to apply migrations.");
             throw result.Error ?? new InvalidOperationException("DbUp migration failed");
         }
 
-        logger.LogInformation("Миграции успешно применены.");
+        logger.LogInformation("Migrations applied successfully.");
         return Task.CompletedTask;
     }
 
