@@ -1,5 +1,7 @@
 using LinkTracker.Bot.Application.Clients.Scrapper;
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Bot.Application.Models;
+using Microsoft.Extensions.Localization;
 
 namespace LinkTracker.Bot.Application.Commands.Helpers;
 
@@ -8,41 +10,36 @@ public static class ScrapperCommandHelper
     public static async Task<OutgoingMessage> ExecuteAsync(
         long chatId,
         Func<CancellationToken, Task<string>> action,
-        string fallbackMessage,
+        IStringLocalizer<Messages> localizer,
+        string fallbackKey,
         CancellationToken ct = default)
     {
-        try
-        {
-            var text = await action(ct);
-            return new OutgoingMessage(chatId, text);
-        }
-        catch (ScrapperClientException ex) when (ScrapperErrorMessageMapper.TryMap(ex, out var message))
-        {
-            return new OutgoingMessage(chatId, message);
-        }
-        catch (ScrapperClientException)
-        {
-            return new OutgoingMessage(chatId, fallbackMessage);
-        }
+        return await ExecuteAsync(
+            chatId,
+            async token => new OutgoingMessage(chatId, await action(token)),
+            localizer,
+            fallbackKey,
+            ct);
     }
 
     public static async Task<OutgoingMessage> ExecuteAsync(
         long chatId,
         Func<CancellationToken, Task<OutgoingMessage>> action,
-        string fallbackMessage,
+        IStringLocalizer<Messages> localizer,
+        string fallbackKey,
         CancellationToken ct = default)
     {
         try
         {
             return await action(ct);
         }
-        catch (ScrapperClientException ex) when (ScrapperErrorMessageMapper.TryMap(ex, out var message))
+        catch (ScrapperClientException ex) when (ScrapperErrorMessageMapper.TryMap(ex, localizer, out var message))
         {
             return new OutgoingMessage(chatId, message);
         }
         catch (ScrapperClientException)
         {
-            return new OutgoingMessage(chatId, fallbackMessage);
+            return new OutgoingMessage(chatId, localizer[fallbackKey]);
         }
     }
 }

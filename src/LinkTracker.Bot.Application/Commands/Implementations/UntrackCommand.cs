@@ -1,14 +1,16 @@
 using LinkTracker.Bot.Application.Clients.Scrapper;
 using LinkTracker.Bot.Application.Commands.Helpers;
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Bot.Application.Models;
+using Microsoft.Extensions.Localization;
 using LinkTracker.Shared.Links;
 
 namespace LinkTracker.Bot.Application.Commands.Implementations;
 
-public sealed class UntrackCommand(IScrapperClient scrapperClient) : ICommandDescriptor, ICommandHandler
+public sealed class UntrackCommand(IScrapperClient scrapperClient, IStringLocalizer<Messages> localizer) : ICommandDescriptor, ICommandHandler
 {
     public string Name => "untrack";
-    public string Description => "Перестать отслеживать ссылку: /untrack <url>";
+    public string Description => localizer[Texts.UntrackDescription];
     public bool ShowInHelp => true;
     public bool ShowInTelegramMenu => true;
 
@@ -25,14 +27,14 @@ public sealed class UntrackCommand(IScrapperClient scrapperClient) : ICommandDes
         {
             return new OutgoingMessage(
                 chatId,
-                "Пришли команду в формате:\n/untrack <url>");
+                localizer[Texts.UntrackUsage]);
         }
 
         if (!TrackedLinkUrl.TryParse(args, out var uri))
         {
             return new OutgoingMessage(
                 chatId,
-                "Это не похоже на корректную ссылку.\nИспользуй формат:\n/untrack <url>");
+                localizer[Texts.UntrackInvalidUrl]);
         }
 
         return await ScrapperCommandHelper.ExecuteAsync(
@@ -40,9 +42,10 @@ public sealed class UntrackCommand(IScrapperClient scrapperClient) : ICommandDes
             async token =>
             {
                 await scrapperClient.RemoveLinkAsync(chatId, uri, token);
-                return $"Больше не отслеживаю:\n{uri}";
+                return localizer[Texts.UntrackSuccess, uri];
             },
-            "Не удалось удалить ссылку из-за ошибки scrapper. Попробуй позже.",
+            localizer,
+            Texts.UntrackScrapperFailed,
             ct);
     }
 }

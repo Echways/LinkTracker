@@ -1,3 +1,4 @@
+using LinkTracker.Tests.Bot.Unit.Support;
 using LinkTracker.Bot.Application.Dialogs.Abstractions;
 using LinkTracker.Bot.Application.Dialogs.Implementations.Track.Nodes;
 
@@ -12,7 +13,7 @@ public sealed class AskUrlNodeTests
     [InlineData("http://example.com/path")]
     public async Task Handle_WhenUrlIsValid_SavesPendingUrlAndMovesToAskTags(string url)
     {
-        var sut = new AskUrlNode();
+        var sut = new AskUrlNode(TestLocalization.Localizer);
         var ctx = new DialogContext { ChatId = 123L };
         var request = new BotRequest(
             123L,
@@ -24,13 +25,13 @@ public sealed class AskUrlNodeTests
         Assert.False(result.EndDialog);
         Assert.Equal(AskTagsNode.NodeId, result.NextNodeId);
         Assert.Equal(url, ctx.Get("pending_url"));
-        Assert.Contains("Добавить теги?", result.ReplyText);
+        Assert.Contains("Add tags?", result.ReplyText);
     }
 
     [Fact]
     public async Task Handle_WhenTextIsEmpty_ReturnsTextPrompt()
     {
-        var sut = new AskUrlNode();
+        var sut = new AskUrlNode(TestLocalization.Localizer);
         var ctx = new DialogContext { ChatId = 123L };
         var request = new BotRequest(
             123L,
@@ -41,14 +42,14 @@ public sealed class AskUrlNodeTests
 
         Assert.False(result.EndDialog);
         Assert.Null(result.NextNodeId);
-        Assert.Equal("Пришли URL текстом (https://...).", result.ReplyText);
+        Assert.Equal("Send the URL as text (https://...).", result.ReplyText);
         Assert.Null(ctx.Get("pending_url"));
     }
 
     [Fact]
     public async Task Handle_WhenTextIsNotAbsoluteUrl_ReturnsValidationMessage()
     {
-        var sut = new AskUrlNode();
+        var sut = new AskUrlNode(TestLocalization.Localizer);
         var ctx = new DialogContext { ChatId = 123L };
         var request = new BotRequest(
             123L,
@@ -59,14 +60,14 @@ public sealed class AskUrlNodeTests
 
         Assert.False(result.EndDialog);
         Assert.Null(result.NextNodeId);
-        Assert.Equal("Это не похоже на ссылку. Пришли URL целиком (https://...).", result.ReplyText);
+        Assert.Equal("This does not look like a link. Send the full URL (https://...).", result.ReplyText);
         Assert.Null(ctx.Get("pending_url"));
     }
 
     [Fact]
     public async Task Handle_WhenAbsoluteUriWithCustomScheme_ReturnsValidationMessage()
     {
-        var sut = new AskUrlNode();
+        var sut = new AskUrlNode(TestLocalization.Localizer);
         var ctx = new DialogContext { ChatId = 123L };
         var request = new BotRequest(
             123L,
@@ -77,7 +78,7 @@ public sealed class AskUrlNodeTests
 
         Assert.False(result.EndDialog);
         Assert.Null(result.NextNodeId);
-        Assert.Equal("Это не похоже на ссылку. Пришли URL целиком (https://...).", result.ReplyText);
+        Assert.Equal("This does not look like a link. Send the full URL (https://...).", result.ReplyText);
         Assert.Null(ctx.Get("pending_url"));
     }
 }

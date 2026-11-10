@@ -1,3 +1,4 @@
+using LinkTracker.Tests.Bot.Unit.Support;
 using System.Net;
 using LinkTracker.Bot.Application.Clients.Scrapper;
 using LinkTracker.Bot.Application.Clients.Scrapper.Contracts.Responses;
@@ -15,12 +16,12 @@ public sealed class UntrackCommandTests
     public async Task Execute_WhenArgsMissing_ReturnsUsageMessage()
     {
         var scrapperClient = Substitute.For<IScrapperClient>();
-        var sut = new UntrackCommand(scrapperClient);
+        var sut = new UntrackCommand(scrapperClient, TestLocalization.Localizer);
 
         var result = await sut.ExecuteAsync(123L, "/untrack");
 
         Assert.Equal(123L, result.ChatId);
-        Assert.Equal("Пришли команду в формате:\n/untrack <url>", result.Text);
+        Assert.Equal("Send the command in this format:\n/untrack <url>", result.Text);
 
         await scrapperClient.DidNotReceive()
             .RemoveLinkAsync(Arg.Any<long>(), Arg.Any<Uri>(), Arg.Any<CancellationToken>());
@@ -30,12 +31,12 @@ public sealed class UntrackCommandTests
     public async Task Execute_WhenUrlInvalid_ReturnsValidationMessage()
     {
         var scrapperClient = Substitute.For<IScrapperClient>();
-        var sut = new UntrackCommand(scrapperClient);
+        var sut = new UntrackCommand(scrapperClient, TestLocalization.Localizer);
 
         var result = await sut.ExecuteAsync(123L, "/untrack not-a-url");
 
         Assert.Equal(123L, result.ChatId);
-        Assert.Equal("Это не похоже на корректную ссылку.\nИспользуй формат:\n/untrack <url>", result.Text);
+        Assert.Equal("This does not look like a valid link.\nUse this format:\n/untrack <url>", result.Text);
 
         await scrapperClient.DidNotReceive()
             .RemoveLinkAsync(Arg.Any<long>(), Arg.Any<Uri>(), Arg.Any<CancellationToken>());
@@ -50,12 +51,12 @@ public sealed class UntrackCommandTests
         scrapperClient.RemoveLinkAsync(123L, uri, Arg.Any<CancellationToken>())
             .Returns(new LinkResponse { Id = 1, Url = uri, Tags = ["dotnet"] });
 
-        var sut = new UntrackCommand(scrapperClient);
+        var sut = new UntrackCommand(scrapperClient, TestLocalization.Localizer);
 
         var result = await sut.ExecuteAsync(123L, $"/untrack {uri}");
 
         Assert.Equal(123L, result.ChatId);
-        Assert.Equal($"Больше не отслеживаю:\n{uri}", result.Text);
+        Assert.Equal($"No longer tracking:\n{uri}", result.Text);
 
         await scrapperClient.Received(1)
             .RemoveLinkAsync(123L, uri, Arg.Any<CancellationToken>());
@@ -74,11 +75,11 @@ public sealed class UntrackCommandTests
                     "Link not found",
                     new ApiErrorResponse { Code = ScrapperErrorCodes.LinkNotFound, Description = "Link not found" })));
 
-        var sut = new UntrackCommand(scrapperClient);
+        var sut = new UntrackCommand(scrapperClient, TestLocalization.Localizer);
 
         var result = await sut.ExecuteAsync(123L, $"/untrack {uri}");
 
         Assert.Equal(123L, result.ChatId);
-        Assert.Equal("Эта ссылка не найдена в отслеживаемых.", result.Text);
+        Assert.Equal("This link is not among the tracked ones.", result.Text);
     }
 }

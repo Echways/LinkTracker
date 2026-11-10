@@ -1,3 +1,4 @@
+using LinkTracker.Tests.Bot.Unit.Support;
 using LinkTracker.Bot.Application.Telemetry.Abstractions;
 using LinkTracker.Bot.Presentation.Telegram.Notifications;
 using LinkTracker.Shared.Contracts.AiAgent;
@@ -16,15 +17,15 @@ public sealed class LinkUpdateNotifierTests
     private static readonly Uri Url = new("https://github.com/dotnet/runtime");
 
     [Theory]
-    [InlineData(LinkUpdatePriority.High, "‼️ Важное обновление по ссылке:")]
-    [InlineData(LinkUpdatePriority.Medium, "Обновление по ссылке:")]
-    [InlineData(LinkUpdatePriority.Low, "Незначительное обновление по ссылке:")]
+    [InlineData(LinkUpdatePriority.High, "‼️ Important update on the link:")]
+    [InlineData(LinkUpdatePriority.Medium, "Update on the link:")]
+    [InlineData(LinkUpdatePriority.Low, "Minor update on the link:")]
     public async Task NotifyAsync_RendersHeaderMatchingPriority(
         LinkUpdatePriority priority,
         string expectedHeader)
     {
         var (botClient, sentTexts) = CreateBotClient();
-        var sut = new LinkUpdateNotifier(botClient, Substitute.For<IBotMetrics>());
+        var sut = new LinkUpdateNotifier(botClient, TestLocalization.CreateLanguages(), TestLocalization.Localizer, Substitute.For<IBotMetrics>());
 
         await sut.NotifyAsync(
             new LinkUpdate { Id = 1, Url = Url, Description = "Новый issue", TgChatIds = [42], Priority = priority },
@@ -40,20 +41,20 @@ public sealed class LinkUpdateNotifierTests
     public async Task NotifyAsync_WhenPriorityIsNotSet_UsesNeutralHeader()
     {
         var (botClient, sentTexts) = CreateBotClient();
-        var sut = new LinkUpdateNotifier(botClient, Substitute.For<IBotMetrics>());
+        var sut = new LinkUpdateNotifier(botClient, TestLocalization.CreateLanguages(), TestLocalization.Localizer, Substitute.For<IBotMetrics>());
 
         await sut.NotifyAsync(
             new LinkUpdate { Id = 1, Url = Url, Description = "Новый issue", TgChatIds = [42] },
             CancellationToken.None);
 
-        Assert.StartsWith("Обновление по ссылке:", Assert.Single(sentTexts), StringComparison.Ordinal);
+        Assert.StartsWith("Update on the link:", Assert.Single(sentTexts), StringComparison.Ordinal);
     }
 
     [Fact]
     public async Task NotifyAsync_WhenSystemReport_SendsDescriptionAsIsWithoutHeader()
     {
         var (botClient, sentTexts) = CreateBotClient();
-        var sut = new LinkUpdateNotifier(botClient, Substitute.For<IBotMetrics>());
+        var sut = new LinkUpdateNotifier(botClient, TestLocalization.CreateLanguages(), TestLocalization.Localizer, Substitute.For<IBotMetrics>());
 
         await sut.NotifyAsync(
             new LinkUpdate

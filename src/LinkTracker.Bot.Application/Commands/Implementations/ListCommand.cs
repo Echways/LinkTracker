@@ -1,13 +1,15 @@
 using LinkTracker.Bot.Application.Clients.Scrapper;
 using LinkTracker.Bot.Application.Commands.Helpers;
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Bot.Application.Models;
+using Microsoft.Extensions.Localization;
 
 namespace LinkTracker.Bot.Application.Commands.Implementations;
 
-public sealed class ListCommand(IScrapperClient scrapperClient) : ICommandDescriptor, ICommandHandler
+public sealed class ListCommand(IScrapperClient scrapperClient, IStringLocalizer<Messages> localizer) : ICommandDescriptor, ICommandHandler
 {
     public string Name => "list";
-    public string Description => "Вывести список отслеживаемых ссылок";
+    public string Description => localizer[Texts.ListDescription];
     public bool ShowInHelp => true;
     public bool ShowInTelegramMenu => true;
 
@@ -40,24 +42,25 @@ public sealed class ListCommand(IScrapperClient scrapperClient) : ICommandDescri
                     return new OutgoingMessage(
                         chatId,
                         string.IsNullOrEmpty(tag)
-                            ? "Пока нет отслеживаемых ссылок. Добавь через /track"
-                            : $"Не нашёл отслеживаемых ссылок с тегом «{tag}».");
+                            ? localizer[Texts.ListEmpty]
+                            : localizer[Texts.ListEmptyForTag, tag]);
                 }
 
                 var lines = items.Select((x, i) =>
                 {
                     var tagsText = x.Tags.Count == 0 ? "—" : string.Join(", ", x.Tags);
-                    return $"{i + 1}) {x.Url}\n   Теги: {tagsText}";
+                    return localizer[Texts.ListItem, i + 1, x.Url, tagsText].Value;
                 });
 
                 var header = string.IsNullOrEmpty(tag)
-                    ? "Отслеживаемые ссылки:\n\n"
-                    : $"Отслеживаемые ссылки (тег: {tag}):\n\n";
+                    ? localizer[Texts.ListHeader].Value
+                    : localizer[Texts.ListHeaderForTag, tag].Value;
 
                 var reply = header + string.Join("\n\n", lines);
                 return new OutgoingMessage(chatId, reply);
             },
-            "Не удалось выполнить команду из-за ошибки scrapper. Попробуй позже.",
+            localizer,
+            Texts.CommandScrapperFailed,
             ct);
     }
 }

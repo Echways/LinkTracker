@@ -1,12 +1,14 @@
 using LinkTracker.Bot.Application.Clients.Scrapper;
 using LinkTracker.Bot.Application.Dialogs.Abstractions;
 using LinkTracker.Bot.Application.Dialogs.Helpers;
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Shared.Contracts.Common;
 using LinkTracker.Shared.Links;
+using Microsoft.Extensions.Localization;
 
 namespace LinkTracker.Bot.Application.Dialogs.Implementations.Track.Nodes;
 
-public sealed class TrackConfirmNode(IScrapperClient scrapperClient) : IDialogNode
+public sealed class TrackConfirmNode(IScrapperClient scrapperClient, IStringLocalizer<Messages> localizer) : IDialogNode
 {
     public const string NodeId = "track_confirm";
     public string Id => NodeId;
@@ -15,7 +17,7 @@ public sealed class TrackConfirmNode(IScrapperClient scrapperClient) : IDialogNo
     {
         if (!DialogText.TryGetText(request, out var raw))
         {
-            return new DialogNodeResult("'да' / 'нет'.");
+            return new DialogNodeResult(localizer[Texts.ConfirmYesNo]);
         }
 
         if (DialogText.IsYes(raw))
@@ -25,13 +27,13 @@ public sealed class TrackConfirmNode(IScrapperClient scrapperClient) : IDialogNo
 
         if (!DialogText.IsNo(raw))
         {
-            return new DialogNodeResult("'да' / 'нет'.");
+            return new DialogNodeResult(localizer[Texts.ConfirmYesNo]);
         }
 
         ctx.ClearTrackState();
 
         return new DialogNodeResult(
-            "Ок.\nПришли другую ссылку.",
+            localizer[Texts.ConfirmRejected],
             AskUrlNode.NodeId);
     }
 
@@ -41,14 +43,14 @@ public sealed class TrackConfirmNode(IScrapperClient scrapperClient) : IDialogNo
         if (string.IsNullOrWhiteSpace(pendingUrl))
         {
             return new DialogNodeResult(
-                "Не удалось понять, что добавлять. Начни заново: /track",
+                localizer[Texts.ConfirmNothingPending],
                 EndDialog: true);
         }
 
         if (!TrackedLinkUrl.TryParse(pendingUrl, out var uri))
         {
             return new DialogNodeResult(
-                "Не удалось разобрать ссылку. Начни заново: /track",
+                localizer[Texts.ConfirmUrlParseFailed],
                 EndDialog: true);
         }
 
@@ -60,10 +62,10 @@ public sealed class TrackConfirmNode(IScrapperClient scrapperClient) : IDialogNo
             await scrapperClient.AddLinkAsync(ctx.ChatId, uri, tags, ct);
 
             return new DialogNodeResult(
-                $"Начал отслеживать:\n{pendingUrl}\nТеги: {tagsText}",
+                localizer[Texts.ConfirmSuccess, pendingUrl, tagsText],
                 EndDialog: true);
         }
-        catch (ScrapperClientException ex) when (ScrapperErrorMessageMapper.TryMap(ex, out var message))
+        catch (ScrapperClientException ex) when (ScrapperErrorMessageMapper.TryMap(ex, localizer, out var message))
         {
             var shouldRetryUrl =
                 ex.HasCode(ScrapperErrorCodes.UnsupportedLink) ||
@@ -73,7 +75,7 @@ public sealed class TrackConfirmNode(IScrapperClient scrapperClient) : IDialogNo
             if (shouldRetryUrl)
             {
                 return new DialogNodeResult(
-                    message + "\n\nПришли другую ссылку.",
+                    localizer[Texts.ConfirmRetryUrl, message],
                     AskUrlNode.NodeId);
             }
 
@@ -84,7 +86,7 @@ public sealed class TrackConfirmNode(IScrapperClient scrapperClient) : IDialogNo
         catch (ScrapperClientException)
         {
             return new DialogNodeResult(
-                "Не удалось добавить ссылку из-за ошибки scrapper. Попробуй ещё раз позже.",
+                localizer[Texts.TrackScrapperFailed],
                 EndDialog: true);
         }
     }

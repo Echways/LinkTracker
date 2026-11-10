@@ -1,9 +1,15 @@
 using LinkTracker.Bot.Application.Dialogs.Abstractions;
 using LinkTracker.Bot.Application.Dialogs.Implementations.Track.Nodes;
+using LinkTracker.Bot.Application.Localization;
+using Microsoft.Extensions.Localization;
 
 namespace LinkTracker.Bot.Application.Dialogs.Implementations.Track;
 
-public sealed class TrackDialog(AskUrlNode askUrl, TrackConfirmNode trackConfirm, AskTagsNode askTags) : IDialog
+public sealed class TrackDialog(
+    AskUrlNode askUrl,
+    TrackConfirmNode trackConfirm,
+    AskTagsNode askTags,
+    IStringLocalizer<Messages> localizer) : IDialog
 {
     public const string DialogId = "track";
 
@@ -14,6 +20,6 @@ public sealed class TrackDialog(AskUrlNode askUrl, TrackConfirmNode trackConfirm
 
     public Task<string> OnStartAsync(DialogContext ctx, CancellationToken ct)
     {
-        return Task.FromResult("Пришли ссылку, которую нужно отслеживать. (/cancel чтобы отменить)");
+        return Task.FromResult(localizer[Texts.TrackStartPrompt].Value);
     }
 }

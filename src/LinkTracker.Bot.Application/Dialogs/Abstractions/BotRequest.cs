@@ -15,5 +15,7 @@ public sealed record BotRequest(
     string? Text = null,
     string? Command = null,
     string? CallbackData = null,
-    string? Phone = null
+    string? Phone = null,
+    int? MessageId = null,
+    string? CallbackQueryId = null
 );

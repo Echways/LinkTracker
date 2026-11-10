@@ -1,3 +1,4 @@
+using LinkTracker.Tests.Bot.Unit.Support;
 using System.Net;
 using LinkTracker.Bot.Application.Clients.Scrapper;
 using LinkTracker.Bot.Application.Clients.Scrapper.Contracts.Responses;
@@ -26,14 +27,14 @@ public sealed class TrackConfirmNodeTests
                 Arg.Any<CancellationToken>())
             .Returns(new LinkResponse { Id = 1, Url = uri, Tags = ["dotnet", "runtime"] });
 
-        var sut = new TrackConfirmNode(scrapperClient);
+        var sut = new TrackConfirmNode(scrapperClient, TestLocalization.Localizer);
         var ctx = CreateContext(123L, uri.ToString(), "dotnet, runtime");
         var request = new BotRequest(123L, BotRequestType.Text, "да");
 
         var result = await sut.HandleAsync(ctx, request, CancellationToken.None);
 
         Assert.True(result.EndDialog);
-        Assert.Contains("Начал отслеживать", result.ReplyText);
+        Assert.Contains("Started tracking", result.ReplyText);
         Assert.Contains(uri.ToString(), result.ReplyText);
         Assert.Contains("dotnet, runtime", result.ReplyText);
 
@@ -48,7 +49,7 @@ public sealed class TrackConfirmNodeTests
     public async Task Handle_WhenUserAnswersNo_ClearsTrackStateAndReturnsAskUrlNode()
     {
         var scrapperClient = Substitute.For<IScrapperClient>();
-        var sut = new TrackConfirmNode(scrapperClient);
+        var sut = new TrackConfirmNode(scrapperClient, TestLocalization.Localizer);
         var ctx = CreateContext(123L, "https://github.com/dotnet/runtime", "dotnet");
         var request = new BotRequest(123L, BotRequestType.Text, "нет");
 
@@ -56,7 +57,7 @@ public sealed class TrackConfirmNodeTests
 
         Assert.False(result.EndDialog);
         Assert.Equal(AskUrlNode.NodeId, result.NextNodeId);
-        Assert.Equal("Ок.\nПришли другую ссылку.", result.ReplyText);
+        Assert.Equal("Okay.\nSend another link.", result.ReplyText);
 
         Assert.Null(ctx.Get("pending_url"));
         Assert.Null(ctx.Get("tags_csv"));
@@ -86,7 +87,7 @@ public sealed class TrackConfirmNodeTests
                     ScrapperErrorCodes.UnsupportedLink,
                     "Unsupported link")));
 
-        var sut = new TrackConfirmNode(scrapperClient);
+        var sut = new TrackConfirmNode(scrapperClient, TestLocalization.Localizer);
         var ctx = CreateContext(123L, "https://example.com/test", "");
         var request = new BotRequest(123L, BotRequestType.Text, "да");
 
@@ -94,8 +95,8 @@ public sealed class TrackConfirmNodeTests
 
         Assert.False(result.EndDialog);
         Assert.Equal(AskUrlNode.NodeId, result.NextNodeId);
-        Assert.Contains("не поддерживается", result.ReplyText, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("Пришли другую ссылку.", result.ReplyText);
+        Assert.Contains("not supported", result.ReplyText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Send another link.", result.ReplyText);
     }
 
     [Fact]
@@ -115,14 +116,14 @@ public sealed class TrackConfirmNodeTests
                     ScrapperErrorCodes.LinkAlreadyExists,
                     "Already exists")));
 
-        var sut = new TrackConfirmNode(scrapperClient);
+        var sut = new TrackConfirmNode(scrapperClient, TestLocalization.Localizer);
         var ctx = CreateContext(123L, "https://github.com/dotnet/runtime", "");
         var request = new BotRequest(123L, BotRequestType.Text, "да");
 
         var result = await sut.HandleAsync(ctx, request, CancellationToken.None);
 
         Assert.True(result.EndDialog);
-        Assert.Contains("уже отслеживается", result.ReplyText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("already being tracked", result.ReplyText, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -141,14 +142,14 @@ public sealed class TrackConfirmNodeTests
                     HttpStatusCode.BadGateway,
                     "Gateway error")));
 
-        var sut = new TrackConfirmNode(scrapperClient);
+        var sut = new TrackConfirmNode(scrapperClient, TestLocalization.Localizer);
         var ctx = CreateContext(123L, "https://github.com/dotnet/runtime", "");
         var request = new BotRequest(123L, BotRequestType.Text, "да");
 
         var result = await sut.HandleAsync(ctx, request, CancellationToken.None);
 
         Assert.True(result.EndDialog);
-        Assert.Contains("ошибки scrapper", result.ReplyText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("scrapper error", result.ReplyText, StringComparison.OrdinalIgnoreCase);
     }
 
     [Theory]
@@ -157,14 +158,14 @@ public sealed class TrackConfirmNodeTests
     public async Task Handle_WhenAnswerIsNotYesOrNo_ReturnsPrompt(string text)
     {
         var scrapperClient = Substitute.For<IScrapperClient>();
-        var sut = new TrackConfirmNode(scrapperClient);
+        var sut = new TrackConfirmNode(scrapperClient, TestLocalization.Localizer);
         var ctx = CreateContext(123L, "https://github.com/dotnet/runtime", "");
         var request = new BotRequest(123L, BotRequestType.Text, text);
 
         var result = await sut.HandleAsync(ctx, request, CancellationToken.None);
 
         Assert.False(result.EndDialog);
-        Assert.Equal("'да' / 'нет'.", result.ReplyText);
+        Assert.Equal("'yes' / 'no'.", result.ReplyText);
     }
 
     private static ScrapperClientException CreateException(

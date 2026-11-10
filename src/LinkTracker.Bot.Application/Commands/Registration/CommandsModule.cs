@@ -16,6 +16,7 @@ public static class CommandsModule
         Register<TrackCommand>(services);
         Register<UntrackCommand>(services);
         Register<ListCommand>(services);
+        Register<LanguageCommand>(services);
 
         services.AddSingleton<CommandRouter>();
         services.AddSingleton<CommandRegistry>();

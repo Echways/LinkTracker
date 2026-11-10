@@ -1,13 +1,15 @@
 using LinkTracker.Bot.Application.Clients.Scrapper;
 using LinkTracker.Bot.Application.Commands.Helpers;
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Bot.Application.Models;
+using Microsoft.Extensions.Localization;
 
 namespace LinkTracker.Bot.Application.Commands.Implementations;
 
-public sealed class StartCommand(IScrapperClient scrapperClient) : ICommandDescriptor, ICommandHandler
+public sealed class StartCommand(IScrapperClient scrapperClient, IStringLocalizer<Messages> localizer) : ICommandDescriptor, ICommandHandler
 {
     public string Name => "start";
-    public string Description => "Зарегистрировать чат и начать работу";
+    public string Description => localizer[Texts.StartDescription];
     public bool ShowInHelp => true;
     public bool ShowInTelegramMenu => true;
 
@@ -23,9 +25,10 @@ public sealed class StartCommand(IScrapperClient scrapperClient) : ICommandDescr
             async token =>
             {
                 await scrapperClient.RegisterChatAsync(chatId, token);
-                return "Привет! Я помогу отслеживать обновления по ссылкам. \nДоступные команды ты можешь посмотреть в справке /help";
+                return localizer[Texts.StartGreeting];
             },
-            "Не удалось выполнить команду из-за ошибки scrapper. Попробуй позже.",
+            localizer,
+            Texts.CommandScrapperFailed,
             ct);
     }
 }

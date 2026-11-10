@@ -1,3 +1,4 @@
+using LinkTracker.Tests.Bot.Unit.Support;
 using System.Net;
 using LinkTracker.Bot.Application.Clients.Scrapper;
 using LinkTracker.Bot.Application.Commands.Implementations;
@@ -18,11 +19,11 @@ public sealed class StartCommandTests
             .RegisterChatAsync(123L, Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
 
-        var command = new StartCommand(scrapperClient);
+        var command = new StartCommand(scrapperClient, TestLocalization.Localizer);
 
         var result = await command.ExecuteAsync(123L, string.Empty, CancellationToken.None);
 
-        Assert.Contains("Привет!", result.Text, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Hi!", result.Text, StringComparison.OrdinalIgnoreCase);
 
         await scrapperClient.Received(1).RegisterChatAsync(123L, Arg.Any<CancellationToken>());
     }
@@ -38,11 +39,11 @@ public sealed class StartCommandTests
                 "Chat already exists",
                 new ApiErrorResponse { Code = ScrapperErrorCodes.ChatAlreadyExists, Description = "Chat already exists" }));
 
-        var command = new StartCommand(scrapperClient);
+        var command = new StartCommand(scrapperClient, TestLocalization.Localizer);
 
         var result = await command.ExecuteAsync(123L, string.Empty, CancellationToken.None);
 
-        Assert.Contains("Чат уже зарегистрирован", result.Text, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("already registered", result.Text, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -56,7 +57,7 @@ public sealed class StartCommandTests
                 "Scrapper is unavailable")
             { FallbackCode = ScrapperErrorCodes.ScrapperServiceUnavailable });
 
-        var command = new StartCommand(scrapperClient);
+        var command = new StartCommand(scrapperClient, TestLocalization.Localizer);
 
         var result = await command.ExecuteAsync(123L, string.Empty, CancellationToken.None);
 

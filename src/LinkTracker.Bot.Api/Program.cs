@@ -1,5 +1,7 @@
+using LinkTracker.Bot.Application.Callbacks;
 using LinkTracker.Bot.Application.Commands.Registration;
 using LinkTracker.Bot.Application.Dialogs.Registration;
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Bot.Application.Routing.Registration;
 using LinkTracker.Bot.Infrastructure.Clients.Registration;
 using LinkTracker.Bot.Infrastructure.Storage.Registration;
@@ -26,7 +28,9 @@ builder.Services.AddApiRateLimiting(builder.Configuration);
 builder.Services.AddServiceAuthentication(builder.Configuration);
 builder.Services.AddServiceAuthClients(builder.Configuration);
 
+builder.Services.AddBotLocalization();
 builder.Services.AddCommands();
+builder.Services.AddCallbacks();
 builder.Services.AddUpdateRouting();
 builder.Services.AddDialogs();
 builder.Services.AddDialogStorage(builder.Configuration);

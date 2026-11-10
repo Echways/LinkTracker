@@ -1,3 +1,4 @@
+using LinkTracker.Tests.Bot.Unit.Support;
 using LinkTracker.Bot.Application.Commands;
 using LinkTracker.Bot.Application.Commands.Implementations;
 using NSubstitute;
@@ -15,7 +16,7 @@ public sealed class HelpCommandTests
     [InlineData("/help foo")]
     public void CanHandle_WhenTextStartsWithHelpCommand_ReturnsTrue(string text)
     {
-        var sut = new HelpCommand(new Lazy<IEnumerable<ICommandDescriptor>>(Array.Empty<ICommandDescriptor>));
+        var sut = new HelpCommand(new Lazy<IEnumerable<ICommandDescriptor>>(Array.Empty<ICommandDescriptor>), TestLocalization.Localizer);
 
         Assert.True(sut.CanHandle(text));
     }
@@ -27,7 +28,7 @@ public sealed class HelpCommandTests
     [InlineData("")]
     public void CanHandle_WhenTextIsNotHelpCommand_ReturnsFalse(string text)
     {
-        var sut = new HelpCommand(new Lazy<IEnumerable<ICommandDescriptor>>(Array.Empty<ICommandDescriptor>));
+        var sut = new HelpCommand(new Lazy<IEnumerable<ICommandDescriptor>>(Array.Empty<ICommandDescriptor>), TestLocalization.Localizer);
 
         Assert.False(sut.CanHandle(text));
     }
@@ -52,7 +53,7 @@ public sealed class HelpCommandTests
         help.Description.Returns("Показать справку");
         help.ShowInHelp.Returns(true);
 
-        var sut = new HelpCommand(new Lazy<IEnumerable<ICommandDescriptor>>(() => [start, list, help]));
+        var sut = new HelpCommand(new Lazy<IEnumerable<ICommandDescriptor>>(() => [start, list, help]), TestLocalization.Localizer);
 
         var result = await sut.ExecuteAsync(chatId, "/help");
 
@@ -60,6 +61,6 @@ public sealed class HelpCommandTests
         Assert.Contains("/start", result.Text);
         Assert.Contains("/list", result.Text);
         Assert.DoesNotContain("/help", result.Text);
-        Assert.StartsWith("Доступные команды:", result.Text);
+        Assert.StartsWith("Available commands:", result.Text);
     }
 }

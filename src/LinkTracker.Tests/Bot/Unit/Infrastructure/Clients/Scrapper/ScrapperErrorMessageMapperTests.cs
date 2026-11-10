@@ -1,3 +1,4 @@
+using LinkTracker.Tests.Bot.Unit.Support;
 using System.Net;
 using LinkTracker.Bot.Application.Clients.Scrapper;
 using LinkTracker.Shared.Contracts.Common;
@@ -16,7 +17,7 @@ public sealed class ScrapperErrorMessageMapperTests
             ScrapperErrorCodes.UnsupportedLink,
             "Unsupported link");
 
-        var result = ScrapperErrorMessageMapper.TryMap(ex, out var message);
+        var result = ScrapperErrorMessageMapper.TryMap(ex, TestLocalization.Localizer, out var message);
 
         Assert.True(result);
         Assert.Contains("GitHub", message);
@@ -32,7 +33,7 @@ public sealed class ScrapperErrorMessageMapperTests
             "some_unknown_error",
             "Unknown");
 
-        var result = ScrapperErrorMessageMapper.TryMap(ex, out var message);
+        var result = ScrapperErrorMessageMapper.TryMap(ex, TestLocalization.Localizer, out var message);
 
         Assert.False(result);
         Assert.Equal(string.Empty, message);
@@ -48,10 +49,10 @@ public sealed class ScrapperErrorMessageMapperTests
             code,
             "Invalid link");
 
-        var result = ScrapperErrorMessageMapper.TryMap(ex, out var message);
+        var result = ScrapperErrorMessageMapper.TryMap(ex, TestLocalization.Localizer, out var message);
 
         Assert.True(result);
-        Assert.Contains("некорректная ссылка", message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("not a valid link", message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -62,7 +63,7 @@ public sealed class ScrapperErrorMessageMapperTests
             "Scrapper is unavailable")
         { FallbackCode = ScrapperErrorCodes.ScrapperServiceUnavailable };
 
-        var result = ScrapperErrorMessageMapper.TryMap(ex, out var message);
+        var result = ScrapperErrorMessageMapper.TryMap(ex, TestLocalization.Localizer, out var message);
 
         Assert.True(result);
         Assert.Contains("Scrapper", message, StringComparison.OrdinalIgnoreCase);

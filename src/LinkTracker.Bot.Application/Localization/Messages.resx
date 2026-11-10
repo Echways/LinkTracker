@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="StartDescription" xml:space="preserve"><value>Register the chat and get started</value></data>
+  <data name="HelpDescription" xml:space="preserve"><value>Show help</value></data>
+  <data name="CancelDescription" xml:space="preserve"><value>Cancel the current dialog</value></data>
+  <data name="TrackDescription" xml:space="preserve"><value>Start tracking a link</value></data>
+  <data name="UntrackDescription" xml:space="preserve"><value>Stop tracking a link: /untrack &lt;url&gt;</value></data>
+  <data name="ListDescription" xml:space="preserve"><value>List tracked links</value></data>
+  <data name="LanguageDescription" xml:space="preserve"><value>Choose the bot language</value></data>
+  <data name="StartGreeting" xml:space="preserve"><value>Hi! I will help you track updates on links.
+You can see the available commands in /help</value></data>
+  <data name="CommandScrapperFailed" xml:space="preserve"><value>The command failed because of a scrapper error. Please try again later.</value></data>
+  <data name="UntrackScrapperFailed" xml:space="preserve"><value>Could not remove the link because of a scrapper error. Please try again later.</value></data>
+  <data name="TrackScrapperFailed" xml:space="preserve"><value>Could not add the link because of a scrapper error. Please try again later.</value></data>
+  <data name="HelpHeader" xml:space="preserve"><value>Available commands:</value></data>
+  <data name="ListEmpty" xml:space="preserve"><value>No tracked links yet. Add one with /track</value></data>
+  <data name="ListEmptyForTag" xml:space="preserve"><value>No tracked links found with the tag “{0}”.</value></data>
+  <data name="ListHeader" xml:space="preserve"><value>Tracked links:
+
+</value></data>
+  <data name="ListHeaderForTag" xml:space="preserve"><value>Tracked links (tag: {0}):
+
+</value></data>
+  <data name="ListItem" xml:space="preserve"><value>{0}) {1}
+   Tags: {2}</value></data>
+  <data name="UntrackUsage" xml:space="preserve"><value>Send the command in this format:
+/untrack &lt;url&gt;</value></data>
+  <data name="UntrackInvalidUrl" xml:space="preserve"><value>This does not look like a valid link.
+Use this format:
+/untrack &lt;url&gt;</value></data>
+  <data name="UntrackSuccess" xml:space="preserve"><value>No longer tracking:
+{0}</value></data>
+  <data name="CommandNotUnderstood" xml:space="preserve"><value>I did not get that. Type /help</value></data>
+  <data name="DialogInterruptedNotice" xml:space="preserve"><value>The unfinished dialog was interrupted, the entered data was not saved.</value></data>
+  <data name="DialogSessionCorrupted" xml:space="preserve"><value>The dialog session is corrupted. Type /start</value></data>
+  <data name="DialogUnknown" xml:space="preserve"><value>Unknown dialog.</value></data>
+  <data name="DialogCancelled" xml:space="preserve"><value>Okay, cancelled. Type /help</value></data>
+  <data name="TrackStartPrompt" xml:space="preserve"><value>Send the link you want to track. (/cancel to abort)</value></data>
+  <data name="AskUrlNotText" xml:space="preserve"><value>Send the URL as text (https://...).</value></data>
+  <data name="AskUrlInvalid" xml:space="preserve"><value>This does not look like a link. Send the full URL (https://...).</value></data>
+  <data name="AskUrlTagsPrompt" xml:space="preserve"><value>Add tags? Enter them separated by commas (for example: work, docs, refactor)
+To skip, send '-'
+
+{0}</value></data>
+  <data name="AskTagsNotText" xml:space="preserve"><value>Send tags separated by commas (for example: work, bug, docs).
+To skip, send '-'</value></data>
+  <data name="AskTagsInvalid" xml:space="preserve"><value>No valid tags recognised.
+Letters, digits, _ and - are allowed, length 1–24. Example: work, docs, refactor</value></data>
+  <data name="AskTagsInvalidList" xml:space="preserve"><value>
+Invalid: {0}</value></data>
+  <data name="AskTagsIgnored" xml:space="preserve"><value>
+Ignoring invalid ones: {0}</value></data>
+  <data name="AskTagsAccepted" xml:space="preserve"><value>Okay.
+Tags: {0}{1}
+
+{2}</value></data>
+  <data name="ConfirmPrompt" xml:space="preserve"><value>Add to tracking?
+Link: {0}
+Tags: {1}
+yes / no</value></data>
+  <data name="ConfirmUnknownUrl" xml:space="preserve"><value>(unknown)</value></data>
+  <data name="ConfirmYesNo" xml:space="preserve"><value>'yes' / 'no'.</value></data>
+  <data name="ConfirmRejected" xml:space="preserve"><value>Okay.
+Send another link.</value></data>
+  <data name="ConfirmNothingPending" xml:space="preserve"><value>Could not tell what to add. Start over: /track</value></data>
+  <data name="ConfirmUrlParseFailed" xml:space="preserve"><value>Could not parse the link. Start over: /track</value></data>
+  <data name="ConfirmSuccess" xml:space="preserve"><value>Started tracking:
+{0}
+Tags: {1}</value></data>
+  <data name="ConfirmRetryUrl" xml:space="preserve"><value>{0}
+
+Send another link.</value></data>
+  <data name="ErrorUnsupportedLink" xml:space="preserve"><value>This link is not supported.
+You can currently track only:
+• GitHub repositories: https://github.com/owner/repo
+• StackOverflow questions: https://stackoverflow.com/questions/12345/...
+• Reddit subreddits: https://reddit.com/r/dotnet</value></data>
+  <data name="ErrorChatAlreadyExists" xml:space="preserve"><value>Hi! This chat is already registered. Use /help to see the commands</value></data>
+  <data name="ErrorLinkAlreadyExists" xml:space="preserve"><value>This link is already being tracked.</value></data>
+  <data name="ErrorLinkNotFound" xml:space="preserve"><value>This link is not among the tracked ones.</value></data>
+  <data name="ErrorChatNotFound" xml:space="preserve"><value>This chat is not registered. Type /start first.</value></data>
+  <data name="ErrorInvalidLink" xml:space="preserve"><value>This is not a valid link.
+Send an absolute http/https link, for example:
+https://github.com/dotnet/runtime</value></data>
+  <data name="ErrorScrapperUnavailable" xml:space="preserve"><value>Scrapper is unavailable right now. Please try again a bit later.</value></data>
+  <data name="LanguagePrompt" xml:space="preserve"><value>Choose the bot language:</value></data>
+  <data name="LanguageChanged" xml:space="preserve"><value>Language switched to: {0}</value></data>
+  <data name="NotificationHigh" xml:space="preserve"><value>‼️ Important update on the link:</value></data>
+  <data name="NotificationLow" xml:space="preserve"><value>Minor update on the link:</value></data>
+  <data name="NotificationDefault" xml:space="preserve"><value>Update on the link:</value></data>
+</root>

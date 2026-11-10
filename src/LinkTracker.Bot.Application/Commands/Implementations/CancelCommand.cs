@@ -1,13 +1,15 @@
 using LinkTracker.Bot.Application.Commands.Helpers;
 using LinkTracker.Bot.Application.Dialogs.Runtime;
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Bot.Application.Models;
+using Microsoft.Extensions.Localization;
 
 namespace LinkTracker.Bot.Application.Commands.Implementations;
 
-public sealed class CancelCommand(DialogManager dialogManager) : ICommandDescriptor, ICommandHandler
+public sealed class CancelCommand(DialogManager dialogManager, IStringLocalizer<Messages> localizer) : ICommandDescriptor, ICommandHandler
 {
     public string Name => "cancel";
-    public string Description => "Отменить текущий диалог";
+    public string Description => localizer[Texts.CancelDescription];
     public bool ShowInHelp => true;
     public bool ShowInTelegramMenu => false;
 

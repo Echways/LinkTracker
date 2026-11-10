@@ -1,12 +1,15 @@
 using System.Diagnostics;
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Bot.Application.Models;
 using LinkTracker.Bot.Application.Telemetry.Abstractions;
+using Microsoft.Extensions.Localization;
 
 namespace LinkTracker.Bot.Application.Commands.Registration;
 
 public sealed class CommandRouter(
     IEnumerable<ICommandHandler> commands,
-    IBotMetrics metrics)
+    IBotMetrics metrics,
+    IStringLocalizer<Messages> localizer)
 {
     private readonly IReadOnlyList<ICommandHandler> _commands = commands.ToList();
 
@@ -19,7 +22,7 @@ public sealed class CommandRouter(
 
         if (cmd is null)
         {
-            return new OutgoingMessage(chatId, "Не понял. Напиши /help");
+            return new OutgoingMessage(chatId, localizer[Texts.CommandNotUnderstood]);
         }
 
         var commandName =

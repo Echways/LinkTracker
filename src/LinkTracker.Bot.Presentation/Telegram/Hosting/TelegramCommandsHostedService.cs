@@ -1,21 +1,27 @@
-using LinkTracker.Bot.Application.Commands.Registration;
+using LinkTracker.Bot.Application.Localization;
+using LinkTracker.Bot.Presentation.Telegram.Menu;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 
 namespace LinkTracker.Bot.Presentation.Telegram.Hosting;
 
 public sealed class TelegramCommandsHostedService(
     ITelegramBotClient botClient,
-    CommandRegistry commandRegistry) : IHostedService
+    TelegramChatMenuUpdater menuUpdater) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var commands = commandRegistry
-            .GetTelegramCommands()
-            .Select(x => new BotCommand { Command = x.Command, Description = x.Description });
+        await botClient.SetMyCommands(
+            menuUpdater.BuildCommands(BotLanguage.Default),
+            cancellationToken: cancellationToken);
 
-        await botClient.SetMyCommands(commands, cancellationToken: cancellationToken);
+        foreach (var language in BotLanguage.All)
+        {
+            await botClient.SetMyCommands(
+                menuUpdater.BuildCommands(language),
+                languageCode: language.Code,
+                cancellationToken: cancellationToken);
+        }
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

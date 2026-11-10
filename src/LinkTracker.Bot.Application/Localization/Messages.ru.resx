@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="StartDescription" xml:space="preserve"><value>Зарегистрировать чат и начать работу</value></data>
+  <data name="HelpDescription" xml:space="preserve"><value>Показать справку</value></data>
+  <data name="CancelDescription" xml:space="preserve"><value>Отменить текущий диалог</value></data>
+  <data name="TrackDescription" xml:space="preserve"><value>Начать отслеживать ссылку</value></data>
+  <data name="UntrackDescription" xml:space="preserve"><value>Перестать отслеживать ссылку: /untrack &lt;url&gt;</value></data>
+  <data name="ListDescription" xml:space="preserve"><value>Вывести список отслеживаемых ссылок</value></data>
+  <data name="LanguageDescription" xml:space="preserve"><value>Выбрать язык бота</value></data>
+  <data name="StartGreeting" xml:space="preserve"><value>Привет! Я помогу отслеживать обновления по ссылкам. 
+Доступные команды ты можешь посмотреть в справке /help</value></data>
+  <data name="CommandScrapperFailed" xml:space="preserve"><value>Не удалось выполнить команду из-за ошибки scrapper. Попробуй позже.</value></data>
+  <data name="UntrackScrapperFailed" xml:space="preserve"><value>Не удалось удалить ссылку из-за ошибки scrapper. Попробуй позже.</value></data>
+  <data name="TrackScrapperFailed" xml:space="preserve"><value>Не удалось добавить ссылку из-за ошибки scrapper. Попробуй ещё раз позже.</value></data>
+  <data name="HelpHeader" xml:space="preserve"><value>Доступные команды:</value></data>
+  <data name="ListEmpty" xml:space="preserve"><value>Пока нет отслеживаемых ссылок. Добавь через /track</value></data>
+  <data name="ListEmptyForTag" xml:space="preserve"><value>Не нашёл отслеживаемых ссылок с тегом «{0}».</value></data>
+  <data name="ListHeader" xml:space="preserve"><value>Отслеживаемые ссылки:
+
+</value></data>
+  <data name="ListHeaderForTag" xml:space="preserve"><value>Отслеживаемые ссылки (тег: {0}):
+
+</value></data>
+  <data name="ListItem" xml:space="preserve"><value>{0}) {1}
+   Теги: {2}</value></data>
+  <data name="UntrackUsage" xml:space="preserve"><value>Пришли команду в формате:
+/untrack &lt;url&gt;</value></data>
+  <data name="UntrackInvalidUrl" xml:space="preserve"><value>Это не похоже на корректную ссылку.
+Используй формат:
+/untrack &lt;url&gt;</value></data>
+  <data name="UntrackSuccess" xml:space="preserve"><value>Больше не отслеживаю:
+{0}</value></data>
+  <data name="CommandNotUnderstood" xml:space="preserve"><value>Не понял. Напиши /help</value></data>
+  <data name="DialogInterruptedNotice" xml:space="preserve"><value>Прерван незавершённый диалог, введённые данные не сохранены.</value></data>
+  <data name="DialogSessionCorrupted" xml:space="preserve"><value>Сессия диалога повреждена. Напиши /start</value></data>
+  <data name="DialogUnknown" xml:space="preserve"><value>Неизвестный диалог.</value></data>
+  <data name="DialogCancelled" xml:space="preserve"><value>Ок, отменил. Напиши /help</value></data>
+  <data name="TrackStartPrompt" xml:space="preserve"><value>Пришли ссылку, которую нужно отслеживать. (/cancel чтобы отменить)</value></data>
+  <data name="AskUrlNotText" xml:space="preserve"><value>Пришли URL текстом (https://...).</value></data>
+  <data name="AskUrlInvalid" xml:space="preserve"><value>Это не похоже на ссылку. Пришли URL целиком (https://...).</value></data>
+  <data name="AskUrlTagsPrompt" xml:space="preserve"><value>Добавить теги? Введи через запятую (например: work, docs, refactor)
+Чтобы пропустить — отправь '-'
+
+{0}</value></data>
+  <data name="AskTagsNotText" xml:space="preserve"><value>Пришли теги через запятую (например: работа, баг, документация).
+Чтобы пропустить — отправь '-'</value></data>
+  <data name="AskTagsInvalid" xml:space="preserve"><value>Не распознал ни одного корректного тега.
+Разрешены буквы/цифры/_/-, длина 1–24. Пример: work, docs, refactor</value></data>
+  <data name="AskTagsInvalidList" xml:space="preserve"><value>
+Проблемные: {0}</value></data>
+  <data name="AskTagsIgnored" xml:space="preserve"><value>
+Игнорирую некорректные: {0}</value></data>
+  <data name="AskTagsAccepted" xml:space="preserve"><value>Ок.
+Теги: {0}{1}
+
+{2}</value></data>
+  <data name="ConfirmPrompt" xml:space="preserve"><value>Добавить в отслеживание?
+Ссылка: {0}
+Теги: {1}
+да / нет</value></data>
+  <data name="ConfirmUnknownUrl" xml:space="preserve"><value>(неизвестно)</value></data>
+  <data name="ConfirmYesNo" xml:space="preserve"><value>'да' / 'нет'.</value></data>
+  <data name="ConfirmRejected" xml:space="preserve"><value>Ок.
+Пришли другую ссылку.</value></data>
+  <data name="ConfirmNothingPending" xml:space="preserve"><value>Не удалось понять, что добавлять. Начни заново: /track</value></data>
+  <data name="ConfirmUrlParseFailed" xml:space="preserve"><value>Не удалось разобрать ссылку. Начни заново: /track</value></data>
+  <data name="ConfirmSuccess" xml:space="preserve"><value>Начал отслеживать:
+{0}
+Теги: {1}</value></data>
+  <data name="ConfirmRetryUrl" xml:space="preserve"><value>{0}
+
+Пришли другую ссылку.</value></data>
+  <data name="ErrorUnsupportedLink" xml:space="preserve"><value>Эта ссылка не поддерживается.
+Сейчас можно отслеживать только:
+• GitHub-репозитории: https://github.com/owner/repo
+• вопросы StackOverflow: https://stackoverflow.com/questions/12345/...
+• сабреддиты Reddit: https://reddit.com/r/dotnet</value></data>
+  <data name="ErrorChatAlreadyExists" xml:space="preserve"><value>Привет! Чат уже зарегистрирован. Используй справку /help для просмотра команд</value></data>
+  <data name="ErrorLinkAlreadyExists" xml:space="preserve"><value>Эта ссылка уже отслеживается.</value></data>
+  <data name="ErrorLinkNotFound" xml:space="preserve"><value>Эта ссылка не найдена в отслеживаемых.</value></data>
+  <data name="ErrorChatNotFound" xml:space="preserve"><value>Чат не зарегистрирован. Сначала напиши /start.</value></data>
+  <data name="ErrorInvalidLink" xml:space="preserve"><value>Это некорректная ссылка.
+Пришли абсолютную ссылку с http/https, например:
+https://github.com/dotnet/runtime</value></data>
+  <data name="ErrorScrapperUnavailable" xml:space="preserve"><value>Scrapper сейчас недоступен. Попробуй ещё раз чуть позже.</value></data>
+  <data name="LanguagePrompt" xml:space="preserve"><value>Выбери язык бота:</value></data>
+  <data name="LanguageChanged" xml:space="preserve"><value>Язык переключён: {0}</value></data>
+  <data name="NotificationHigh" xml:space="preserve"><value>‼️ Важное обновление по ссылке:</value></data>
+  <data name="NotificationLow" xml:space="preserve"><value>Незначительное обновление по ссылке:</value></data>
+  <data name="NotificationDefault" xml:space="preserve"><value>Обновление по ссылке:</value></data>
+</root>
