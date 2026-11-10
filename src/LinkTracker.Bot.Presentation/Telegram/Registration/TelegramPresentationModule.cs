@@ -1,5 +1,7 @@
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Bot.Presentation.Telegram.Configuration;
 using LinkTracker.Bot.Presentation.Telegram.Hosting;
+using LinkTracker.Bot.Presentation.Telegram.Menu;
 using LinkTracker.Bot.Presentation.Telegram.Updates;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +28,9 @@ public static class TelegramPresentationModule
             return new TelegramBotClient(options.Token);
         });
 
+        services.AddSingleton<TelegramReplySender>();
+        services.AddSingleton<TelegramChatMenuUpdater>();
+        services.AddSingleton<IChatMenuUpdater>(sp => sp.GetRequiredService<TelegramChatMenuUpdater>());
         services.AddSingleton<UpdateMapper>();
         services.AddSingleton<UpdateReceiver>();
 

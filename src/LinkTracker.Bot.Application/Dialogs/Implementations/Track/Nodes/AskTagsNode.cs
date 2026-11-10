@@ -1,9 +1,11 @@
 using LinkTracker.Bot.Application.Dialogs.Abstractions;
 using LinkTracker.Bot.Application.Dialogs.Helpers;
+using LinkTracker.Bot.Application.Localization;
+using Microsoft.Extensions.Localization;
 
 namespace LinkTracker.Bot.Application.Dialogs.Implementations.Track.Nodes;
 
-public sealed class AskTagsNode : IDialogNode
+public sealed class AskTagsNode(IStringLocalizer<Messages> localizer) : IDialogNode
 {
     public const string NodeId = "ask_tags";
     public string Id => NodeId;
@@ -12,7 +14,7 @@ public sealed class AskTagsNode : IDialogNode
     {
         if (!DialogText.TryGetText(request, out var raw))
         {
-            return Task.FromResult(new DialogNodeResult(BuildValidationMessage()));
+            return Task.FromResult(new DialogNodeResult(localizer[Texts.AskTagsNotText]));
         }
 
         if (ShouldSkip(raw))
@@ -42,44 +44,33 @@ public sealed class AskTagsNode : IDialogNode
         return raw is "-" or "skip" or "пропустить";
     }
 
-    private static string BuildValidationMessage()
+    private string BuildInvalidTagsMessage(IReadOnlyList<string> invalid)
     {
-        return "Пришли теги через запятую (например: работа, баг, документация).\n" +
-               "Чтобы пропустить — отправь '-'";
+        var message = localizer[Texts.AskTagsInvalid].Value;
+
+        return invalid.Count > 0
+            ? message + localizer[Texts.AskTagsInvalidList, string.Join(", ", invalid.Take(5))]
+            : message;
     }
 
-    private static string BuildInvalidTagsMessage(IReadOnlyList<string> invalid)
-    {
-        var msg =
-            "Не распознал ни одного корректного тега.\n" +
-            "Разрешены буквы/цифры/_/-, длина 1–24. Пример: work, docs, refactor";
-
-        if (invalid.Count > 0)
-        {
-            msg += $"\nПроблемные: {string.Join(", ", invalid.Take(5))}";
-        }
-
-        return msg;
-    }
-
-    private static string BuildAcceptedTagsReply(
+    private string BuildAcceptedTagsReply(
         DialogContext ctx,
         IReadOnlyList<string> tags,
         IReadOnlyList<string> invalid)
     {
-        var warn = invalid.Count > 0
-            ? $"\nИгнорирую некорректные: {string.Join(", ", invalid.Take(5))}"
-            : "";
+        var ignored = invalid.Count > 0
+            ? localizer[Texts.AskTagsIgnored, string.Join(", ", invalid.Take(5))].Value
+            : string.Empty;
 
-        return $"Ок.\nТеги: {string.Join(", ", tags)}{warn}\n\n{BuildConfirmText(ctx)}";
+        return localizer[Texts.AskTagsAccepted, string.Join(", ", tags), ignored, BuildConfirmText(ctx)];
     }
 
-    private static string BuildConfirmText(DialogContext ctx)
+    private string BuildConfirmText(DialogContext ctx)
     {
-        var url = ctx.GetPendingUrl() ?? "(неизвестно)";
+        var url = ctx.GetPendingUrl() ?? localizer[Texts.ConfirmUnknownUrl];
         var tagsCsv = ctx.GetTagsCsv();
         var tagsText = string.IsNullOrWhiteSpace(tagsCsv) ? "—" : string.Join(", ", tagsCsv.Split(','));
 
-        return $"Добавить в отслеживание?\nСсылка: {url}\nТеги: {tagsText}\nда / нет";
+        return localizer[Texts.ConfirmPrompt, url, tagsText];
     }
 }

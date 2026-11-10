@@ -7,7 +7,10 @@ using Telegram.Bot.Types.Enums;
 
 namespace LinkTracker.Bot.Presentation.Telegram.Updates;
 
-public sealed class UpdateMapper(UpdateRouter router, ILogger<UpdateMapper> logger)
+public sealed class UpdateMapper(
+    UpdateRouter router,
+    TelegramReplySender replySender,
+    ILogger<UpdateMapper> logger)
 {
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
     {
@@ -17,13 +20,14 @@ public sealed class UpdateMapper(UpdateRouter router, ILogger<UpdateMapper> logg
             return;
         }
 
+        if (request.CallbackQueryId is not null)
+        {
+            await botClient.AnswerCallbackQuery(request.CallbackQueryId, cancellationToken: ct);
+        }
+
         var reply = await router.RouteAsync(request, ct);
 
-        await botClient.SendMessage(
-            reply.ChatId,
-            reply.Text,
-            cancellationToken: ct
-        );
+        await replySender.SendAsync(reply, ct);
     }
 
     public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken ct)
@@ -89,7 +93,9 @@ public sealed class UpdateMapper(UpdateRouter router, ILogger<UpdateMapper> logg
             return new BotRequest(
                 chatId.Value,
                 BotRequestType.Callback,
-                CallbackData: cb.Data
+                CallbackData: cb.Data,
+                MessageId: cb.Message?.MessageId,
+                CallbackQueryId: cb.Id
             );
         }
     }

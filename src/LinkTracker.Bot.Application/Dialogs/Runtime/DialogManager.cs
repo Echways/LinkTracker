@@ -1,8 +1,13 @@
 using LinkTracker.Bot.Application.Dialogs.Abstractions;
+using LinkTracker.Bot.Application.Localization;
+using Microsoft.Extensions.Localization;
 
 namespace LinkTracker.Bot.Application.Dialogs.Runtime;
 
-public sealed class DialogManager(IDialogStateStore store, IEnumerable<IDialog> dialogs)
+public sealed class DialogManager(
+    IDialogStateStore store,
+    IEnumerable<IDialog> dialogs,
+    IStringLocalizer<Messages> localizer)
 {
     private readonly IReadOnlyDictionary<string, IDialog> _dialogs =
         dialogs.ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
@@ -20,7 +25,7 @@ public sealed class DialogManager(IDialogStateStore store, IEnumerable<IDialog> 
         {
             ctx.Reset();
             await store.SaveAsync(ctx, ct);
-            return (true, "Сессия диалога повреждена. Напиши /start");
+            return (true, localizer[Texts.DialogSessionCorrupted]);
         }
 
         var result = await node.HandleAsync(ctx, request, ct);
@@ -42,7 +47,7 @@ public sealed class DialogManager(IDialogStateStore store, IEnumerable<IDialog> 
     {
         if (!_dialogs.TryGetValue(dialogId, out var dialog))
         {
-            return "Неизвестный диалог.";
+            return localizer[Texts.DialogUnknown];
         }
 
         var ctx = await store.GetOrCreateAsync(chatId, ct);
@@ -57,7 +62,7 @@ public sealed class DialogManager(IDialogStateStore store, IEnumerable<IDialog> 
     public async Task<string> CancelAsync(long chatId, CancellationToken ct)
     {
         await store.ResetAsync(chatId, ct);
-        return "Ок, отменил. Напиши /help";
+        return localizer[Texts.DialogCancelled];
     }
 
     public async Task<bool> ResetAsync(long chatId, CancellationToken ct)

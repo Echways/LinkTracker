@@ -5,21 +5,21 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Google.Protobuf" Version="3.34.0"/>
-        <PackageReference Include="Grpc.Tools" Version="2.76.0" PrivateAssets="all"/>
-        <PackageReference Include="Grpc.Core.Api" Version="2.76.0"/>
-        <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.5.0"/>
-        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.5"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5"/>
-        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.1"/>
-        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.1"/>
-        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.1"/>
-        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1"/>
-        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.15.1-beta.1"/>
-        <PackageReference Include="Serilog" Version="4.3.0"/>
-        <PackageReference Include="StackExchange.Redis" Version="2.12.14"/>
-        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0"/>
-        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1"/>
+        <PackageReference Include="Google.Protobuf"/>
+        <PackageReference Include="Grpc.Tools" PrivateAssets="all"/>
+        <PackageReference Include="Grpc.Core.Api"/>
+        <PackageReference Include="Microsoft.Extensions.Http.Resilience"/>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http"/>
+        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime"/>
+        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"/>
+        <PackageReference Include="Serilog"/>
+        <PackageReference Include="StackExchange.Redis"/>
+        <PackageReference Include="Serilog.AspNetCore"/>
+        <PackageReference Include="Serilog.Sinks.Console"/>
     </ItemGroup>
 
     <ItemGroup>

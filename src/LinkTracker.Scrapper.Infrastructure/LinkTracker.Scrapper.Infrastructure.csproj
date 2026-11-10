@@ -11,23 +11,23 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Apache.Avro" Version="1.12.1"/>
-        <PackageReference Include="Confluent.SchemaRegistry" Version="2.14.0"/>
-        <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro" Version="2.14.0"/>
-        <PackageReference Include="dbup" Version="5.0.41"/>
-        <PackageReference Include="dbup-postgresql" Version="7.0.1"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5"/>
-        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.5"/>
-        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5"/>
-        <PackageReference Include="Grpc.Net.Client" Version="2.76.0"/>
-        <PackageReference Include="Google.Protobuf" Version="3.34.0"/>
-        <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1"/>
-        <PackageReference Include="Quartz" Version="3.16.1"/>
-        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.16.1"/>
-        <PackageReference Include="NSwag.AspNetCore" Version="14.6.3"/>
-        <PackageReference Include="Confluent.Kafka" Version="2.14.0"/>
-        <PackageReference Include="StackExchange.Redis" Version="2.12.14"/>
+        <PackageReference Include="Apache.Avro"/>
+        <PackageReference Include="Confluent.SchemaRegistry"/>
+        <PackageReference Include="Confluent.SchemaRegistry.Serdes.Avro"/>
+        <PackageReference Include="dbup"/>
+        <PackageReference Include="dbup-postgresql"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
+        <PackageReference Include="Microsoft.Extensions.Http"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions"/>
+        <PackageReference Include="Grpc.Net.Client"/>
+        <PackageReference Include="Google.Protobuf"/>
+        <PackageReference Include="prometheus-net.AspNetCore"/>
+        <PackageReference Include="Quartz"/>
+        <PackageReference Include="Quartz.Extensions.Hosting"/>
+        <PackageReference Include="NSwag.AspNetCore"/>
+        <PackageReference Include="Confluent.Kafka"/>
+        <PackageReference Include="StackExchange.Redis"/>
     </ItemGroup>
 
 </Project>

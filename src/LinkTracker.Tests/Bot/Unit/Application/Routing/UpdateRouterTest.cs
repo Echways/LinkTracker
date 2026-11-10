@@ -1,3 +1,5 @@
+using LinkTracker.Bot.Application.Callbacks;
+using LinkTracker.Tests.Bot.Unit.Support;
 using LinkTracker.Bot.Application.Commands;
 using LinkTracker.Bot.Application.Commands.Registration;
 using LinkTracker.Bot.Application.Dialogs.Abstractions;
@@ -13,7 +15,7 @@ namespace LinkTracker.Tests.Bot.Unit.Application.Routing;
 [Trait("Category", "Unit")]
 public sealed class UpdateRouterTests
 {
-    private const string DialogInterruptedNotice = "Прерван незавершённый диалог, введённые данные не сохранены.";
+    private const string DialogInterruptedNotice = "The unfinished dialog was interrupted, the entered data was not saved.";
 
     [Fact]
     public async Task Route_WhenCommandAndDialogActive_RoutesToCommandFirst()
@@ -43,8 +45,11 @@ public sealed class UpdateRouterTests
         var metrics = Substitute.For<IBotMetrics>();
 
         var sut = new UpdateRouter(
-            new CommandRouter([command], metrics),
-            new DialogManager(store, [dialog]),
+            new CommandRouter([command], metrics, TestLocalization.Localizer),
+            new CallbackRouter([], TestLocalization.Localizer),
+            new DialogManager(store, [dialog], TestLocalization.Localizer),
+            TestLocalization.CreateLanguages(),
+            TestLocalization.Localizer,
             metrics
         );
 
@@ -80,8 +85,11 @@ public sealed class UpdateRouterTests
         var metrics = Substitute.For<IBotMetrics>();
 
         var sut = new UpdateRouter(
-            new CommandRouter([command], metrics),
-            new DialogManager(store, Array.Empty<IDialog>()),
+            new CommandRouter([command], metrics, TestLocalization.Localizer),
+            new CallbackRouter([], TestLocalization.Localizer),
+            new DialogManager(store, Array.Empty<IDialog>(), TestLocalization.Localizer),
+            TestLocalization.CreateLanguages(),
+            TestLocalization.Localizer,
             metrics
         );
 
@@ -120,8 +128,11 @@ public sealed class UpdateRouterTests
         var metrics = Substitute.For<IBotMetrics>();
 
         var sut = new UpdateRouter(
-            new CommandRouter([command], metrics),
-            new DialogManager(store, [dialog]),
+            new CommandRouter([command], metrics, TestLocalization.Localizer),
+            new CallbackRouter([], TestLocalization.Localizer),
+            new DialogManager(store, [dialog], TestLocalization.Localizer),
+            TestLocalization.CreateLanguages(),
+            TestLocalization.Localizer,
             metrics
         );
 

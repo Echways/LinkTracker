@@ -1,21 +1,33 @@
+using LinkTracker.Bot.Application.Callbacks;
 using LinkTracker.Bot.Application.Commands.Registration;
 using LinkTracker.Bot.Application.Dialogs.Abstractions;
 using LinkTracker.Bot.Application.Dialogs.Runtime;
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Bot.Application.Models;
 using LinkTracker.Bot.Application.Telemetry.Abstractions;
+using Microsoft.Extensions.Localization;
 
 namespace LinkTracker.Bot.Application.Routing;
 
 public sealed class UpdateRouter(
     CommandRouter commandRouter,
+    CallbackRouter callbackRouter,
     DialogManager dialogManager,
+    ChatLanguageService languages,
+    IStringLocalizer<Messages> localizer,
     IBotMetrics metrics)
 {
-    private const string DialogInterruptedNotice = "Прерван незавершённый диалог, введённые данные не сохранены.";
-
     public async Task<OutgoingMessage> RouteAsync(BotRequest request, CancellationToken ct)
     {
         metrics.IncrementRequest(request.Type.ToString());
+
+        var language = await languages.GetAsync(request.ChatId, ct);
+        using var _ = UiCulture.Use(language);
+
+        if (request.Type == BotRequestType.Callback)
+        {
+            return await callbackRouter.RouteAsync(request, ct);
+        }
 
         if (IsCommand(request))
         {
@@ -23,7 +35,7 @@ public sealed class UpdateRouter(
             var message = await RouteCommandAsync(request, ct);
 
             return dialogInterrupted
-                ? message with { Text = $"{DialogInterruptedNotice}{Environment.NewLine}{Environment.NewLine}{message.Text}" }
+                ? message with { Text = $"{localizer[Texts.DialogInterruptedNotice]}{Environment.NewLine}{Environment.NewLine}{message.Text}" }
                 : message;
         }
 

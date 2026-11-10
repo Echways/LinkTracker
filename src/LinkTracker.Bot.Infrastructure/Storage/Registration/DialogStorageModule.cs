@@ -1,4 +1,5 @@
 using LinkTracker.Bot.Application.Dialogs.Abstractions;
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Bot.Infrastructure.Configuration.Valkey;
 using LinkTracker.Bot.Infrastructure.Storage.InMemory;
 using LinkTracker.Bot.Infrastructure.Storage.Valkey;
@@ -35,6 +36,7 @@ public static class DialogStorageModule
         if (!options.Enabled)
         {
             services.AddSingleton<IDialogStateStore, InMemoryDialogStateStore>();
+            services.AddSingleton<ILanguageStore, InMemoryLanguageStore>();
 
             return services;
         }
@@ -47,6 +49,7 @@ public static class DialogStorageModule
         });
 
         services.AddSingleton<IDialogStateStore, ValkeyDialogStateStore>();
+        services.AddSingleton<ILanguageStore, ValkeyLanguageStore>();
 
         return services;
     }

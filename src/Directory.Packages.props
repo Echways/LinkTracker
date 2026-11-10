@@ -1,0 +1,70 @@
+<Project>
+
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <MicrosoftExtensionsVersion>10.0.14</MicrosoftExtensionsVersion>
+        <GrpcVersion>2.85.0</GrpcVersion>
+        <OpenTelemetryVersion>1.15.1</OpenTelemetryVersion>
+        <ConfluentVersion>2.16.0</ConfluentVersion>
+        <TestcontainersVersion>4.16.0</TestcontainersVersion>
+        <QuartzVersion>3.22.10</QuartzVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageVersion Include="Apache.Avro" Version="1.12.2"/>
+        <PackageVersion Include="Confluent.Kafka" Version="$(ConfluentVersion)"/>
+        <PackageVersion Include="Confluent.SchemaRegistry" Version="$(ConfluentVersion)"/>
+        <PackageVersion Include="Confluent.SchemaRegistry.Serdes.Avro" Version="$(ConfluentVersion)"/>
+        <PackageVersion Include="coverlet.collector" Version="10.1.0"/>
+        <PackageVersion Include="Dapper" Version="2.1.89"/>
+        <PackageVersion Include="dbup" Version="5.0.41"/>
+        <PackageVersion Include="dbup-postgresql" Version="7.0.1"/>
+        <PackageVersion Include="Google.Protobuf" Version="3.36.2"/>
+        <PackageVersion Include="Grpc.AspNetCore" Version="$(GrpcVersion)"/>
+        <PackageVersion Include="Grpc.Core.Api" Version="$(GrpcVersion)"/>
+        <PackageVersion Include="Grpc.Net.Client" Version="$(GrpcVersion)"/>
+        <PackageVersion Include="Grpc.Tools" Version="$(GrpcVersion)"/>
+        <PackageVersion Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.13"/>
+        <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="9.0.7"/>
+        <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.9"/>
+        <PackageVersion Include="Microsoft.Extensions.Configuration" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageVersion Include="Microsoft.Extensions.Http" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0"/>
+        <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageVersion Include="Microsoft.Extensions.Localization" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(MicrosoftExtensionsVersion)"/>
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0"/>
+        <PackageVersion Include="Npgsql" Version="10.0.3"/>
+        <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4"/>
+        <PackageVersion Include="NSubstitute" Version="6.2.0"/>
+        <PackageVersion Include="NSwag.AspNetCore" Version="14.7.1"/>
+        <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.15.1-beta.1"/>
+        <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="$(OpenTelemetryVersion)"/>
+        <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="$(OpenTelemetryVersion)"/>
+        <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="$(OpenTelemetryVersion)"/>
+        <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="$(OpenTelemetryVersion)"/>
+        <PackageVersion Include="prometheus-net.AspNetCore" Version="8.2.1"/>
+        <PackageVersion Include="Quartz" Version="$(QuartzVersion)"/>
+        <PackageVersion Include="Quartz.Extensions.Hosting" Version="$(QuartzVersion)"/>
+        <PackageVersion Include="Serilog" Version="4.4.0"/>
+        <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0"/>
+        <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1"/>
+        <PackageVersion Include="StackExchange.Redis" Version="3.4.31"/>
+        <PackageVersion Include="Telegram.Bot" Version="22.10.4"/>
+        <PackageVersion Include="Testcontainers" Version="$(TestcontainersVersion)"/>
+        <PackageVersion Include="Testcontainers.Kafka" Version="$(TestcontainersVersion)"/>
+        <PackageVersion Include="Testcontainers.PostgreSql" Version="$(TestcontainersVersion)"/>
+        <PackageVersion Include="Testcontainers.Redis" Version="$(TestcontainersVersion)"/>
+        <PackageVersion Include="xunit" Version="2.9.3"/>
+        <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5"/>
+    </ItemGroup>
+
+</Project>

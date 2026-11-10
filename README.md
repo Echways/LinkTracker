@@ -1,132 +1,130 @@
+<div align="center">
+
 # LinkTracker
 
+**Track updates on links and get them in Telegram.**
+Send a link to the bot and it tells you about new issues, pull requests, answers and posts. Long updates are summarized, noise is filtered out and related events arrive as one message.
 
-Проект сделан в рамках курса Академия Бэкенда.
-Приложение для отслеживания обновлений контента по ссылкам.
-При появлении новых событий отправляется уведомление в Telegram.
-Проект состоит из 3-х приложений:
+**English** · [Русский](README.ru.md)
 
-Bot
-Scrapper
-AI-Agent (исходно отсутствует в шаблоне)
+[![CI](https://github.com/Echways/LinkTracker/actions/workflows/ci.yml/badge.svg)](https://github.com/Echways/LinkTracker/actions/workflows/ci.yml)
+[![.NET](https://img.shields.io/badge/.NET-9.0-512BD4)](https://dotnet.microsoft.com/)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
+</div>
 
-Описание сервисов
+## Why LinkTracker
 
-Bot Service
-Отвечает за взаимодействие с пользователями через Telegram Bot API:
+Checking a repository, a question or a subreddit by hand does not scale. LinkTracker watches the sources for you and sends only what is worth reading.
 
-Регистрация и авторизация пользователей
-Обработка команд (/track, /untrack, /list и др.)
-Управление подписками через взаимодействие со Scrapper Service
-Отправка уведомлений пользователям
-Хранение данных о пользователях и их настройках
+- **A bot in the chat.** `/track` walks through a dialog with an optional set of tags, `/list` shows what is tracked, `/untrack` removes a link.
+- **Three sources.** GitHub repositories (issues and pull requests), Stack Overflow questions (answers and comments) and subreddits (posts).
+- **An AI agent between the services.** It drops stop words and excluded authors, summarizes long text with Yandex AI, ranks updates by priority and groups them in a time window.
+- **Reliable delivery.** A transactional outbox in the Scrapper, Kafka with dead-letter topics, retries and a circuit breaker on HTTP calls.
+- **Fast reads.** A Valkey cluster caches the list of links; `GET /links` drops from 50 ms to 5 ms on average.
+- **Your language per chat.** English by default, Russian through `/language`.
+- **Observable.** OpenTelemetry metrics, a provisioned Grafana dashboard and a memory alert.
+- **Tested.** Unit and Testcontainers integration tests, a build, format and test pipeline in CI.
 
+## Architecture
 
-Scrapper Service
-Осуществляет мониторинг контента:
-
-Периодическая проверка отслеживаемых URL на наличие изменений
-Парсинг контента с поддерживаемых источников:
-- GitHub-репозитории — новые issue и pull request: `https://github.com/owner/repo`
-- вопросы Stack Overflow — новые ответы и комментарии: `https://stackoverflow.com/questions/12345/...`
-- сабреддиты Reddit — новые посты: `https://reddit.com/r/dotnet`
-Определение изменений (diff detection)
-Отправка уведомлений в Bot Service при обнаружении обновлений
-Хранение информации о подписках и состоянии контента
-
-
-Методы коммуникации:
-
-REST API для синхронной коммуникации
-Apache Kafka для асинхронной обработки
-
-
-AI Agent Service
-Обрабатывает контент перед отправкой уведомлений:
-
-Суммаризация длинных обновлений
-Фильтрация по стоп-словам и авторам
-Приоритизация обновлений
-Группировка связанных обновлений
-Работает как промежуточное звено между Scrapper и Bot
-
----
-## Инструкция для запуска бота
-
-1. Создать копию [.env.template](src/LinkTracker.Bot.Api/.env.template) с именем .env в каталоге бота.
+```mermaid
+flowchart LR
+    U([Telegram]) <--> B[Bot]
+    B -- "gRPC / REST" --> S[Scrapper]
+    S -- "link.raw-updates" --> K{{Kafka}}
+    K --> A[AI Agent]
+    A -- "link.processed-updates" --> K
+    K --> B
+    S --- P[(PostgreSQL)]
+    S --- V[(Valkey)]
+    B --- V
+    S -. polls .-> G[GitHub · Stack Overflow · Reddit]
+    A -. summarizes .-> Y[Yandex AI]
 ```
+
+| Service  | Role                                                                          | Ports (REST · gRPC · metrics) |
+| -------- | ----------------------------------------------------------------------------- | ----------------------------- |
+| Bot      | Telegram commands, dialogs, languages, notifications                          | 8091 · 8092 · 8011            |
+| Scrapper | Subscriptions, periodic source polling, diff detection, outbox                | 8081 · 8082 · 8081            |
+| AI Agent | Filtering, summarization, prioritization and grouping of updates              | 8101 · – · 8102               |
+
+More in [Architecture](docs/en/architecture.md).
+
+## Quick start
+
+Create the environment files and set real values:
+
+```bash
+cp deploy/.env.template deploy/.env
 cp src/LinkTracker.Bot.Api/.env.template src/LinkTracker.Bot.Api/.env
-```
-2. Поставить действительные параметры в .env.
-3. Создать копию [.env.template](src/LinkTracker.Scrapper.Api/.env.template) с именем .env в каталоге скреппера.
-```
 cp src/LinkTracker.Scrapper.Api/.env.template src/LinkTracker.Scrapper.Api/.env
-```
-4. Поставить действительные параметры в .env. Для Reddit нужны `Reddit__ClientId` и
-   `Reddit__ClientSecret` — создаются на https://www.reddit.com/prefs/apps как приложение типа `script`.
-5. Создать копию [.env.template](src/LinkTracker.AiAgent.Api/.env.template) с именем .env в каталоге ии-агента.
-```
 cp src/LinkTracker.AiAgent.Api/.env.template src/LinkTracker.AiAgent.Api/.env
 ```
-6. Поставить действительные параметры в .env.
-7. Задать общий сервисный секрет. Bot и Scrapper аутентифицируют друг друга по нему,
-   поэтому значение должно совпадать в обоих сервисах.
-```
-cp deploy/.env.template deploy/.env
-```
-8. Поставить в `deploy/.env` своё значение `SERVICE_AUTH_SECRET`, а в
-   `src/LinkTracker.Bot.Api/.env` и `src/LinkTracker.Scrapper.Api/.env` — то же самое
-   значение в `ServiceAuth__Secret` (нужно для локального запуска без Docker).
 
-### Для локального запуска
-9. В [bot.Api.appsettings](src/LinkTracker.Bot.Api/appsettings.json), [scrapper.Api.appsettings](src/LinkTracker.Scrapper.Api/appsettings.json) и [aiagent.Api.appsettings](src/LinkTracker.AiAgent.Api/appsettings.json) в ветках Scrapper, Bot и AiAgent соответственно выбрать валидные параметры.
-10. Выполнить поочердено запуск сначала [docker-compose](deploy/docker-compose.yml), [Scrapper](src/LinkTracker.Scrapper.Api/Program.cs), [Bot](src/LinkTracker.Bot.Api/Program.cs) и [AiAgent](src/LinkTracker.AiAgent.Api/Program.cs) с помощью команд.
+`SERVICE_AUTH_SECRET` in `deploy/.env` and `ServiceAuth__Secret` in the Bot and Scrapper files must be the same string. Run everything in containers:
+
+```bash
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.apps.yml up
 ```
-docker compose -f deploy/docker-compose.yml up
+
+Or run the infrastructure in Docker and the services with the .NET 9 SDK:
+
+```bash
+docker compose -f deploy/docker-compose.yml up -d
 dotnet run --project src/LinkTracker.Scrapper.Api
 dotnet run --project src/LinkTracker.Bot.Api
 dotnet run --project src/LinkTracker.AiAgent.Api
 ```
 
-### Для запуска в контейнерах
-9. В [bot.Docker.appesettings](src/LinkTracker.Bot.Api/appsettings.Docker.json), [scrapper.Docker.appsettings](src/LinkTracker.Scrapper.Api/appsettings.Docker.json) и [aiagent.Docker.appesettings](src/LinkTracker.AiAgent.Api/appsettings.Docker.json) в ветках Scrapper, Bot и AiAgent соответственно выбрать валидные параметры.
-10. Поднять инфраструктуру и все три сервиса одной командой — порядок запуска обеспечивают `depends_on` в compose-файлах.
-```
-docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.apps.yml up
-```
+Details, tokens and settings are in [Getting started](docs/en/getting-started.md).
 
+## Bot commands
 
----
-## Инструкция для запуска тестов
+| Command            | Action                                       |
+| ------------------ | -------------------------------------------- |
+| `/start`           | Register the chat                            |
+| `/help`            | List the commands                            |
+| `/track`           | Start tracking a link, with optional tags    |
+| `/untrack <url>`   | Stop tracking a link                         |
+| `/list`            | Show tracked links                           |
+| `/language`        | Choose the bot language                      |
+| `/cancel`          | Cancel the current dialog                    |
 
-1. Выполнить запуск команды из корня
-```
-dotnet test
-```
+## Supported sources
 
----
-## Итоги нагрузочного тестирования
+| Source         | Link                                          | Updates                  |
+| -------------- | --------------------------------------------- | ------------------------ |
+| GitHub         | `https://github.com/owner/repo`               | New issues, pull requests |
+| Stack Overflow | `https://stackoverflow.com/questions/12345/…` | New answers, comments    |
+| Reddit         | `https://reddit.com/r/dotnet`                 | New posts                |
 
-Нагрузочное тестирование выполнялось на данных объёмом 100 000 ссылок, 1 000 пользователей и примерно 100 ссылок на пользователя.
+## Load test
 
-Основной эффект Valkey-кэша заметен на `GET /links`.
+100 000 links, 1 000 users, about 100 links per user. The Valkey cache shows on `GET /links`:
 
-| Метрика `GET /links` | Без кэша | С Valkey | Изменение |
-|---|---:|---:|---:|
-| RPS | 70.85 | 76.83 | +8.44% |
-| Avg latency | 50.44 ms | 5.30 ms | -89.49% |
-| p50 | 19.52 ms | 2.95 ms | -84.88% |
-| p99 | 283.45 ms | 19.76 ms | -93.03% |
-| Успешные ответы 200 | 25 507 | 29 482 | +3 975 |
-| Ошибки 500/502/504 | 0 | 0 | без изменений |
+| `GET /links` metric  | No cache  | Valkey    | Change   |
+| -------------------- | --------: | --------: | -------: |
+| RPS                  |     70.85 |     76.83 |   +8.44% |
+| Average latency      |  50.44 ms |   5.30 ms |  -89.49% |
+| p50                  |  19.52 ms |   2.95 ms |  -84.88% |
+| p99                  | 283.45 ms |  19.76 ms |  -93.03% |
+| Responses 200        |    25 507 |    29 482 |   +3 975 |
+| Errors 500/502/504   |         0 |         0 | no change |
 
----
-## Структура репозитория
+## Documentation
 
-| Путь | Содержимое |
-|---|---|
-| [src/](src/) | Исходный код сервисов, общие библиотеки и тесты |
-| [migrations/](migrations/) | SQL-миграции схемы Postgres (применяются DbUp при старте Scrapper) |
-| [deploy/](deploy/) | Compose-файлы, конфигурация Prometheus и Grafana, шаблон корневого `.env` |
-| [docs/](docs/) | [Наблюдаемость](docs/OBSERVABILITY.md) и [примеры PromQL](docs/example-pql.txt) |
+|                                                  |                                                    |
+| ------------------------------------------------ | -------------------------------------------------- |
+| [Getting started](docs/en/getting-started.md)    | Tokens, environment files, local and container run |
+| [Architecture](docs/en/architecture.md)          | Services, data flow, topics, storage               |
+| [Configuration](docs/en/configuration.md)        | Settings of every service                          |
+| [Bot](docs/en/bot.md)                            | Commands, dialogs, languages                       |
+| [Scrapper](docs/en/scrapper.md)                  | Sources, scheduling, API, outbox                   |
+| [AI Agent](docs/en/ai-agent.md)                  | Filtering, summaries, priorities, grouping         |
+| [Observability](docs/en/observability.md)        | Metrics, Prometheus, Grafana, alerts               |
+| [Development](docs/en/development.md)            | Structure, tests, CI                               |
+
+## License
+
+[MIT](LICENSE)

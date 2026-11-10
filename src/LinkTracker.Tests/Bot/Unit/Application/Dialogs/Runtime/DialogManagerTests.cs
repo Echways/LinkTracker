@@ -1,3 +1,4 @@
+using LinkTracker.Tests.Bot.Unit.Support;
 using LinkTracker.Bot.Application.Dialogs.Abstractions;
 using LinkTracker.Bot.Application.Dialogs.Runtime;
 using NSubstitute;
@@ -34,7 +35,7 @@ public sealed class DialogManagerTests
         dialog.StartNodeId.Returns("ask_url");
         dialog.Nodes.Returns(new Dictionary<string, IDialogNode> { ["ask_url"] = node });
 
-        var sut = new DialogManager(store, [dialog]);
+        var sut = new DialogManager(store, [dialog], TestLocalization.Localizer);
 
         var result = await sut.TryHandleAsync(
             new BotRequest(123L, BotRequestType.Text, "https://github.com/user/repo"),

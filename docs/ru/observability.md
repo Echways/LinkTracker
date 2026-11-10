@@ -1,4 +1,6 @@
-# Observability
+# Наблюдаемость
+
+[English](../en/observability.md) · [Русский](observability.md) · [Документация](README.md)
 
 ## Архитектура сбора метрик
 
@@ -100,7 +102,7 @@ Rate limiter применяется точечно, политикой `public-a
 
 ## PromQL запросы
 
-Примеры PromQL для визуализаций — в `docs/example-pql.txt`.
+Примеры PromQL для визуализаций — в [example-pql.txt](../example-pql.txt).
 
 ## Запуск мониторинга
 
@@ -114,4 +116,4 @@ docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.apps.yml up
 
 После запуска:
 - Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000 (admin / admin)
+- Grafana: http://localhost:3000 (`admin` / `admin`)

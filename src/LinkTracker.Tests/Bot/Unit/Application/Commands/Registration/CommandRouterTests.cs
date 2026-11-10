@@ -1,3 +1,4 @@
+using LinkTracker.Tests.Bot.Unit.Support;
 using LinkTracker.Bot.Application.Commands;
 using LinkTracker.Bot.Application.Commands.Registration;
 using LinkTracker.Bot.Application.Models;
@@ -25,7 +26,7 @@ public sealed class CommandRouterTests
 
         var metrics = Substitute.For<IBotMetrics>();
 
-        var sut = new CommandRouter([other, cmd], metrics);
+        var sut = new CommandRouter([other, cmd], metrics, TestLocalization.Localizer);
 
         var result = await sut.RouteAsync(chatId, "/start");
 
@@ -44,7 +45,7 @@ public sealed class CommandRouterTests
 
         var metrics = Substitute.For<IBotMetrics>();
 
-        var sut = new CommandRouter([cmd], metrics);
+        var sut = new CommandRouter([cmd], metrics, TestLocalization.Localizer);
 
         var result = await sut.RouteAsync(chatId, "/unknown");
 
@@ -70,7 +71,7 @@ public sealed class CommandRouterTests
 
         var metrics = Substitute.For<IBotMetrics>();
 
-        var sut = new CommandRouter([first, second], metrics);
+        var sut = new CommandRouter([first, second], metrics, TestLocalization.Localizer);
 
         var result = await sut.RouteAsync(chatId, "/start");
 

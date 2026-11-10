@@ -1,35 +1,20 @@
+using LinkTracker.Bot.Application.Localization;
 using LinkTracker.Shared.Contracts.Common;
 
 namespace LinkTracker.Bot.Application.Clients.Scrapper;
 
 internal static class ScrapperErrorMessages
 {
-    internal static readonly IReadOnlyDictionary<string, string> ByCode =
+    internal static readonly IReadOnlyDictionary<string, string> KeyByCode =
         new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            [ScrapperErrorCodes.UnsupportedLink] =
-                "Эта ссылка не поддерживается.\n" +
-                "Сейчас можно отслеживать только:\n" +
-                "• GitHub-репозитории: https://github.com/owner/repo\n" +
-                "• вопросы StackOverflow: https://stackoverflow.com/questions/12345/...\n" +
-                "• сабреддиты Reddit: https://reddit.com/r/dotnet",
-            [ScrapperErrorCodes.ChatAlreadyExists] =
-                "Привет! Чат уже зарегистрирован. Используй справку /help для просмотра команд",
-            [ScrapperErrorCodes.LinkAlreadyExists] =
-                "Эта ссылка уже отслеживается.",
-            [ScrapperErrorCodes.LinkNotFound] =
-                "Эта ссылка не найдена в отслеживаемых.",
-            [ScrapperErrorCodes.ChatNotFound] =
-                "Чат не зарегистрирован. Сначала напиши /start.",
-            [ScrapperErrorCodes.InvalidLink] =
-                "Это некорректная ссылка.\n" +
-                "Пришли абсолютную ссылку с http/https, например:\n" +
-                "https://github.com/dotnet/runtime",
-            [ScrapperErrorCodes.InvalidLinkScheme] =
-                "Это некорректная ссылка.\n" +
-                "Пришли абсолютную ссылку с http/https, например:\n" +
-                "https://github.com/dotnet/runtime",
-            [ScrapperErrorCodes.ScrapperServiceUnavailable] =
-                "Scrapper сейчас недоступен. Попробуй ещё раз чуть позже."
+            [ScrapperErrorCodes.UnsupportedLink] = Texts.ErrorUnsupportedLink,
+            [ScrapperErrorCodes.ChatAlreadyExists] = Texts.ErrorChatAlreadyExists,
+            [ScrapperErrorCodes.LinkAlreadyExists] = Texts.ErrorLinkAlreadyExists,
+            [ScrapperErrorCodes.LinkNotFound] = Texts.ErrorLinkNotFound,
+            [ScrapperErrorCodes.ChatNotFound] = Texts.ErrorChatNotFound,
+            [ScrapperErrorCodes.InvalidLink] = Texts.ErrorInvalidLink,
+            [ScrapperErrorCodes.InvalidLinkScheme] = Texts.ErrorInvalidLink,
+            [ScrapperErrorCodes.ScrapperServiceUnavailable] = Texts.ErrorScrapperUnavailable
         };
 }
