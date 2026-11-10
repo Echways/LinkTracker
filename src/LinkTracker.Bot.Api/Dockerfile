@@ -3,6 +3,7 @@ WORKDIR /src
 
 COPY ["linktracker.sln", "./"]
 COPY ["src/Directory.Build.props", "src/"]
+COPY ["src/Directory.Packages.props", "src/"]
 
 COPY ["src/LinkTracker.Bot.Api/LinkTracker.Bot.Api.csproj", "src/LinkTracker.Bot.Api/"]
 COPY ["src/LinkTracker.Bot.Application/LinkTracker.Bot.Application.csproj", "src/LinkTracker.Bot.Application/"]
